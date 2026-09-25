@@ -1,0 +1,21 @@
+KRAFTWERK – App aufs iPhone bringen (einmalig, ca. 10 Minuten)
+
+Die App ist eine Web-App. Damit sie im Keller ohne Internet läuft, muss sie
+einmal von einer https-Adresse geladen werden. Kostenlos geht das mit GitHub Pages:
+
+1. Auf github.com ein kostenloses Konto anlegen (falls noch keins vorhanden).
+2. Oben rechts „+“ → „New repository“ → Name z. B. kraftwerk → „Public“ → „Create repository“.
+3. Auf „uploading an existing file“ klicken und ALLE Dateien aus diesem Ordner
+   hineinziehen (index.html, sw.js, manifest.webmanifest, alle icon-*.png und splash-*.png).
+   → „Commit changes“.
+4. Im Repository: „Settings“ → „Pages“ → bei „Branch“ „main“ wählen → „Save“.
+   Nach 1–2 Minuten steht dort die Adresse, z. B. https://DEINNAME.github.io/kraftwerk/
+5. Diese Adresse auf dem iPhone in Safari öffnen → Teilen-Symbol → „Zum Home-Bildschirm“.
+6. Die App einmal mit Internet vom Home-Bildschirm starten. Ab dann läuft sie offline.
+
+Wichtig
+· Alle Trainingsdaten liegen nur auf dem iPhone (in der App selbst).
+· Regelmäßig unter Einstellungen → „Sicherung exportieren“ eine Sicherung anlegen
+  (z. B. in „Dateien“ oder iCloud Drive), am besten nach jedem Block.
+· Updates: neue index.html hochladen und in sw.js die Versionsnummer erhöhen
+  (kraftwerk-v1 → kraftwerk-v2). Beim nächsten Start mit Internet wird aktualisiert.

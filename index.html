@@ -10,6 +10,14 @@
 <meta name="theme-color" content="#0A0B0D">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1206x2622.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1080x2340.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash-750x1334.png">
 <title>Kraftwerk</title>
 <style>
 :root{
@@ -195,19 +203,52 @@ nav.tabs button.sel{ color:var(--gold); }
 .fbq{ margin:12px 0; } .fbq>span{ display:block; font-size:14px; color:var(--silver); margin-bottom:6px; }
 .fbres{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:15px; color:var(--gold2); }
 .frow2{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:15px; }
-.sumcard{ border:1px solid #2F4A37; background:#101A14; border-radius:14px; padding:14px; margin-bottom:18px; }
-.sumtitle{ font-family:var(--serif); font-size:22px; color:var(--sage); }
-.sumgrid{ display:grid; grid-template-columns:repeat(3,1fr); margin-top:10px; }
-.sumgrid b{ display:block; font-family:var(--serif); font-weight:400; font-size:28px; color:var(--text); }
-.sumgrid span{ font-size:12px; color:var(--muted); }
-.sumpr{ margin-top:10px; font-size:14px; color:var(--gold2); }
 .warm{ font-size:13px; color:var(--muted); margin:6px 0 2px; }
 .ex.ss{ border-left:2px solid var(--gold); padding-left:12px; margin-left:-14px; }
 .setsel{ display:flex; gap:6px; margin:6px 0 14px; }
-@media (prefers-reduced-motion: reduce){ .sheet,.toggle::after{ transition:none; } }
+
+/* Start-Animation */
+#splash{ position:fixed; inset:0; z-index:100; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  animation:splashOut .45s ease 1.25s forwards; }
+#splash .word{ font-family:var(--serif); font-size:28px; letter-spacing:.38em; color:var(--gold); padding-left:.38em; display:flex; }
+#splash .word span{ opacity:0; transform:translateY(8px); animation:letterIn .5s cubic-bezier(.2,.7,.2,1) forwards; }
+#splash .rule{ height:1px; width:0; background:var(--gold); animation:ruleIn .7s ease .45s forwards; }
+#splash .claim{ font-size:12px; color:var(--muted); opacity:0; animation:fadeIn .5s ease .75s forwards; }
+@keyframes letterIn{ to{ opacity:1; transform:none; } }
+@keyframes ruleIn{ to{ width:150px; } }
+@keyframes fadeIn{ to{ opacity:1; } }
+@keyframes splashOut{ to{ opacity:0; visibility:hidden; } }
+/* Seitenwechsel */
+#app.enter{ animation:enter .32s cubic-bezier(.2,.7,.2,1); }
+@keyframes enter{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+/* Satz abgehakt */
+.set.pop .chk{ animation:pop .42s cubic-bezier(.3,1.6,.5,1); }
+.set.pop .fld input{ animation:okflash .6s ease; }
+@keyframes pop{ 0%{ transform:scale(.7); } 60%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
+@keyframes okflash{ from{ box-shadow:0 0 0 0 rgba(147,190,154,.45); } to{ box-shadow:0 0 0 8px rgba(147,190,154,0); } }
+/* Pausenende */
+.timer.end .in{ animation:pulse 1.2s ease-in-out 3; }
+@keyframes pulse{ 0%,100%{ background:#1B2A20; } 50%{ background:#2A4432; } }
+/* Rekord-Moment */
+#pr{ position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center; pointer-events:none; }
+#pr.show{ display:flex; }
+#pr .card{ text-align:center; padding:26px 30px; border-radius:18px; background:radial-gradient(circle at 50% 30%,#2A2212,#0E0D0B 70%); border:1px solid var(--gold);
+  box-shadow:0 0 60px rgba(201,164,92,.35); animation:prIn .5s cubic-bezier(.2,1.4,.4,1), prOut .5s ease 2.1s forwards; }
+#pr .t1{ font-size:13px; color:var(--gold); letter-spacing:.2em; }
+#pr .t2{ font-family:var(--serif); font-size:54px; color:var(--gold2); line-height:1.1; margin-top:6px;
+  background:linear-gradient(100deg,#C9A45C 20%,#FFF1CC 45%,#C9A45C 70%); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shine 1.6s ease .3s; }
+#pr .t3{ font-size:14px; color:var(--silver); margin-top:4px; }
+@keyframes prIn{ from{ opacity:0; transform:scale(.85); } to{ opacity:1; transform:none; } }
+@keyframes prOut{ to{ opacity:0; transform:scale(.96); } }
+@keyframes shine{ from{ background-position:100% 0; } to{ background-position:0 0; } }
+@media (prefers-reduced-motion: reduce){ .sheet,.toggle::after{ transition:none; } #app.enter,.set.pop .chk,.set.pop .fld input,.timer.end .in{ animation:none; }
+  #splash{ animation:splashOut .2s ease .3s forwards; } #splash *{ animation-duration:.01s !important; animation-delay:0s !important; }
+  #pr .card,#pr .t2{ animation:none; } }
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><div class="word" id="spw"></div><div class="rule"></div><div class="claim">15 Wochen · stärker werden</div></div>
+<div id="pr" aria-live="polite"><div class="card"><div class="t1">NEUER REKORD</div><div class="t2" id="prv"></div><div class="t3" id="prn"></div></div></div>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"><div class="in" style="position:relative"><div class="bar" id="tbar"></div>
   <div class="t" id="tval">0:00</div><div class="lbl" id="tlbl">Pause</div>
@@ -370,7 +411,9 @@ let ui = { tab:"train", w:currentWeek(), d:0, hint:{} };
 (function pickDay(){ for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; return; } } ui.d=started(ui.w,3)?3:0; })();
 
 /* ============ Render ============ */
+let lastView="";
 function render(){
+  const view=ui.tab+"|"+ui.w+"|"+ui.d; const app0=$("#app"); if(view!==lastView){ app0.classList.remove("enter"); void app0.offsetWidth; app0.classList.add("enter"); lastView=view; }
   document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("sel",b.dataset.tab===ui.tab));
   const app=$("#app");
   if(ui.tab==="train") app.innerHTML=vTrain();
@@ -394,7 +437,6 @@ function vTrain(){
   h+=`<div class="days">`+DAYS.map((dd,i)=>{ const s=dayDone(w,i); const opt=dd.optional&&!started(w,i)&&i!==d;
     return `<button class="day ${i===d?"sel":""} ${s.done?"done":""} ${opt?"optx":""}" data-day="${i}"><b>${dd.name}</b><span>${s.done?"✓ fertig":s.ok?s.ok+"/"+s.all:(dd.optional?"+ optional":dd.tag)}</span></button>`; }).join("")+`</div>`;
   if(P.deload && (w===5||w===10)) h+=vFeedback(P.block+1);
-  const sum=vSummary(w,d); if(sum) h+=sum;
   if(day.optional && !started(w,d)) h+=`<p class="lead">Optionaler Tag – trainiere ihn, wenn Woche und Laufumfang es zulassen. Er zählt erst, sobald du den ersten Satz abhakst.</p>`;
   const fv=st.form[w+"|"+d];
   h+=`<section class="formsec"><div class="formhead"><span>Tagesform</span><small>Schlaf · Energie · Beine vom Laufen</small></div>
@@ -427,16 +469,6 @@ function vFeedback(nb){
     <div class="frow2"><span>Für Block ${nb} übernehmen</span><button class="toggle ${f.use!==false?"on":""}" data-fbuse="${nb}" aria-label="Übernehmen"></button></div>`; }
   return h+`</section>`;
 }
-function vSummary(w,d){
-  const s=dayDone(w,d); if(!s.done) return "";
-  let ton=0,sets=0,prs=[];
-  DAYS[d].slots.forEach(sl=>{ const L=getLog(w,d,sl.id); if(!L) return; L.sets.forEach(z=>{ if(!z.ok) return; sets++; const kg=num(z.kg)||0, r=num(z.reps)||0; ton+=kg*r; });
-    if(sl.t==="TOP"&&["kb","bd","kh"].includes(sl.lift)&&!W(w).deload){ const e=topE1(sl.lift,w); const prev=bestMain(sl.lift,w); if(e!=null&&(!prev||e>prev.e)) prs.push(exName(sl,w)+" "+f1(e)+" kg"); } });
-  const a=st.dates[w+"|"+d], b=st.ends[w+"|"+d]; const min=(a&&b)?Math.max(1,Math.round((new Date(b)-new Date(a))/60000)):null;
-  return `<section class="sumcard"><div class="sumtitle">Einheit abgeschlossen</div><div class="sumgrid">
-    <div><b>${sets}</b><span>Sätze</span></div><div><b>${min!=null?min:"–"}</b><span>Minuten</span></div><div><b>${(ton/1000).toLocaleString("de-DE",{maximumFractionDigits:1})}</b><span>Tonnen bewegt</span></div></div>
-    ${prs.length?`<div class="sumpr">Neuer Rekord: ${prs.map(esc).join(" · ")}</div>`:""}</section>`;
-}
 function vSlot(slot,w,d){
   const r=rx(slot,w), name=exName(slot,w), main=!!slot.t, L=ensureLog(w,d,slot.id,r.sets);
   const lib=libEntry(name); const tracked=!main && st.set.tracked.includes(name);
@@ -455,7 +487,7 @@ function vSlot(slot,w,d){
   const lt=main?null:lastTime(name,w,d,slot.id);
   for(let i=0;i<r.sets;i++){ const s=L.sets[i];
     const kph = main? f1(r.kg).replace(",0","") : (lt?fk(lt.kg):"–");
-    h+=`<div class="set ${hasRir?"hasrir":""} ${s.ok?"ok":""}" data-i="${i}">
+    h+=`<div class="set ${hasRir?"hasrir":""} ${s.ok?"ok":""} ${ui.pop===slot.id+"|"+i?"pop":""}" data-i="${i}">
       <div class="no">${i+1}</div>
       <div class="fld"><label>kg</label><input inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}"></div>
       <div class="fld"><label>Wdh.</label><input inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${esc(String(r.reps))}"></div>
@@ -584,6 +616,7 @@ function openSwap(sid){
 function closeSheet(){ $("#sheet").classList.remove("show"); $("#sheetbg").classList.remove("show"); }
 function applySwap(sid,name){ const w=ui.w; const arr=(st.swaps[sid]||[]).filter(s=>s.from<w); arr.push({from:w,name}); st.swaps[sid]=arr; save(); closeSheet(); render(); toast("Ab Woche "+w+": "+name); }
 
+function showPR(name,e){ $("#prv").textContent=f1(e)+" kg"; $("#prn").textContent=name+" · e1RM"; const p=$("#pr"); p.classList.remove("show"); void p.offsetWidth; p.classList.add("show"); setTimeout(()=>p.classList.remove("show"),2700); }
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function beep(){ if(!st.set.sound) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); [0,.28,.56].forEach(o=>{ const g=actx.createGain(), osc=actx.createOscillator(); osc.frequency.value=880; osc.type="sine"; g.gain.setValueAtTime(0.0001,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(0.35,actx.currentTime+o+0.02); g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+o+0.22); osc.connect(g).connect(actx.destination); osc.start(actx.currentTime+o); osc.stop(actx.currentTime+o+0.25); }); }catch(e){} }
@@ -621,13 +654,18 @@ document.addEventListener("click",e=>{
   if(t.dataset.chk!==undefined){ const sec=t.closest("[data-slot]"); const sid=sec.dataset.slot; const slot=slotFor(ui.d,sid); const r=rx(slot,ui.w);
     const L=ensureLog(ui.w,ui.d,sid,r.sets); const s=L.sets[+t.dataset.chk];
     s.ok=!s.ok;
+    ui.pop = s.ok ? sid+"|"+t.dataset.chk : null;
+    let prevBest=null; if(s.ok&&slot.t==="TOP"&&["kb","bd","kh"].includes(slot.lift)&&!W(ui.w).deload){ const pb=bestMain(slot.lift,ui.w); prevBest=pb?pb.e:null; }
     if(s.ok){ const row=t.closest(".set"); if(s.kg===""){ const ph=num(row.querySelector('[data-f=kg]').placeholder); if(ph!=null) s.kg=String(ph).replace(".",","); }
       if(s.reps===""&&/^\d+$/.test(String(r.reps))) s.reps=String(r.reps);
       if(slot.t==="TOP"&&s.rir==="") s.rir=String(r.rir).replace(".",",");
       if(slot.t==="VAR"&&s.rir==="") s.rir=String(r.rir).replace(".",",");
       const dk=ui.w+"|"+ui.d; if(!st.dates[dk]) st.dates[dk]=new Date().toISOString();
       st.ends[dk]=new Date().toISOString(); const ss=slot.t?null:ssInfo(slot,ui.d); if(!(ss&&ss.pos===1)) startTimer(pauseSec(slot.p), exName(slot,ui.w)); else toast("Weiter: "+exName(ss.other,ui.w)); }
-    save(); render(); return; }
+    save(); render(); setTimeout(()=>{ ui.pop=null; },500);
+    if(s.ok&&slot.t==="TOP"&&["kb","bd","kh"].includes(slot.lift)&&!W(ui.w).deload){ const e=topE1(slot.lift,ui.w); const anyPrev=[...Array(NW)].some((_,i)=>i+1!==ui.w&&topE1(slot.lift,i+1)!=null);
+      if(e!=null&&anyPrev&&(prevBest==null||e>prevBest)) showPR(exName(slot,ui.w),e); }
+    return; }
   if(t.dataset.toggle){ st.set[t.dataset.toggle]=!st.set[t.dataset.toggle]; save(); if(t.dataset.toggle==="wake"){ if(st.set.wake) wake(); else if(wl){ wl.release(); wl=null; } } render(); return; }
   if(t.dataset.act==="export") return doExport();
   if(t.dataset.act==="import") return $("#impfile").click();
@@ -672,6 +710,8 @@ async function doExport(){
 /* ============ Start ============ */
 if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 if(navigator.storage&&navigator.storage.persist){ navigator.storage.persist().catch(()=>{}); }
+(function(){ const el=$("#spw"); if(el) el.innerHTML="KRAFTWERK".split("").map((c,i)=>`<span style="animation-delay:${i*45}ms">${c}</span>`).join("");
+  setTimeout(()=>{ const s=$("#splash"); if(s) s.remove(); },2200); })();
 render(); wake();
 </script>
 </body>

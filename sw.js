@@ -1,6 +1,6 @@
 // Kraftwerk – Offline-Cache. Bei Updates die Versionsnummer erhöhen.
-const CACHE = "kraftwerk-v4";
-const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
+const CACHE = "kraftwerk-v5";
+const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png", "./splash-1080x2340.png", "./splash-1170x2532.png", "./splash-1179x2556.png", "./splash-1206x2622.png", "./splash-1284x2778.png", "./splash-1290x2796.png", "./splash-1320x2868.png", "./splash-750x1334.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {
