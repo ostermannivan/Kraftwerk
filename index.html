@@ -328,7 +328,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = ["Bankdrücken (LH)","Kniebeuge (LH)","Kreuzheben (LH)","Pausiertes Bankdrücken (2 s, LH)","Pausierte Kniebeuge (2 s, LH)"];
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = 7;
+const KEY = "kraftwerk.v1"; const APPVER = 8;
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:["Langhantelrudern","Schulterdrücken sitzend (LH)"],
@@ -697,9 +697,11 @@ async function shareFile(name,text,type){
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
 function doCsv(){
-  const rows=[["Woche","Tag","Übung","Satz","kg","Wdh","RIR","erledigt"]];
-  Object.keys(st.log).sort().forEach(k=>{ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) return;
-    st.log[k].sets.forEach((z,i)=>{ if(z.kg===""&&z.reps===""&&!z.ok) return; rows.push([w,DAYS[+d].tag,exName(slot,+w),i+1,z.kg,z.reps,z.rir,z.ok?"ja":"nein"]); }); });
+  const rows=[["Woche","Tag","Pos","Übung","Satz","kg","Wdh","RIR","erledigt","Datum"]]; const recs=[];
+  Object.keys(st.log).forEach(k=>{ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) return; const pos=DAYS[+d].slots.indexOf(slot)+1;
+    const dt=st.dates[w+"|"+d]; const ds=dt?iso(new Date(dt)):"";
+    st.log[k].sets.forEach((z,i)=>{ if(z.kg===""&&z.reps===""&&!z.ok) return; recs.push([+w,+d,pos,i+1,[w,DAYS[+d].tag,pos,exName(slot,+w),i+1,z.kg,z.reps,z.rir,z.ok?"ja":"nein",ds]]); }); });
+  recs.sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]||a[3]-b[3]).forEach(r=>rows.push(r[4]));
   const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
   shareFile("kraftwerk-training-"+iso(new Date())+".csv",csv,"text/csv");
 }
