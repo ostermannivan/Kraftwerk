@@ -242,7 +242,7 @@ nav.tabs button.sel{ color:var(--gold); }
 @keyframes prOut{ to{ opacity:0; transform:scale(.96); } }
 @keyframes shine{ from{ background-position:100% 0; } to{ background-position:0 0; } }
 @media (prefers-reduced-motion: reduce){ .sheet,.toggle::after{ transition:none; } #app.enter,.set.pop .chk,.set.pop .fld input,.timer.end .in{ animation:none; }
-  #splash{ animation:splashOut .2s ease .3s forwards; } #splash *{ animation-duration:.01s !important; animation-delay:0s !important; }
+  #splash .word span{ transform:none; animation:fadeIn .6s ease forwards; } #splash .rule{ width:150px; opacity:0; animation:fadeIn .6s ease .2s forwards; }
   #pr .card,#pr .t2{ animation:none; } }
 </style>
 </head>
@@ -328,7 +328,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = ["Bankdrücken (LH)","Kniebeuge (LH)","Kreuzheben (LH)","Pausiertes Bankdrücken (2 s, LH)","Pausierte Kniebeuge (2 s, LH)"];
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1";
+const KEY = "kraftwerk.v1"; const APPVER = 6;
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:["Langhantelrudern","Schulterdrücken stehend (LH)"],
@@ -596,7 +596,8 @@ function vSet(){
    <button class="btn" data-act="import">Sicherung importieren</button><input type="file" id="impfile" accept="application/json,.json" hidden>
    <button class="btn" data-act="csv">Trainingsdaten als CSV (für Excel)</button>
    <button class="btn" data-act="cfgreset">Sätze & Supersätze zurücksetzen</button>
-   <button class="btn danger" data-act="reset">Alle Trainingsdaten löschen</button></div>`;
+   <button class="btn danger" data-act="reset">Alle Trainingsdaten löschen</button>
+   <p class="lead small" style="margin-top:18px;text-align:center">Kraftwerk · App-Version ${APPVER}</p></div>`;
 }
 
 /* ============ Tauschen ============ */
