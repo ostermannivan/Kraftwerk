@@ -171,6 +171,39 @@ nav.tabs button.sel{ color:var(--gold); }
 .toast{ position:fixed; left:50%; top:calc(12px + env(safe-area-inset-top,0px)); transform:translateX(-50%); background:var(--s3); color:var(--text);
   padding:10px 16px; border-radius:12px; font-size:14px; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; }
 .toast.show{ opacity:1; }
+.day.optx{ border:1px dashed var(--line); background:transparent; }
+.day.optx b{ color:var(--silver); font-weight:500; }
+.small{ font-size:13px; }
+.formsec{ margin:2px 0 6px; }
+.formhead{ display:flex; justify-content:space-between; align-items:baseline; }
+.formhead span{ font-size:15px; } .formhead small{ font-size:12px; color:var(--muted); }
+.scale{ display:grid; grid-template-columns:repeat(5,1fr); margin-top:8px; border:1px solid var(--line); border-radius:12px; overflow:hidden;
+  background:linear-gradient(90deg,#2A1D18 0%,#1A1B1F 45%,#1A1B1F 55%,#1B2A20 100%); }
+.sc{ padding:8px 0 7px; display:flex; flex-direction:column; align-items:center; gap:2px; border-right:1px solid var(--line); }
+.sc:last-child{ border-right:0; }
+.sc b{ font-family:var(--serif); font-weight:400; font-size:20px; color:var(--text); }
+.sc span{ font-size:11px; color:var(--muted); }
+.sc.on{ background:var(--gold); } .sc.on b,.sc.on span{ color:#16120A; }
+.sc.on.low{ background:var(--bronze); }
+.formtxt{ margin-top:8px; } .formtxt b{ color:var(--text); font-weight:600; }
+.chips{ display:flex; gap:6px; }
+.chips.cwrap{ flex-wrap:wrap; }
+.chip{ min-width:40px; height:36px; padding:0 12px; border-radius:18px; background:var(--s1); border:1px solid var(--line); color:var(--silver); font-size:14px; }
+.chip.on{ background:var(--gold); border-color:var(--gold); color:#16120A; font-weight:600; }
+.fb{ background:var(--s1); border:1px solid var(--steel); border-radius:14px; padding:14px; margin-bottom:18px; }
+.fb h3{ font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 4px; }
+.fbq{ margin:12px 0; } .fbq>span{ display:block; font-size:14px; color:var(--silver); margin-bottom:6px; }
+.fbres{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:15px; color:var(--gold2); }
+.frow2{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:15px; }
+.sumcard{ border:1px solid #2F4A37; background:#101A14; border-radius:14px; padding:14px; margin-bottom:18px; }
+.sumtitle{ font-family:var(--serif); font-size:22px; color:var(--sage); }
+.sumgrid{ display:grid; grid-template-columns:repeat(3,1fr); margin-top:10px; }
+.sumgrid b{ display:block; font-family:var(--serif); font-weight:400; font-size:28px; color:var(--text); }
+.sumgrid span{ font-size:12px; color:var(--muted); }
+.sumpr{ margin-top:10px; font-size:14px; color:var(--gold2); }
+.warm{ font-size:13px; color:var(--muted); margin:6px 0 2px; }
+.ex.ss{ border-left:2px solid var(--gold); padding-left:12px; margin-left:-14px; }
+.setsel{ display:flex; gap:6px; margin:6px 0 14px; }
 @media (prefers-reduced-motion: reduce){ .sheet,.toggle::after{ transition:none; } }
 </style>
 </head>
@@ -214,57 +247,56 @@ const MOTTO = ["Der erste Satz legt das Fundament.","Konstanz schlägt Motivatio
 function W(w){ const r=WK[w-1]; const b=BLK[r[0]]; return {block:r[0],phase:r[1],top:r[2],bo:r[3],vr:r[4],acc:r[5],deload:r[1]==="Deload",...b}; }
 const BLOCKC = {1:"var(--gold)",2:"var(--bronze)",3:"var(--silver)"};
 
-// Plan: Tag 1 OK1 · Tag 2 UK1 · Tag 3 OK2 · Tag 4 UK2
+// Plan: 3 feste Tage + optionaler UK2
+const A=(id,g,ex,wu,n,rt,p,art="Assistenz")=>({id,art,g,ex,wu,n,rt,p});
 const DAYS = [
- {id:"ok1", name:"Bank", long:"Oberkörper 1 · Bankdrücken", slots:[
+ {id:"ok1", name:"Bank", tag:"OK1", slots:[
   {id:"ok1t",art:"Topset",g:"Brust",ex:"Bankdrücken (LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"bd"},
   {id:"ok1b",art:"Backoff",g:"Brust",ex:"Bankdrücken (LH)",wu:"0",p:"2–3 min",t:"BO",lift:"bd"},
-  {id:"ok1a",art:"Assistenz",g:"Latissimus",ex:"Klimmzüge",wu:"1–2",n:3,rt:"G",p:"2–3 min"},
-  {id:"ok1c",art:"Assistenz",g:"Brust",ex:"Schrägbankdrücken (KH)",wu:"1–2",n:3,rt:"G",p:"2 min"},
-  {id:"ok1d",art:"Assistenz",g:"Oberer Rücken",ex:"Rudern am Kabel sitzend (eng)",wu:"1",n:3,rt:"G",p:"2 min"},
-  {id:"ok1e",art:"Assistenz",g:"Schulter seitlich",ex:"Seitheben (KH)",wu:"0",n:3,rt:"I",p:"1–1,5 min"},
-  {id:"ok1f",art:"Supersatz A1",g:"Trizeps",ex:"Trizepsdrücken am Kabel (Seil)",wu:"1",n:2,rt:"I",p:"direkt A2"},
-  {id:"ok1g",art:"Supersatz A2",g:"Bizeps",ex:"Bizeps-Curls (KH)",wu:"0",n:2,rt:"I",p:"1–2 min"}]},
- {id:"uk1", name:"Beuge", long:"Unterkörper 1 · Kniebeuge", slots:[
+  A("ok1a","Latissimus","Klimmzüge","1–2",3,"G","2–3 min"), A("ok1c","Brust","Schrägbankdrücken (KH)","1–2",3,"G","2 min"),
+  A("ok1d","Oberer Rücken","Rudern am Kabel sitzend (eng)","1",3,"G","2 min"), A("ok1e","Schulter seitlich","Seitheben (KH)","0",3,"I","1–1,5 min"),
+  A("ok1f","Trizeps","Trizepsdrücken am Kabel (Seil)","1",2,"I","1–1,5 min"), A("ok1g","Bizeps","Bizeps-Curls (KH)","0",2,"I","1–1,5 min")]},
+ {id:"uk1", name:"Beuge", tag:"UK1", slots:[
   {id:"uk1t",art:"Topset",g:"Quadrizeps",ex:"Kniebeuge (LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"kb"},
   {id:"uk1b",art:"Backoff",g:"Quadrizeps",ex:"Kniebeuge (LH)",wu:"0",p:"2–3 min",t:"BO",lift:"kb"},
-  {id:"uk1a",art:"Assistenz",g:"Beinbeuger",ex:"Rumänisches Kreuzheben (LH)",wu:"2",n:3,rt:"G",p:"2–3 min"},
-  {id:"uk1c",art:"Assistenz",g:"Quadrizeps",ex:"Beinstrecker (Anbau)",wu:"1",n:3,rt:"I",p:"1–2 min"},
-  {id:"uk1d",art:"Assistenz",g:"Beinbeuger",ex:"Beinbeuger (Anbau)",wu:"1",n:2,rt:"I",p:"1–2 min"},
-  {id:"uk1e",art:"Assistenz",g:"Waden",ex:"Wadenheben stehend",wu:"1",n:3,rt:"I",p:"1–2 min"},
-  {id:"uk1f",art:"Core",g:"Bauch",ex:"Cable Crunch (Kabelturm)",wu:"0",n:3,rt:"I",p:"1 min"},
-  {id:"uk1g",art:"Core",g:"Bauch",ex:"Pallof Press (Kabel)",wu:"0",n:2,rt:"I",p:"1 min"}]},
- {id:"ok2", name:"P-Bank", long:"Oberkörper 2 · Pausiertes Bankdrücken", slots:[
+  A("uk1a","Beinbeuger","Rumänisches Kreuzheben (LH)","2",3,"G","2–3 min"), A("uk1c","Quadrizeps","Bulgarian Split Squat (KH)","1",2,"G","2 min"),
+  A("uk1d","Quadrizeps","Beinstrecker (Anbau)","1",2,"I","1–2 min"), A("uk1e","Beinbeuger","Beinbeuger (Anbau)","1",3,"I","1–2 min"),
+  A("uk1f","Waden","Wadenheben stehend","1",2,"I","1–1,5 min"), A("uk1g","Bauch","Cable Crunch (Kabelturm)","0",2,"I","1 min","Core"),
+  A("uk1h","Bauch","Pallof Press (Kabel)","0",2,"I","1 min","Core")]},
+ {id:"ok2", name:"P-Bank", tag:"OK2", slots:[
   {id:"ok2t",art:"Topset",g:"Brust",ex:"Pausiertes Bankdrücken (2 s, LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"pbd"},
   {id:"ok2b",art:"Backoff",g:"Brust",ex:"Pausiertes Bankdrücken (2 s, LH)",wu:"0",p:"2–3 min",t:"BO",lift:"pbd"},
-  {id:"ok2a",art:"Assistenz",g:"Schulter vorne",ex:"Schulterdrücken stehend (LH)",wu:"2",n:3,rt:"G",p:"2–3 min"},
-  {id:"ok2c",art:"Assistenz",g:"Latissimus",ex:"Latzug (Kabelturm, eng/neutral)",wu:"1",n:3,rt:"G",p:"2 min"},
-  {id:"ok2d",art:"Assistenz",g:"Oberer Rücken",ex:"Langhantelrudern",wu:"1",n:2,rt:"G",p:"2–3 min"},
-  {id:"ok2e",art:"Assistenz",g:"Schulter seitlich",ex:"Seitheben am Kabel",wu:"0",n:3,rt:"I",p:"1 min"},
-  {id:"ok2f",art:"Assistenz",g:"Schulter hinten",ex:"Face Pulls (Seil)",wu:"0",n:2,rt:"I",p:"1 min"},
-  {id:"ok2g",art:"Supersatz B1",g:"Trizeps",ex:"Überkopf-Trizepsstrecken (Kabel)",wu:"0",n:2,rt:"I",p:"direkt B2"},
-  {id:"ok2h",art:"Supersatz B2",g:"Bizeps",ex:"Hammer Curls (KH)",wu:"0",n:2,rt:"I",p:"1–2 min"}]},
- {id:"uk2", name:"Kreuz", long:"Unterkörper 2 · Kreuzheben", slots:[
+  A("ok2a","Schulter vorne","Schulterdrücken stehend (LH)","2",3,"G","2–3 min"), A("ok2c","Latissimus","Latzug (Kabelturm, eng/neutral)","1",3,"G","2 min"),
+  A("ok2d","Oberer Rücken","Langhantelrudern","1",3,"G","2–3 min"), A("ok2e","Schulter seitlich","Seitheben am Kabel","0",2,"I","1 min"),
+  A("ok2f","Schulter hinten","Face Pulls (Seil)","0",2,"I","1 min"), A("ok2g","Trizeps","Überkopf-Trizepsstrecken (Kabel)","0",2,"I","1–1,5 min"),
+  A("ok2h","Bizeps","Hammer Curls (KH)","0",2,"I","1–1,5 min")]},
+ {id:"uk2", name:"Kreuz", tag:"UK2", optional:true, slots:[
   {id:"uk2t",art:"Topset",g:"Gesäß",ex:"Kreuzheben (LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"kh"},
   {id:"uk2b",art:"Backoff",g:"Gesäß",ex:"Kreuzheben (LH)",wu:"0",p:"2–3 min",t:"BO",lift:"kh"},
   {id:"uk2v",art:"Variante",g:"Quadrizeps",ex:"Pausierte Kniebeuge (2 s, LH)",wu:"2–3",p:"3 min",t:"VAR",lift:"pkb"},
-  {id:"uk2a",art:"Assistenz",g:"Quadrizeps",ex:"Bulgarian Split Squat (KH)",wu:"1",n:2,rt:"G",p:"2 min"},
-  {id:"uk2c",art:"Assistenz",g:"Beinbeuger",ex:"Beinbeuger (Anbau)",wu:"1",n:3,rt:"I",p:"1–2 min"},
-  {id:"uk2d",art:"Assistenz",g:"Waden",ex:"Wadenheben sitzend",wu:"1",n:3,rt:"I",p:"1 min"},
-  {id:"uk2e",art:"Core",g:"Bauch",ex:"Hängendes Beinheben",wu:"0",n:3,rt:"I",p:"1 min"},
-  {id:"uk2f",art:"Core",g:"Bauch",ex:"Ab-Wheel Rollout",wu:"0",n:2,rt:"I",p:"1 min"}]}
+  A("uk2a","Gesäß","Hip Thrust (LH)","1",2,"G","2 min"), A("uk2c","Waden","Wadenheben sitzend","1",3,"I","1 min"),
+  A("uk2d","Bauch","Hängendes Beinheben","0",3,"I","1 min","Core"), A("uk2e","Bauch","Ab-Wheel Rollout","0",2,"I","1 min","Core")]}
 ];
+const FORM=[["platt","kaum geschlafen, erschöpft, Beine schwer vom Laufen."],["müde","schlecht geschlafen oder ein zäher Tag."],
+ ["normal","ganz okay, nichts Besonderes."],["gut","ausgeruht und motiviert."],["top","bestens erholt, voller Energie."]];
+const SLOTDAY={}; DAYS.forEach((d,i)=>d.slots.forEach(s=>SLOTDAY[s.id]=i));
+const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am Limit",-1],["überfordert",-2]]],
+ ["RIR-Ziele",[["zu leicht",1],["passend",0],["zu schwer",-1]]],
+ ["Gelenke & Sehnen",[["keine Probleme",0],["leichte Beschwerden",-1],["deutliche Beschwerden",-2]]],
+ ["Laufumfang im Block",[["weniger als sonst",1],["normal",0],["mehr als sonst",-1]]]];
 const MAIN_NAMES = ["Bankdrücken (LH)","Kniebeuge (LH)","Kreuzheben (LH)","Pausiertes Bankdrücken (2 s, LH)","Pausierte Kniebeuge (2 s, LH)"];
 
 /* ============ Speicher ============ */
 const KEY = "kraftwerk.v1";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
-  round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:["Langhantelrudern","Schulterdrücken stehend (LH)"] },
-  swaps:{}, custom:[], log:{}, dates:{}, notes:{}, body:{} });
+  round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:["Langhantelrudern","Schulterdrücken stehend (LH)"],
+  bar:20 },
+  swaps:{}, custom:[], log:{}, dates:{}, ends:{}, notes:{}, body:{}, cfg:{}, form:{}, fb:{}, onboarded:false });
 let st;
 try{ st = JSON.parse(localStorage.getItem(KEY)) || DEF(); }catch(e){ st = DEF(); }
 st = Object.assign(DEF(), st); st.set = Object.assign(DEF().set, st.set);
+if(!st.onboarded && Object.keys(st.log).some(k=>st.log[k].sets.some(z=>z.ok))) st.onboarded=true;
 let saveT=null;
 function flush(){ clearTimeout(saveT); try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){ toast("Speichern nicht möglich – Speicher voll?"); } }
 function save(){ clearTimeout(saveT); saveT=setTimeout(flush,150); }
@@ -312,22 +344,30 @@ function topE1(lift,w){ const [d,sid]=LIFTDAY[lift]; const L=getLog(w,d,sid); if
 // Vorgaben eines Slots in Woche w
 function rx(slot,w){
   const P=W(w), red=P.deload?1:0;
-  if(slot.t==="TOP"){ const reps=P[{bd:"bdt",kb:"kbt",kh:"kht",pbd:"pbt"}[slot.lift]]; const p=pct(reps,P.top); return {sets:1,reps,rir:P.top,pct:p,kg:rnd(base1RM(slot.lift,w)*p)}; }
+  if(slot.t==="TOP"){ const reps=P[{bd:"bdt",kb:"kbt",kh:"kht",pbd:"pbt"}[slot.lift]]; const rir=P.top+formAdj(w,SLOTDAY[slot.id]); const p=pct(reps,rir); return {sets:1,reps,rir,pct:p,kg:rnd(base1RM(slot.lift,w)*p),formUp:rir>P.top}; }
   if(slot.t==="VAR"){ const p=pct(P.pkr,P.vr); return {sets:P.pks,reps:P.pkr,rir:P.vr,pct:p,kg:rnd(base1RM("pkb",w)*p)}; }
   if(slot.t==="BO"){ const k={bd:["bdb","bds"],kb:["kbb","kbs"],kh:["khb","khs"],pbd:["pbb","pbs"]}[slot.lift];
     const e=topE1(slot.lift,w); const ref=e??base1RM(slot.lift,w); return {sets:P[k[1]],reps:P[k[0]],pct:P.bo,kg:rnd(ref*P.bo),fromDay:e!=null}; }
-  return {sets:Math.max(1,slot.n-red),reps:slot.rt==="I"?P.ri:P.rg,rir:P.acc};
+  const c=st.cfg[slot.id]||{}; return {sets:Math.max(1,(c.n??slot.n)-red+fbAdj(P.block)),reps:slot.rt==="I"?P.ri:P.rg,rir:P.acc};
 }
 function lastTime(name,w,d,sid){
   for(let x=w-1;x>=1;x--){ for(let di=0;di<4;di++) for(const s of DAYS[di].slots){ if(exName(s,x)!==name) continue;
     const L=getLog(x,di,s.id); if(L&&L.sets.some(z=>num(z.kg)!=null)){ const kgs=L.sets.map(z=>num(z.kg)).filter(v=>v!=null); return {w:x,kg:Math.max(...kgs),reps:L.sets.map(z=>z.reps).filter(Boolean).join(" · ")}; } } }
   return null;
 }
+function fbAdj(block){ const f=st.fb[block]; return (f&&f.use!==false&&f.adj)?f.adj:0; }
+function formAdj(w,d){ const f=st.form[w+"|"+d]; return (f!=null&&f<=2)?1:0; }
+function fbCalc(f){ if(!f||!f.a||f.a.filter(x=>x!=null).length<4) return null; const s=f.a.reduce((acc,oi,qi)=>acc+FBQ[qi][1][oi][1],0); return s>=2?1:s<=-2?-1:0; }
+function started(w,d){ return DAYS[d].slots.some(s=>{ const L=getLog(w,d,s.id); return L&&L.sets.some(z=>z.ok); }); }
+function weekDone(w){ return [0,1,2].every(d=>dayDone(w,d).done) && (!started(w,3)||dayDone(w,3).done); }
+function ssInfo(slot,d){ const sl=DAYS[d].slots, i=sl.indexOf(slot); const me=(st.cfg[slot.id]||{}).ss&&i<sl.length-1; const prev=i>0&&(st.cfg[sl[i-1].id]||{}).ss;
+  return me?{pos:1,other:sl[i+1]}:prev?{pos:2,other:sl[i-1]}:null; }
+function warmups(kg){ const b=st.set.bar; return [[b,10],[Math.max(b,rnd(kg*.4)),5],[rnd(kg*.6),3],[rnd(kg*.75),2],[rnd(kg*.85),1]]; }
 function dayDone(w,d){ const day=DAYS[d]; let all=0,ok=0; day.slots.forEach(s=>{ const r=rx(s,w); const L=getLog(w,d,s.id); all+=r.sets; if(L) ok+=L.sets.slice(0,r.sets).filter(z=>z.ok).length; }); return {all,ok,done:all>0&&ok>=all}; }
 
 /* ============ UI-Zustand ============ */
 let ui = { tab:"train", w:currentWeek(), d:0, hint:{} };
-(function pickDay(){ for(let d=0;d<4;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; return; } } ui.d=0; })();
+(function pickDay(){ for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; return; } } ui.d=started(ui.w,3)?3:0; })();
 
 /* ============ Render ============ */
 function render(){
@@ -341,6 +381,7 @@ function render(){
 }
 
 function vTrain(){
+  if(!st.onboarded) return vWelcome();
   const w=ui.w, P=W(w), d=ui.d, day=DAYS[d];
   const from=weekDate(w), to=weekDate(w,6);
   let h=`<header class="top"><div class="brand"><h1>KRAFTWERK</h1><span class="today">${esc(MOTTO[w-1])}</span></div>
@@ -348,34 +389,76 @@ function vTrain(){
    <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase} · ${dshort(from)}–${dshort(to)}</div></div>
    <div class="params"><div><b>${fk(P.top)}</b><span>Topset-RIR</span></div><div><b>${Math.round(P.bo*100)} %</b><span>Backoffs</span></div>
    <div><b>${fk(P.acc)}</b><span>Assistenz-RIR</span></div><div><b>${P.rg}</b><span>Grundübung</span></div><div><b>${P.ri}</b><span>Isolation</span></div></div></header>`;
-  h+=`<div class="weeks">`+WK.map((r,i)=>{ const x=i+1; const done=[0,1,2,3].every(dd=>dayDone(x,dd).done); const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
-    return `<button class="wk ${x===w?"sel":""} ${done?"done":""} ${x===currentWeek()?"now":""}" style="--c:${c}" data-week="${x}" aria-label="Woche ${x}">${x}<i></i></button>`; }).join("")+`</div>`;
-  h+=`<div class="days">`+DAYS.map((dd,i)=>{ const s=dayDone(w,i); return `<button class="day ${i===d?"sel":""} ${s.done?"done":""}" data-day="${i}"><b>${dd.name}</b><span>${s.done?"✓ fertig":s.ok?s.ok+"/"+s.all:(i<2?(i===0?"OK1":"UK1"):(i===2?"OK2":"UK2"))}</span></button>`; }).join("")+`</div>`;
+  h+=`<div class="weeks">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
+    return `<button class="wk ${x===w?"sel":""} ${weekDone(x)?"done":""} ${x===currentWeek()?"now":""}" style="--c:${c}" data-week="${x}" aria-label="Woche ${x}">${x}<i></i></button>`; }).join("")+`</div>`;
+  h+=`<div class="days">`+DAYS.map((dd,i)=>{ const s=dayDone(w,i); const opt=dd.optional&&!started(w,i)&&i!==d;
+    return `<button class="day ${i===d?"sel":""} ${s.done?"done":""} ${opt?"optx":""}" data-day="${i}"><b>${dd.name}</b><span>${s.done?"✓ fertig":s.ok?s.ok+"/"+s.all:(dd.optional?"+ optional":dd.tag)}</span></button>`; }).join("")+`</div>`;
+  if(P.deload && (w===5||w===10)) h+=vFeedback(P.block+1);
+  const sum=vSummary(w,d); if(sum) h+=sum;
+  if(day.optional && !started(w,d)) h+=`<p class="lead">Optionaler Tag – trainiere ihn, wenn Woche und Laufumfang es zulassen. Er zählt erst, sobald du den ersten Satz abhakst.</p>`;
+  const fv=st.form[w+"|"+d];
+  h+=`<section class="formsec"><div class="formhead"><span>Tagesform</span><small>Schlaf · Energie · Beine vom Laufen</small></div>
+   <div class="scale">${FORM.map((f,i)=>`<button class="sc ${fv===i+1?"on":""} ${fv!=null&&i+1<=2&&fv===i+1?"low":""}" data-form="${i+1}"><b>${i+1}</b><span>${f[0]}</span></button>`).join("")}</div>
+   <p class="lead small formtxt">${fv==null?"Wie fühlst du dich heute? Tippe auf den passenden Wert.":`<b>${FORM[fv-1][0]}:</b> ${FORM[fv-1][1]} ${fv<=2?"→ Topset heute mit einer RIR mehr Reserve. Die Backoffs passen sich über dein Tages-e1RM automatisch an.":"→ Plan wie vorgesehen."}`}</p></section>`;
   day.slots.forEach(slot=>{ h+=vSlot(slot,w,d); });
   const nk=w+"|"+d;
   h+=`<div class="sec note"><h3>Notizen</h3><textarea data-note="${nk}" placeholder="Wie lief die Einheit? Technik, Schlaf, Besonderheiten …">${esc(st.notes[nk]||"")}</textarea></div>`;
   return h;
 }
-
+function vWelcome(){
+  const s=st.set;
+  return `<header class="top"><div class="brand"><h1>KRAFTWERK</h1></div><div class="weekhead"><h2>Willkommen</h2>
+   <div class="sub">15 Wochen Powerbuilding: drei feste Tage mit Bankdrücken, Kniebeuge und pausiertem Bankdrücken – Kreuzheben als optionaler vierter Tag.</div></div></header>
+   <div class="sec form"><h3>Deine Startwerte</h3><p class="lead">Echtes 1RM oder aus einem harten 3–5er-Satz geschätzt. Im Zweifel lieber etwas tiefer.</p>
+   <div class="frow"><span>Startdatum<small>ein Montag</small></span><input type="date" data-set="start" value="${esc(s.start)}"></div>
+   <div class="frow"><span>1RM Bankdrücken<small>kg</small></span><input inputmode="decimal" data-set="bd" value="${fk(s.bd)}"></div>
+   <div class="frow"><span>1RM Kniebeuge<small>kg</small></span><input inputmode="decimal" data-set="kb" value="${fk(s.kb)}"></div>
+   <div class="frow"><span>1RM Kreuzheben<small>kg</small></span><input inputmode="decimal" data-set="kh" value="${fk(s.kh)}"></div>
+   <div class="frow"><span>Hantelstange<small>kg</small></span><input inputmode="decimal" data-set="bar" value="${fk(s.bar)}"></div>
+   <button class="btn gold" data-act="onboard">Plan starten</button>
+   <p class="lead small" style="margin-top:12px">Alles lässt sich später unter „Einstellungen“ ändern. Deine Daten bleiben nur auf diesem Gerät.</p></div>`;
+}
+function vFeedback(nb){
+  const f=st.fb[nb]||{a:[null,null,null,null],use:true}; const adj=fbCalc(f);
+  let h=`<section class="fb"><h3>Block-Feedback</h3><p class="lead">Vier kurze Fragen zu Block ${nb-1}. Daraus stellt der Plan das Assistenzvolumen für Block ${nb} ein.</p>`;
+  FBQ.forEach((q,qi)=>{ h+=`<div class="fbq"><span>${q[0]}</span><div class="chips cwrap">${q[1].map((o,oi)=>`<button class="chip ${f.a[qi]===oi?"on":""}" data-fb="${nb}|${qi}|${oi}">${o[0]}</button>`).join("")}</div></div>`; });
+  if(adj!=null){ const txt=adj>0?"+1 Satz je Assistenzübung – du verträgst mehr.":adj<0?"−1 Satz je Assistenzübung – Erholung geht vor.":"Volumen halten – passt so.";
+    h+=`<div class="fbres"><b>${txt}</b>${f.a[2]===2?"<br><span class='muted'>Bei deutlichen Beschwerden: betroffene Übung über ⇄ tauschen.</span>":""}</div>
+    <div class="frow2"><span>Für Block ${nb} übernehmen</span><button class="toggle ${f.use!==false?"on":""}" data-fbuse="${nb}" aria-label="Übernehmen"></button></div>`; }
+  return h+`</section>`;
+}
+function vSummary(w,d){
+  const s=dayDone(w,d); if(!s.done) return "";
+  let ton=0,sets=0,prs=[];
+  DAYS[d].slots.forEach(sl=>{ const L=getLog(w,d,sl.id); if(!L) return; L.sets.forEach(z=>{ if(!z.ok) return; sets++; const kg=num(z.kg)||0, r=num(z.reps)||0; ton+=kg*r; });
+    if(sl.t==="TOP"&&["kb","bd","kh"].includes(sl.lift)&&!W(w).deload){ const e=topE1(sl.lift,w); const prev=bestMain(sl.lift,w); if(e!=null&&(!prev||e>prev.e)) prs.push(exName(sl,w)+" "+f1(e)+" kg"); } });
+  const a=st.dates[w+"|"+d], b=st.ends[w+"|"+d]; const min=(a&&b)?Math.max(1,Math.round((new Date(b)-new Date(a))/60000)):null;
+  return `<section class="sumcard"><div class="sumtitle">Einheit abgeschlossen</div><div class="sumgrid">
+    <div><b>${sets}</b><span>Sätze</span></div><div><b>${min!=null?min:"–"}</b><span>Minuten</span></div><div><b>${(ton/1000).toLocaleString("de-DE",{maximumFractionDigits:1})}</b><span>Tonnen bewegt</span></div></div>
+    ${prs.length?`<div class="sumpr">Neuer Rekord: ${prs.map(esc).join(" · ")}</div>`:""}</section>`;
+}
 function vSlot(slot,w,d){
   const r=rx(slot,w), name=exName(slot,w), main=!!slot.t, L=ensureLog(w,d,slot.id,r.sets);
   const lib=libEntry(name); const tracked=!main && st.set.tracked.includes(name);
-  const hasRir = slot.t==="TOP"||slot.t==="VAR"||tracked;
-  let h=`<section class="ex ${slot.t==="TOP"?"main":""}" data-slot="${slot.id}">
-   <div class="exhead"><div><div class="kind">${esc(slot.art)} · ${esc(slot.g)}</div><div class="exname">${esc(name)}</div>
-   <div class="exmeta">${slot.t==="BO"?`<em>${r.sets} × ${r.reps}</em> · ${Math.round(r.pct*100)} % vom Tages-e1RM`:`<em>${r.sets} × ${r.reps}</em> @ RIR ${fk(r.rir)}`} · Pause ${esc(slot.p)} · Aufwärmen ${esc(slot.wu)}</div></div>
-   <div class="tools">${lib&&lib.h?`<button class="tbtn" data-hint="${slot.id}" aria-label="Technik-Hinweis">i</button>`:""}${main?"":`<button class="tbtn" data-swap="${slot.id}" aria-label="Übung tauschen">⇄</button>`}</div></div>`;
+  const hasRir = slot.t==="TOP"||slot.t==="VAR"||tracked; const ss=main?null:ssInfo(slot,d);
+  const kind = ss?`Supersatz ${ss.pos}/2 · ${esc(slot.g)}`:`${esc(slot.art)} · ${esc(slot.g)}`;
+  const pause = ss&&ss.pos===1 ? "direkt weiter zu „"+esc(exName(ss.other,w))+"“" : "Pause "+esc(slot.p);
+  let h=`<section class="ex ${slot.t==="TOP"?"main":""} ${ss?"ss":""}" data-slot="${slot.id}">
+   <div class="exhead"><div><div class="kind">${kind}</div><div class="exname">${esc(name)}</div>
+   <div class="exmeta">${slot.t==="BO"?`<em>${r.sets} × ${r.reps}</em> · ${Math.round(r.pct*100)} % vom Tages-e1RM`:`<em>${r.sets} × ${r.reps}</em> @ RIR ${fk(r.rir)}`} · ${pause}</div></div>
+   <div class="tools">${lib&&lib.h?`<button class="tbtn" data-hint="${slot.id}" aria-label="Technik-Hinweis">i</button>`:""}${main?"":`<button class="tbtn" data-swap="${slot.id}" aria-label="Übung anpassen">⇄</button>`}</div></div>`;
   if(ui.hint[slot.id]&&lib&&lib.h) h+=`<div class="hint">${esc(lib.h)}</div>`;
-  if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small>kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`<b>${Math.round(r.pct*100)} %</b> vom 1RM`}</div></div>`; }
+  if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small>kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`<b>${Math.round(r.pct*100)} %</b> vom 1RM${r.formUp?" · Form-Puffer +1 RIR":""}`}</div></div>`;
+    if(slot.t==="TOP"||slot.t==="VAR") h+=`<div class="warm">Aufwärmen: ${warmups(r.kg).map(([k,n])=>fk(k)+"×"+n).join(" · ")}</div>`; }
   else { const lt=lastTime(name,w,d,slot.id); h+=`<div class="last">${lt?`Letztes Mal (W${lt.w}): <b>${f1(lt.kg)} kg</b>${lt.reps?" × "+esc(lt.reps):""}`:"Noch kein Eintrag – Startgewicht so wählen, dass die Ziel-RIR passt."}</div>`; }
   h+=`<div class="sets">`;
+  const lt=main?null:lastTime(name,w,d,slot.id);
   for(let i=0;i<r.sets;i++){ const s=L.sets[i];
-    const kph = main? f1(r.kg).replace(",0","") : (lastTime(name,w,d,slot.id)?fk(lastTime(name,w,d,slot.id).kg):"–");
-    const rph = String(r.reps);
+    const kph = main? f1(r.kg).replace(",0","") : (lt?fk(lt.kg):"–");
     h+=`<div class="set ${hasRir?"hasrir":""} ${s.ok?"ok":""}" data-i="${i}">
       <div class="no">${i+1}</div>
       <div class="fld"><label>kg</label><input inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}"></div>
-      <div class="fld"><label>Wdh.</label><input inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${esc(rph)}"></div>
+      <div class="fld"><label>Wdh.</label><input inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${esc(String(r.reps))}"></div>
       ${hasRir?`<div class="fld"><label>RIR</label><input inputmode="decimal" data-f="rir" value="${esc(s.rir)}" placeholder="${r.rir!=null?fk(r.rir):""}"></div>`:"<div></div>"}
       <button class="chk" data-chk="${i}" aria-label="Satz ${i+1} erledigt">${s.ok?"✓":"○"}</button></div>`; }
   h+=`</div>`;
@@ -467,7 +550,7 @@ function vSet(){
   <div class="sec form"><h3>Startwerte</h3>
    <div class="frow"><span>Startdatum<small>ein Montag</small></span><input type="date" data-set="start" value="${esc(s.start)}"></div>
    ${inp("kb","1RM Kniebeuge","kg")}${inp("bd","1RM Bankdrücken","kg")}${inp("kh","1RM Kreuzheben","kg")}
-   ${inp("round","Rundung","kleinster Scheibenschritt in kg")}</div>
+   ${inp("round","Rundung","kleinster Gewichtsschritt in kg")}${inp("bar","Hantelstange","kg – fürs Aufwärmschema")}</div>
   <div class="sec form"><h3>Rechen-1RM Block 2 & 3</h3><p class="lead">Leer lassen = automatisch aus deinen Topsets (Block 2: W3/W4, Block 3: W8/W9).</p>
    ${inp("kb2","Kniebeuge Block 2","automatisch: "+auto("kb",2),"auto")}${inp("bd2","Bankdrücken Block 2","automatisch: "+auto("bd",2),"auto")}${inp("kh2","Kreuzheben Block 2","automatisch: "+auto("kh",2),"auto")}
    ${inp("kb3","Kniebeuge Block 3","automatisch: "+auto("kb",3),"auto")}${inp("bd3","Bankdrücken Block 3","automatisch: "+auto("bd",3),"auto")}${inp("kh3","Kreuzheben Block 3","automatisch: "+auto("kh",3),"auto")}
@@ -479,16 +562,23 @@ function vSet(){
   <div class="sec"><h3>Sicherung</h3><p class="lead">Die Daten liegen nur auf diesem Gerät. Exportiere regelmäßig eine Sicherung – z. B. nach jedem Block.</p>
    <button class="btn gold" data-act="export">Sicherung exportieren</button>
    <button class="btn" data-act="import">Sicherung importieren</button><input type="file" id="impfile" accept="application/json,.json" hidden>
+   <button class="btn" data-act="csv">Trainingsdaten als CSV (für Excel)</button>
+   <button class="btn" data-act="cfgreset">Sätze & Supersätze zurücksetzen</button>
    <button class="btn danger" data-act="reset">Alle Trainingsdaten löschen</button></div>`;
 }
 
 /* ============ Tauschen ============ */
 function openSwap(sid){
-  const d=ui.d, slot=slotFor(d,sid), w=ui.w, cur=exName(slot,w);
-  const list=[...LIB[slot.g]||[], ...st.custom.filter(c=>c.g===slot.g).map(c=>({n:c.n,o:"eigene"}))];
-  $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung tauschen</h3><p>${esc(slot.g)} · gilt ab Woche ${w} für alle folgenden Wochen.</p>
+  const d=ui.d, slot=slotFor(d,sid), w=ui.w, cur=exName(slot,w), c=st.cfg[sid]||{}, n=c.n??slot.n;
+  const sl=DAYS[d].slots, i=sl.indexOf(slot), next=sl[i+1]&&!sl[i+1].t?sl[i+1]:null;
+  const list=[...LIB[slot.g]||[], ...st.custom.filter(x=>x.g===slot.g).map(x=>({n:x.n,o:"eigene"}))];
+  $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung anpassen</h3><p>${esc(slot.g)} · Änderungen gelten ab Woche ${w}.</p>
+   <div class="frow2"><span>Sätze (normale Woche)</span></div><div class="setsel">${[1,2,3,4,5,6].map(v=>`<button class="chip ${v===n?"on":""}" data-setn="${v}">${v}</button>`).join("")}</div>
+   ${next?`<div class="frow2"><span>Supersatz mit „${esc(exName(next,w))}“<br><small class="muted">keine Pause dazwischen</small></span><button class="toggle ${c.ss?"on":""}" data-ss="1" aria-label="Supersatz"></button></div>`:""}
+   <p style="margin-top:18px">Übung tauschen (${esc(slot.g)}):</p>
    ${list.map(e=>`<button class="opt ${e.n===cur?"cur":""}" data-pick="${esc(e.n)}"><span class="n">${esc(e.n)}${e.n===slot.ex?' <span class="muted">· Plan</span>':''}</span><span class="o">${esc(e.o)}</span></button>`).join("")}
-   <div class="addrow"><input id="customName" placeholder="Eigene Übung (${esc(slot.g)})"><button data-addcustom="1">Hinzufügen</button></div>`;
+   <div class="addrow"><input id="customName" placeholder="Eigene Übung (${esc(slot.g)})"><button data-addcustom="1">Hinzufügen</button></div>
+   <button class="btn" data-act="close">Fertig</button>`;
   $("#sheet").dataset.sid=sid; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show");
 }
 function closeSheet(){ $("#sheet").classList.remove("show"); $("#sheetbg").classList.remove("show"); }
@@ -513,10 +603,19 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,[data-pick]"); if(!t) return; unlockAudio();
   if(t.dataset.tab){ ui.tab=t.dataset.tab; render(); window.scrollTo(0,0); return; }
-  if(t.dataset.week){ ui.w=+t.dataset.week; ui.d=0; for(let d=0;d<4;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; break; } } render(); return; }
+  if(t.dataset.week){ ui.w=+t.dataset.week; ui.d=0; for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; break; } } render(); return; }
   if(t.dataset.day!==undefined){ ui.d=+t.dataset.day; render(); window.scrollTo({top:0}); return; }
   if(t.dataset.hint){ ui.hint[t.dataset.hint]=!ui.hint[t.dataset.hint]; render(); return; }
   if(t.dataset.swap){ openSwap(t.dataset.swap); return; }
+  if(t.dataset.setn){ const sid=$("#sheet").dataset.sid; st.cfg[sid]=Object.assign(st.cfg[sid]||{},{n:+t.dataset.setn}); save(); openSwap(sid); render(); return; }
+  if(t.dataset.ss){ const sid=$("#sheet").dataset.sid; const c=st.cfg[sid]||{}; c.ss=!c.ss; st.cfg[sid]=c; save(); openSwap(sid); render(); return; }
+  if(t.dataset.form){ const k=ui.w+"|"+ui.d, v=+t.dataset.form; st.form[k]= st.form[k]===v?null:v; save(); render(); return; }
+  if(t.dataset.fb){ const [nb,qi,oi]=t.dataset.fb.split("|").map(Number); const f=st.fb[nb]||{a:[null,null,null,null],use:true}; f.a[qi]=oi; f.adj=fbCalc(f); st.fb[nb]=f; save(); render(); return; }
+  if(t.dataset.fbuse){ const f=st.fb[t.dataset.fbuse]; if(f){ f.use=f.use===false; save(); render(); } return; }
+  if(t.dataset.act==="onboard"){ st.onboarded=true; save(); ui.w=currentWeek(); ui.d=0; render(); toast("Los geht’s – viel Erfolg!"); return; }
+  if(t.dataset.act==="csv") return doCsv();
+  if(t.dataset.act==="close"){ closeSheet(); return; }
+  if(t.dataset.act==="cfgreset"){ if(confirm("Satzzahlen und Supersätze auf den Ausgangsplan zurücksetzen?")){ st.cfg={}; save(); render(); toast("Plan zurückgesetzt"); } return; }
   if(t.dataset.pick){ applySwap($("#sheet").dataset.sid,t.dataset.pick); return; }
   if(t.dataset.addcustom){ const n=$("#customName").value.trim(); if(!n) return; const sid=$("#sheet").dataset.sid; const g=slotFor(ui.d,sid).g; if(!st.custom.find(c=>c.n===n)) st.custom.push({n,g}); applySwap(sid,n); return; }
   if(t.dataset.chk!==undefined){ const sec=t.closest("[data-slot]"); const sid=sec.dataset.slot; const slot=slotFor(ui.d,sid); const r=rx(slot,ui.w);
@@ -527,7 +626,7 @@ document.addEventListener("click",e=>{
       if(slot.t==="TOP"&&s.rir==="") s.rir=String(r.rir).replace(".",",");
       if(slot.t==="VAR"&&s.rir==="") s.rir=String(r.rir).replace(".",",");
       const dk=ui.w+"|"+ui.d; if(!st.dates[dk]) st.dates[dk]=new Date().toISOString();
-      startTimer(pauseSec(slot.p), exName(slot,ui.w)); }
+      st.ends[dk]=new Date().toISOString(); const ss=slot.t?null:ssInfo(slot,ui.d); if(!(ss&&ss.pos===1)) startTimer(pauseSec(slot.p), exName(slot,ui.w)); else toast("Weiter: "+exName(ss.other,ui.w)); }
     save(); render(); return; }
   if(t.dataset.toggle){ st.set[t.dataset.toggle]=!st.set[t.dataset.toggle]; save(); if(t.dataset.toggle==="wake"){ if(st.set.wake) wake(); else if(wl){ wl.release(); wl=null; } } render(); return; }
   if(t.dataset.act==="export") return doExport();
@@ -552,6 +651,18 @@ document.addEventListener("change",e=>{ const t=e.target;
   if(t.dataset.track!==undefined){ const arr=[...st.set.tracked]; arr[+t.dataset.track]=t.value; st.set.tracked=arr.filter(Boolean); save(); render(); }
   if(t.id==="impfile"&&t.files[0]){ const fr=new FileReader(); fr.onload=()=>{ try{ const d=JSON.parse(fr.result); if(!d||!d.set||!d.log) throw 0; st=Object.assign(DEF(),d); st.set=Object.assign(DEF().set,d.set); save(); render(); toast("Sicherung importiert"); }catch(err){ toast("Datei ist keine Kraftwerk-Sicherung"); } }; fr.readAsText(t.files[0]); t.value=""; }
 });
+async function shareFile(name,text,type){
+  const blob=new Blob([text],{type});
+  try{ const file=new File([blob],name,{type}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:name}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function doCsv(){
+  const rows=[["Woche","Tag","Übung","Satz","kg","Wdh","RIR","erledigt"]];
+  Object.keys(st.log).sort().forEach(k=>{ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) return;
+    st.log[k].sets.forEach((z,i)=>{ if(z.kg===""&&z.reps===""&&!z.ok) return; rows.push([w,DAYS[+d].tag,exName(slot,+w),i+1,z.kg,z.reps,z.rir,z.ok?"ja":"nein"]); }); });
+  const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+  shareFile("kraftwerk-training-"+iso(new Date())+".csv",csv,"text/csv");
+}
 async function doExport(){
   const name="kraftwerk-sicherung-"+iso(new Date())+".json"; const blob=new Blob([JSON.stringify(st)],{type:"application/json"});
   try{ const file=new File([blob],name,{type:"application/json"}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:"Kraftwerk-Sicherung"}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
