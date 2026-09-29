@@ -209,11 +209,12 @@ nav.tabs button.sel{ color:var(--gold); }
 
 /* Start-Animation */
 #splash{ position:fixed; inset:0; z-index:100; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-  animation:splashOut .45s ease 1.25s forwards; }
+  animation:splashOut .5s ease 2.7s forwards; }
+#splash .claim2{ font-size:13px; color:var(--silver); opacity:0; animation:fadeIn .6s ease 1.6s forwards; }
 #splash .word{ font-family:var(--serif); font-size:28px; letter-spacing:.38em; color:var(--gold); padding-left:.38em; display:flex; }
 #splash .word span{ opacity:0; transform:translateY(8px); animation:letterIn .5s cubic-bezier(.2,.7,.2,1) forwards; }
 #splash .rule{ height:1px; width:0; background:var(--gold); animation:ruleIn .7s ease .45s forwards; }
-#splash .claim{ font-size:12px; color:var(--muted); opacity:0; animation:fadeIn .5s ease .75s forwards; }
+#splash .claim{ font-family:var(--serif); font-size:20px; color:var(--text); opacity:0; animation:fadeIn .7s ease 1.05s forwards; margin-top:10px; }
 @keyframes letterIn{ to{ opacity:1; transform:none; } }
 @keyframes ruleIn{ to{ width:150px; } }
 @keyframes fadeIn{ to{ opacity:1; } }
@@ -241,13 +242,23 @@ nav.tabs button.sel{ color:var(--gold); }
 @keyframes prIn{ from{ opacity:0; transform:scale(.85); } to{ opacity:1; transform:none; } }
 @keyframes prOut{ to{ opacity:0; transform:scale(.96); } }
 @keyframes shine{ from{ background-position:100% 0; } to{ background-position:0 0; } }
+.quote{ font-family:var(--serif); font-style:italic; color:var(--silver); text-align:center; font-size:16px; margin:14px 0 6px; }
+.exnote{ font-size:12px; color:var(--gold2); margin-top:4px; }
+.sugg{ color:var(--gold2); }
+.exnotein{ width:100%; min-height:64px; border-radius:10px; border:1px solid var(--inline); background:var(--inbg); padding:8px 10px; font-size:15px; }
+.swrap{ position:relative; overflow:hidden; border-radius:10px; }
+.swin{ position:relative; z-index:1; background:var(--bg); transition:transform .2s ease; }
+.swrap.open .swin{ transform:translateX(-100px); }
+.swdel{ position:absolute; right:0; top:0; bottom:0; width:96px; background:#8E3B2E; color:#fff; font-weight:600; font-size:14px; border-radius:10px; }
+.sets .swrap{ margin-bottom:0; }
+.addset{ margin-top:8px; font-size:13px; color:var(--gold); padding:6px 2px; }
 @media (prefers-reduced-motion: reduce){ .sheet,.toggle::after{ transition:none; } #app.enter,.set.pop .chk,.set.pop .fld input,.timer.end .in{ animation:none; }
   #splash .word span{ transform:none; animation:fadeIn .6s ease forwards; } #splash .rule{ width:150px; opacity:0; animation:fadeIn .6s ease .2s forwards; }
   #pr .card,#pr .t2{ animation:none; } }
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true"><div class="word" id="spw"></div><div class="rule"></div><div class="claim">15 Wochen · stärker werden</div></div>
+<div id="splash" aria-hidden="true"><div class="word" id="spw"></div><div class="rule"></div><div class="claim" id="spg"></div><div class="claim2" id="spd"></div></div>
 <div id="pr" aria-live="polite"><div class="card"><div class="t1">NEUER REKORD</div><div class="t2" id="prv"></div><div class="t3" id="prn"></div></div></div>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"><div class="in" style="position:relative"><div class="bar" id="tbar"></div>
@@ -266,15 +277,20 @@ nav.tabs button.sel{ color:var(--gold); }
 <script>
 "use strict";
 /* ============ Daten ============ */
-const LIB = {"Brust": [{"n": "Bankdrücken (LH)", "o": "Homegym", "h": "Schulterblätter fest, Füße aktiv, Stange berührt Brust"}, {"n": "Pausiertes Bankdrücken (2 s, LH)", "o": "Homegym", "h": "2 s ruhige Pause auf der Brust, dann explosiv"}, {"n": "Schrägbankdrücken (KH)", "o": "Homegym", "h": "Bank ca. 30°, tiefe Dehnung unten"}, {"n": "Schrägbankdrücken (LH)", "o": "Homegym", "h": "Bank ca. 30°, Stange zur oberen Brust"}, {"n": "Bankdrücken (KH)", "o": "Homegym", "h": "Tiefer als mit der Stange, Ellbogen ca. 45°"}, {"n": "Fliegende (KH, Schrägbank)", "o": "Homegym", "h": "Leichter Bogen, Dehnung betonen"}, {"n": "Fliegende am Kabel / Butterfly", "o": "Studio", "h": "Konstante Spannung, kontrolliert zurück"}, {"n": "Dips", "o": "Studio", "h": "Oberkörper leicht nach vorne"}], "Latissimus": [{"n": "Klimmzüge", "o": "Homegym / Studio", "h": "Voller Bewegungsumfang; ab 12 Wdh. Zusatzgewicht"}, {"n": "Latzug (Kabelturm, eng/neutral)", "o": "Homegym", "h": "Ellbogen Richtung Hüfte ziehen"}, {"n": "Latzug (breit)", "o": "Homegym", "h": "Brust zur Stange, nicht nach hinten lehnen"}, {"n": "Einarmiges KH-Rudern", "o": "Homegym", "h": "Ellbogen zur Hüfte, lange Dehnung unten"}, {"n": "Überzüge am Kabel", "o": "Homegym", "h": "Arme fast gestreckt, Lat-Isolation"}], "Oberer Rücken": [{"n": "Rudern am Kabel sitzend (eng)", "o": "Homegym", "h": "Brust raus, Schulterblätter zusammen"}, {"n": "Brustgestütztes KH-Rudern (Schrägbank)", "o": "Homegym", "h": "Rückenschonend – ideal nach Kreuzheben-Tagen"}, {"n": "Langhantelrudern", "o": "Homegym", "h": "Oberkörper ca. 45°, kein Schwung"}, {"n": "Rudern am Kabel (weit)", "o": "Homegym", "h": "Ellbogen weit, zur unteren Brust ziehen"}], "Schulter vorne": [{"n": "Schulterdrücken sitzend (LH)", "o": "Homegym", "h": "Lehne fast senkrecht, Stange vor dem Gesicht bis Kinnhöhe ablassen"}, {"n": "Schulterdrücken stehend (LH)", "o": "Homegym", "h": "Po & Bauch fest, Kopf durch die Arme schieben"}, {"n": "Schulterdrücken sitzend (KH)", "o": "Homegym", "h": "Lehne fast senkrecht, tief ablassen"}, {"n": "Arnold Press (KH)", "o": "Homegym", "h": "Rotation kontrolliert"}], "Schulter seitlich": [{"n": "Seitheben (KH)", "o": "Homegym", "h": "Leicht nach vorne lehnen, Ellbogen führt"}, {"n": "Seitheben am Kabel", "o": "Homegym / Studio", "h": "Kabel hinter dem Körper, konstante Spannung"}, {"n": "Y-Raise (Schrägbank, KH)", "o": "Homegym", "h": "Bauchlage, Arme im Y, leichte Gewichte"}, {"n": "Aufrechtes Rudern am Kabel (weit)", "o": "Homegym", "h": "Nur bis Brusthöhe, Ellbogen führt"}], "Schulter hinten": [{"n": "Face Pulls (Seil)", "o": "Homegym", "h": "Auf Stirnhöhe ziehen, Daumen nach hinten"}, {"n": "Reverse Flys (KH, vorgebeugt)", "o": "Homegym", "h": "Leicht & sauber, Arme weit"}, {"n": "Reverse Flys am Kabel", "o": "Homegym", "h": "Kabel überkreuzt, Arme weit öffnen"}], "Bizeps": [{"n": "Bizeps-Curls (KH)", "o": "Homegym", "h": "Supinieren, kein Schwung"}, {"n": "Hammer Curls (KH)", "o": "Homegym", "h": "Neutraler Griff – Brachialis & Unterarm"}, {"n": "Langhantel-Curls", "o": "Homegym", "h": "Ellbogen bleiben am Körper"}, {"n": "Schrägbank-Curls (KH)", "o": "Homegym", "h": "Arme hängen hinter dem Körper – starke Dehnung"}, {"n": "Kabel-Curls", "o": "Homegym", "h": "Konstante Spannung, oben kurz halten"}], "Trizeps": [{"n": "Trizepsdrücken am Kabel (Seil)", "o": "Homegym", "h": "Ellbogen fixiert, unten Seil auseinanderziehen"}, {"n": "Überkopf-Trizepsstrecken (Kabel)", "o": "Homegym", "h": "Langer Kopf – tiefe Dehnung hinter dem Kopf"}, {"n": "SZ-Stirndrücken", "o": "Homegym", "h": "Stange Richtung Stirn/hinter den Kopf"}, {"n": "Enges Bankdrücken (LH)", "o": "Homegym", "h": "Griff schulterbreit, Ellbogen nah am Körper"}], "Quadrizeps": [{"n": "Kniebeuge (LH)", "o": "Homegym", "h": "Bracing vor jeder Wdh., kontrolliert runter, explosiv hoch"}, {"n": "Pausierte Kniebeuge (2 s, LH)", "o": "Homegym", "h": "2 s Pause unten – Spannung halten, nicht absitzen"}, {"n": "Frontkniebeuge (LH)", "o": "Homegym", "h": "Ellbogen hoch, Oberkörper aufrecht"}, {"n": "Beinstrecker (Anbau)", "o": "Homegym", "h": "Oben 1 s halten"}, {"n": "Bulgarian Split Squat (KH)", "o": "Homegym", "h": "Wdh.-Angabe pro Bein; schwächere Seite zuerst"}, {"n": "Ausfallschritte (KH)", "o": "Homegym", "h": "Langer Schritt, hinteres Knie fast am Boden"}, {"n": "Beinpresse", "o": "Studio", "h": "Tief, Rücken bleibt an der Lehne"}, {"n": "Hackenschmidt-Kniebeuge", "o": "Studio", "h": "Füße eher tief auf der Plattform"}], "Beinbeuger": [{"n": "Rumänisches Kreuzheben (LH)", "o": "Homegym", "h": "Hüfte nach hinten, Knie leicht gebeugt, Dehnung spüren"}, {"n": "Rumänisches Kreuzheben (KH)", "o": "Homegym", "h": "Hanteln nah an den Beinen führen"}, {"n": "Beinbeuger (Anbau)", "o": "Homegym", "h": "Langsam ablassen (2–3 s)"}, {"n": "Beinbeuger sitzend (Maschine)", "o": "Studio", "h": "Hüfte gebeugt = mehr Dehnung"}, {"n": "Nordic Curls", "o": "Homegym", "h": "Exzentrisch langsam, mit Händen abfangen"}], "Gesäß": [{"n": "Kreuzheben (LH)", "o": "Homegym", "h": "Stange am Körper, Lat fest, Boden wegdrücken"}, {"n": "Hip Thrust (LH)", "o": "Homegym", "h": "Oben 1 s halten, Kinn zur Brust"}, {"n": "Glute Kickbacks am Kabel", "o": "Homegym", "h": "Becken stabil, nicht ins Hohlkreuz"}], "Waden": [{"n": "Wadenheben stehend", "o": "Homegym", "h": "Unten 1–2 s Dehnung, oben 1 s halten"}, {"n": "Wadenheben sitzend", "o": "Homegym / Studio", "h": "Soleus – wichtig für Läufer:innen"}, {"n": "Wadenheben an der Beinpresse", "o": "Studio", "h": "Volle Dehnung, langsam"}], "Bauch": [{"n": "Cable Crunch (Kabelturm)", "o": "Homegym", "h": "Wirbelsäule einrollen, nicht aus der Hüfte ziehen"}, {"n": "Hängendes Beinheben", "o": "Homegym / Studio", "h": "Becken einrollen, kein Schwung"}, {"n": "Pallof Press (Kabel)", "o": "Homegym", "h": "Anti-Rotation; Wdh.-Angabe pro Seite"}, {"n": "Ab-Wheel Rollout", "o": "Homegym", "h": "Kein Hohlkreuz – nur so weit wie kontrolliert"}, {"n": "Russian Twist", "o": "Homegym", "h": "Langsam, Rotation aus dem Brustkorb"}, {"n": "Crunches (Zusatzgewicht)", "o": "Homegym", "h": "Kurzer Weg, oben anspannen"}]};
+const D = {"LIB": {"Brust": [{"n": "Bankdrücken (LH)", "o": "Homegym", "h": "Schulterblätter fest, Füße aktiv, Stange berührt Brust"}, {"n": "Bankdrücken (pausiert 2 s; LH)", "o": "Homegym", "h": "2 s ruhige Pause auf der Brust, dann explosiv"}, {"n": "Bankdrücken (KH)", "o": "Homegym", "h": "Tiefer als mit der Stange, Ellbogen ca. 45°"}, {"n": "Schrägbankdrücken (30°; KH)", "o": "Homegym", "h": "Tiefe Dehnung unten, oben nicht zusammenschlagen"}, {"n": "Schrägbankdrücken (30°; LH)", "o": "Homegym", "h": "Stange zur oberen Brust"}, {"n": "Floor Press (LH)", "o": "Homegym", "h": "Oberarme kurz am Boden ablegen, dann drücken"}, {"n": "Fliegende (flach; KH)", "o": "Homegym", "h": "Leichter Bogen, Dehnung betonen"}, {"n": "Fliegende (schräg; KH)", "o": "Homegym", "h": "Bank 30°, Arme leicht gebeugt"}, {"n": "Fliegende (einarmig; Kabel)", "o": "Homegym", "h": "Seitlich zum Turm, Arm vor den Körper führen"}, {"n": "Liegestütze (KG)", "o": "Homegym", "h": "Körper als Brett, Brust bis knapp zum Boden"}, {"n": "Liegestütze (Füße erhöht; KG)", "o": "Homegym", "h": "Füße auf der Bank – mehr obere Brust"}, {"n": "Dips (KG)", "o": "Studio", "h": "Oberkörper leicht nach vorne"}, {"n": "Butterfly (Maschine)", "o": "Studio", "h": "Kontrolliert zurück, Dehnung halten"}, {"n": "Brustpresse (Maschine)", "o": "Studio", "h": "Griffe auf Brusthöhe"}], "Latissimus": [{"n": "Klimmzüge (Obergriff; KG)", "o": "Homegym", "h": "Voller Bewegungsumfang; ab 12 Wdh. Zusatzgewicht"}, {"n": "Klimmzüge (Untergriff; KG)", "o": "Homegym", "h": "Schulterbreit, Brust zur Stange"}, {"n": "Latzug (breit; Kabel)", "o": "Homegym", "h": "Brust zur Stange, nicht nach hinten lehnen"}, {"n": "Latzug (eng/neutral; Kabel)", "o": "Homegym", "h": "Ellbogen Richtung Hüfte ziehen"}, {"n": "Latzug (Untergriff; Kabel)", "o": "Homegym", "h": "Schulterbreit, Ellbogen nach unten-hinten"}, {"n": "Latzug (einarmig; Kabel)", "o": "Homegym", "h": "Leicht zur Seite lehnen, volle Dehnung oben"}, {"n": "Überzüge (gestreckte Arme; Kabel)", "o": "Homegym", "h": "Arme fast gestreckt, Lat-Isolation"}, {"n": "Überzüge (KH)", "o": "Homegym", "h": "Quer auf der Bank, Hüfte tief"}, {"n": "Rudern (einarmig; KH)", "o": "Homegym", "h": "Ellbogen zur Hüfte, lange Dehnung unten"}], "Oberer Rücken": [{"n": "Rudern sitzend (eng; Kabel)", "o": "Homegym", "h": "Brust raus, Schulterblätter zusammen"}, {"n": "Rudern sitzend (breit; Kabel)", "o": "Homegym", "h": "Ellbogen weit, zur unteren Brust ziehen"}, {"n": "Rudern (vorgebeugt; LH)", "o": "Homegym", "h": "Oberkörper ca. 45°, kein Schwung"}, {"n": "Pendlay-Rudern (LH)", "o": "Homegym", "h": "Jede Wdh. vom Boden, Rücken waagerecht"}, {"n": "Rudern (brustgestützt, Schrägbank; KH)", "o": "Homegym", "h": "Rückenschonend – gut nach Kreuzheben-Tagen"}, {"n": "Shrugs (LH)", "o": "Homegym", "h": "Schultern gerade hoch, oben 1 s halten"}, {"n": "Shrugs (KH)", "o": "Homegym", "h": "Kein Kreisen, oben halten"}], "Schulter vorne": [{"n": "Schulterdrücken (sitzend; LH)", "o": "Homegym", "h": "Lehne fast senkrecht, Stange vor dem Gesicht bis Kinnhöhe"}, {"n": "Schulterdrücken (stehend; LH)", "o": "Homegym", "h": "Po & Bauch fest, Kopf durch die Arme schieben"}, {"n": "Schulterdrücken (sitzend; KH)", "o": "Homegym", "h": "Lehne fast senkrecht, tief ablassen"}, {"n": "Arnold Press (KH)", "o": "Homegym", "h": "Rotation kontrolliert"}, {"n": "Landmine Press (einarmig; LH)", "o": "Homegym", "h": "Stange in die Rack-Ecke, schulterfreundlich"}, {"n": "Frontheben (KH)", "o": "Homegym", "h": "Bis Augenhöhe, ohne Schwung"}, {"n": "Frontheben (Kabel)", "o": "Homegym", "h": "Rücken zum Turm, konstante Spannung"}], "Schulter seitlich": [{"n": "Seitheben (KH)", "o": "Homegym", "h": "Leicht nach vorne lehnen, Ellbogen führt"}, {"n": "Seitheben (sitzend; KH)", "o": "Homegym", "h": "Kein Schwung möglich – ehrlicher Reiz"}, {"n": "Seitheben (einarmig; Kabel)", "o": "Homegym", "h": "Kabel hinter dem Körper, konstante Spannung"}, {"n": "Y-Raise (Schrägbank; KH)", "o": "Homegym", "h": "Bauchlage, Arme im Y, leichte Gewichte"}, {"n": "Aufrechtes Rudern (breit; Kabel)", "o": "Homegym", "h": "Nur bis Brusthöhe, Ellbogen führt"}, {"n": "Aufrechtes Rudern (breit; SZ)", "o": "Homegym", "h": "Breiter Griff, bis Brusthöhe"}], "Schulter hinten": [{"n": "Face Pulls (Seil; Kabel)", "o": "Homegym", "h": "Auf Stirnhöhe ziehen, Daumen nach hinten"}, {"n": "Reverse Flys (vorgebeugt; KH)", "o": "Homegym", "h": "Leicht & sauber, Arme weit"}, {"n": "Reverse Flys (Bauchlage, Schrägbank; KH)", "o": "Homegym", "h": "Brust auf der Bank, kein Schwung"}, {"n": "Reverse Flys (einarmig; Kabel)", "o": "Homegym", "h": "Kabel auf Schulterhöhe, Arm weit öffnen"}], "Bizeps": [{"n": "Bizeps-Curls (KH)", "o": "Homegym", "h": "Supinieren, kein Schwung"}, {"n": "Bizeps-Curls (LH)", "o": "Homegym", "h": "Ellbogen bleiben am Körper"}, {"n": "Bizeps-Curls (SZ)", "o": "Homegym", "h": "Handgelenkschonend, voller Weg"}, {"n": "Bizeps-Curls (Stange; Kabel)", "o": "Homegym", "h": "Konstante Spannung, oben kurz halten"}, {"n": "Hammer Curls (KH)", "o": "Homegym", "h": "Neutraler Griff – Brachialis & Unterarm"}, {"n": "Hammer Curls (Seil; Kabel)", "o": "Homegym", "h": "Seil, Daumen oben"}, {"n": "Schrägbank-Curls (KH)", "o": "Homegym", "h": "Arme hängen hinter dem Körper – starke Dehnung"}, {"n": "Konzentrationscurls (KH)", "o": "Homegym", "h": "Ellbogen am Oberschenkel, langsam ablassen"}, {"n": "Preacher Curls (Schrägbank; SZ)", "o": "Homegym", "h": "Oberarme auf der Lehne, nicht ganz strecken"}], "Trizeps": [{"n": "Trizepsdrücken (SZ-Stange; Kabel)", "o": "Homegym", "h": "Ellbogen fixiert, unten voll strecken"}, {"n": "Trizepsdrücken (Seil; Kabel)", "o": "Homegym", "h": "Unten Seil auseinanderziehen"}, {"n": "Überkopf-Trizepsstrecken (Seil; Kabel)", "o": "Homegym", "h": "Langer Kopf – tiefe Dehnung hinter dem Kopf"}, {"n": "Überkopf-Trizepsstrecken (KH)", "o": "Homegym", "h": "Eine Hantel beidhändig, Ellbogen eng"}, {"n": "Stirndrücken (SZ)", "o": "Homegym", "h": "Stange Richtung Stirn/hinter den Kopf"}, {"n": "Stirndrücken (KH)", "o": "Homegym", "h": "Neutraler Griff, Ellbogen zeigen zur Decke"}, {"n": "Bankdrücken (eng; LH)", "o": "Homegym", "h": "Griff schulterbreit, Ellbogen nah am Körper"}, {"n": "Kickbacks (Kabel)", "o": "Homegym", "h": "Oberarm parallel zum Boden, oben halten"}, {"n": "Kickbacks (KH)", "o": "Homegym", "h": "Oberarm fixiert, nur Unterarm bewegt sich"}, {"n": "Dips (an der Bank; KG)", "o": "Homegym", "h": "Hände auf der Bank, Ellbogen nach hinten"}], "Quadrizeps": [{"n": "Kniebeuge (LH)", "o": "Homegym", "h": "Bracing vor jeder Wdh., kontrolliert runter, explosiv hoch"}, {"n": "Kniebeuge (pausiert 2 s; LH)", "o": "Homegym", "h": "2 s Pause unten – Spannung halten, nicht absitzen"}, {"n": "Kniebeuge (Tempo 3-1-0; LH)", "o": "Homegym", "h": "3 s runter, 1 s Pause, explosiv hoch"}, {"n": "Frontkniebeuge (LH)", "o": "Homegym", "h": "Ellbogen hoch, Oberkörper aufrecht"}, {"n": "Goblet Squat (KH)", "o": "Homegym", "h": "Hantel vor der Brust, tief sitzen"}, {"n": "Beinstrecker (Anbau)", "o": "Homegym", "h": "Oben 1 s halten"}, {"n": "Bulgarian Split Squat (KH)", "o": "Homegym", "h": "Wdh. pro Bein; schwächere Seite zuerst"}, {"n": "Bulgarian Split Squat (LH)", "o": "Homegym", "h": "Im Rack starten, Wdh. pro Bein"}, {"n": "Ausfallschritte (KH)", "o": "Homegym", "h": "Langer Schritt, hinteres Knie fast am Boden"}, {"n": "Ausfallschritte (rückwärts; KH)", "o": "Homegym", "h": "Knieschonender, Schritt nach hinten"}, {"n": "Step-ups (Bank; KH)", "o": "Homegym", "h": "Ganzer Fuß auf der Bank, nicht abdrücken"}, {"n": "Beinpresse (Maschine)", "o": "Studio", "h": "Tief, Rücken bleibt an der Lehne"}, {"n": "Hackenschmidt-Kniebeuge (Maschine)", "o": "Studio", "h": "Füße eher tief auf der Plattform"}], "Beinbeuger": [{"n": "Rumänisches Kreuzheben (LH)", "o": "Homegym", "h": "Hüfte nach hinten, Knie leicht gebeugt, Dehnung spüren"}, {"n": "Rumänisches Kreuzheben (KH)", "o": "Homegym", "h": "Hanteln nah an den Beinen führen"}, {"n": "Good Mornings (LH)", "o": "Homegym", "h": "Leichtes Gewicht, Hüfte weit nach hinten"}, {"n": "Beinbeuger (Anbau)", "o": "Homegym", "h": "Langsam ablassen (2–3 s)"}, {"n": "Beinbeuger (stehend, einbeinig; Kabel)", "o": "Homegym", "h": "Fußschlaufe, Oberschenkel bleibt ruhig"}, {"n": "Nordic Curls (KG)", "o": "Homegym", "h": "Exzentrisch langsam, mit Händen abfangen"}, {"n": "Beinbeuger sitzend (Maschine)", "o": "Studio", "h": "Hüfte gebeugt = mehr Dehnung"}], "Gesäß": [{"n": "Kreuzheben (LH)", "o": "Homegym", "h": "Stange am Körper, Lat fest, Boden wegdrücken"}, {"n": "Kreuzheben (Sumo; LH)", "o": "Homegym", "h": "Breiter Stand, Knie nach außen"}, {"n": "Hip Thrust (LH)", "o": "Homegym", "h": "Oben 1 s halten, Kinn zur Brust"}, {"n": "Glute Bridge (LH)", "o": "Homegym", "h": "Vom Boden, kürzerer Weg als Hip Thrust"}, {"n": "Glute Kickbacks (Kabel)", "o": "Homegym", "h": "Becken stabil, nicht ins Hohlkreuz"}, {"n": "Abduktion (einbeinig; Kabel)", "o": "Homegym", "h": "Seitlich zum Turm, Bein nach außen führen"}], "Waden": [{"n": "Wadenheben (stehend; LH)", "o": "Homegym", "h": "Unten 1–2 s Dehnung, oben 1 s halten"}, {"n": "Wadenheben (stehend, einbeinig; KH)", "o": "Homegym", "h": "Auf einer Stufe/Scheibe, volle Dehnung"}, {"n": "Wadenheben (sitzend; LH)", "o": "Homegym", "h": "Stange gepolstert auf den Knien – Soleus"}, {"n": "Wadenheben (sitzend; KH)", "o": "Homegym", "h": "Hanteln auf den Knien, Vorfuß erhöht"}, {"n": "Wadenheben (Beinpresse)", "o": "Studio", "h": "Volle Dehnung, langsam"}], "Bauch": [{"n": "Cable Crunch (kniend; Kabel)", "o": "Homegym", "h": "Wirbelsäule einrollen, nicht aus der Hüfte ziehen"}, {"n": "Hängendes Beinheben (KG)", "o": "Homegym", "h": "Becken einrollen, kein Schwung"}, {"n": "Knieheben hängend (KG)", "o": "Homegym", "h": "Leichtere Variante des Beinhebens"}, {"n": "Pallof Press (Kabel)", "o": "Homegym", "h": "Anti-Rotation; Wdh. pro Seite"}, {"n": "Holzhacker (Kabel)", "o": "Homegym", "h": "Rotation aus dem Rumpf, Arme lang"}, {"n": "Ab-Wheel Rollout (KG)", "o": "Homegym", "h": "Kein Hohlkreuz – nur so weit wie kontrolliert"}, {"n": "Russian Twist (KH)", "o": "Homegym", "h": "Langsam, Rotation aus dem Brustkorb"}, {"n": "Crunches (Zusatzgewicht; KH)", "o": "Homegym", "h": "Kurzer Weg, oben anspannen"}, {"n": "Seitbeugen (KH)", "o": "Homegym", "h": "Nur zur Seite, nicht nach vorn"}, {"n": "Dead Bug (KG)", "o": "Homegym", "h": "Lendenwirbelsäule bleibt am Boden"}]}, "MAIN": {"bd": "Bankdrücken (LH)", "pbd": "Bankdrücken (pausiert 2 s; LH)", "kb": "Kniebeuge (LH)", "pkb": "Kniebeuge (pausiert 2 s; LH)", "kh": "Kreuzheben (LH)"}, "OK1_MIX": [{"id": "ok1m0", "art": "Assistenz", "g": "Latissimus", "ex": "Klimmzüge (Obergriff; KG)", "wu": "1–2", "n": 2, "rt": "G", "p": "2–3 min"}, {"id": "ok1m1", "art": "Assistenz", "g": "Brust", "ex": "Schrägbankdrücken (30°; KH)", "wu": "1–2", "n": 2, "rt": "G", "p": "2 min"}, {"id": "ok1m2", "art": "Assistenz", "g": "Oberer Rücken", "ex": "Rudern sitzend (eng; Kabel)", "wu": "1", "n": 3, "rt": "G", "p": "2 min"}, {"id": "ok1m3", "art": "Assistenz", "g": "Brust", "ex": "Fliegende (schräg; KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok1m4", "art": "Assistenz", "g": "Schulter seitlich", "ex": "Seitheben (KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok1m5", "art": "Assistenz", "g": "Schulter hinten", "ex": "Reverse Flys (einarmig; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "ok1m6", "art": "Assistenz", "g": "Trizeps", "ex": "Trizepsdrücken (SZ-Stange; Kabel)", "wu": "1", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok1m7", "art": "Assistenz", "g": "Bizeps", "ex": "Bizeps-Curls (KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}], "OK2_MIX": [{"id": "ok2m0", "art": "Assistenz", "g": "Schulter vorne", "ex": "Schulterdrücken (sitzend; LH)", "wu": "2", "n": 2, "rt": "G", "p": "2–3 min"}, {"id": "ok2m1", "art": "Assistenz", "g": "Latissimus", "ex": "Latzug (eng/neutral; Kabel)", "wu": "1", "n": 2, "rt": "G", "p": "2 min"}, {"id": "ok2m2", "art": "Assistenz", "g": "Oberer Rücken", "ex": "Rudern (vorgebeugt; LH)", "wu": "1", "n": 2, "rt": "G", "p": "2–3 min"}, {"id": "ok2m3", "art": "Assistenz", "g": "Latissimus", "ex": "Rudern (einarmig; KH)", "wu": "0", "n": 2, "rt": "G", "p": "1,5–2 min"}, {"id": "ok2m4", "art": "Assistenz", "g": "Schulter seitlich", "ex": "Seitheben (einarmig; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "ok2m5", "art": "Assistenz", "g": "Schulter hinten", "ex": "Face Pulls (Seil; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "ok2m6", "art": "Assistenz", "g": "Trizeps", "ex": "Überkopf-Trizepsstrecken (Seil; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok2m7", "art": "Assistenz", "g": "Bizeps", "ex": "Hammer Curls (KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}], "OK1_PP": [{"id": "ok1p0", "art": "Assistenz", "g": "Brust", "ex": "Schrägbankdrücken (30°; KH)", "wu": "1–2", "n": 2, "rt": "G", "p": "2 min"}, {"id": "ok1p1", "art": "Assistenz", "g": "Schulter vorne", "ex": "Schulterdrücken (sitzend; LH)", "wu": "2", "n": 2, "rt": "G", "p": "2–3 min"}, {"id": "ok1p2", "art": "Assistenz", "g": "Brust", "ex": "Fliegende (schräg; KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok1p3", "art": "Assistenz", "g": "Schulter seitlich", "ex": "Seitheben (KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok1p4", "art": "Assistenz", "g": "Schulter seitlich", "ex": "Aufrechtes Rudern (breit; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok1p5", "art": "Assistenz", "g": "Schulter seitlich", "ex": "Y-Raise (Schrägbank; KH)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "ok1p6", "art": "Assistenz", "g": "Trizeps", "ex": "Trizepsdrücken (SZ-Stange; Kabel)", "wu": "1", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok1p7", "art": "Assistenz", "g": "Trizeps", "ex": "Überkopf-Trizepsstrecken (Seil; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}], "OK2_PP": [{"id": "ok2p0", "art": "Assistenz", "g": "Latissimus", "ex": "Klimmzüge (Obergriff; KG)", "wu": "1–2", "n": 2, "rt": "G", "p": "2–3 min"}, {"id": "ok2p1", "art": "Assistenz", "g": "Latissimus", "ex": "Latzug (eng/neutral; Kabel)", "wu": "1", "n": 2, "rt": "G", "p": "2 min"}, {"id": "ok2p2", "art": "Assistenz", "g": "Oberer Rücken", "ex": "Rudern sitzend (eng; Kabel)", "wu": "1", "n": 3, "rt": "G", "p": "2 min"}, {"id": "ok2p3", "art": "Assistenz", "g": "Oberer Rücken", "ex": "Rudern (vorgebeugt; LH)", "wu": "1", "n": 2, "rt": "G", "p": "2–3 min"}, {"id": "ok2p4", "art": "Assistenz", "g": "Schulter hinten", "ex": "Face Pulls (Seil; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "ok2p5", "art": "Assistenz", "g": "Schulter hinten", "ex": "Reverse Flys (einarmig; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "ok2p6", "art": "Assistenz", "g": "Bizeps", "ex": "Bizeps-Curls (KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "ok2p7", "art": "Assistenz", "g": "Bizeps", "ex": "Hammer Curls (KH)", "wu": "0", "n": 2, "rt": "I", "p": "1–1,5 min"}], "UK1": [{"id": "uk1a0", "art": "Assistenz", "g": "Beinbeuger", "ex": "Rumänisches Kreuzheben (LH)", "wu": "2", "n": 2, "rt": "G", "p": "2–3 min"}, {"id": "uk1a1", "art": "Assistenz", "g": "Quadrizeps", "ex": "Bulgarian Split Squat (KH)", "wu": "1", "n": 2, "rt": "G", "p": "2 min"}, {"id": "uk1a2", "art": "Assistenz", "g": "Gesäß", "ex": "Hip Thrust (LH)", "wu": "1", "n": 2, "rt": "G", "p": "2 min"}, {"id": "uk1a3", "art": "Assistenz", "g": "Quadrizeps", "ex": "Beinstrecker (Anbau)", "wu": "1", "n": 2, "rt": "I", "p": "1–2 min"}, {"id": "uk1a4", "art": "Assistenz", "g": "Beinbeuger", "ex": "Beinbeuger (Anbau)", "wu": "1", "n": 2, "rt": "I", "p": "1–2 min"}, {"id": "uk1a5", "art": "Assistenz", "g": "Waden", "ex": "Wadenheben (stehend; LH)", "wu": "1", "n": 2, "rt": "I", "p": "1–1,5 min"}, {"id": "uk1a6", "art": "Core", "g": "Bauch", "ex": "Cable Crunch (kniend; Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "uk1a7", "art": "Core", "g": "Bauch", "ex": "Pallof Press (Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}], "UK2": [{"id": "uk2a0", "art": "Assistenz", "g": "Beinbeuger", "ex": "Beinbeuger (Anbau)", "wu": "1", "n": 2, "rt": "I", "p": "1–2 min"}, {"id": "uk2a1", "art": "Assistenz", "g": "Quadrizeps", "ex": "Beinstrecker (Anbau)", "wu": "1", "n": 2, "rt": "I", "p": "1–2 min"}, {"id": "uk2a2", "art": "Assistenz", "g": "Gesäß", "ex": "Glute Kickbacks (Kabel)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "uk2a3", "art": "Assistenz", "g": "Waden", "ex": "Wadenheben (sitzend; LH)", "wu": "1", "n": 2, "rt": "I", "p": "1 min"}, {"id": "uk2a4", "art": "Core", "g": "Bauch", "ex": "Hängendes Beinheben (KG)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "uk2a5", "art": "Core", "g": "Bauch", "ex": "Ab-Wheel Rollout (KG)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}, {"id": "uk2a6", "art": "Core", "g": "Bauch", "ex": "Russian Twist (KH)", "wu": "0", "n": 2, "rt": "I", "p": "1 min"}], "TRACKED": ["Rudern (vorgebeugt; LH)", "Schulterdrücken (sitzend; LH)"], "QUOTES": ["Der erste Satz legt das Fundament.", "Konstanz schlägt Motivation.", "Die Stange wird nicht leichter – du wirst stärker.", "Stark wird man nicht an leichten Tagen.", "Erst die Technik, dann das Ego.", "Jede Wiederholung ist eine Entscheidung.", "Disziplin ist, was du tust, wenn niemand zuschaut.", "Heute zählt nur der nächste saubere Satz.", "Ruhig bleiben. Sauber bleiben. Stark bleiben.", "Kleine Schritte, jede Woche. Das ist das ganze Geheimnis.", "Du musst nicht motiviert sein. Du musst nur anfangen.", "Gewicht bewegen, Charakter bauen.", "Fortschritt ist leise – bis er nicht mehr zu übersehen ist.", "Heute ein bisschen besser als letzte Woche.", "Vertrau dem Plan. Er vertraut dir.", "Kraft entsteht zwischen den Einheiten – gib heute den Grund dafür.", "Das Eisen lügt nie.", "Wer ankommt, hat schon gewonnen.", "Fokus auf die Form – das Gewicht folgt.", "Jeder Satz zählt. Auch der letzte.", "Schwere Tage machen leichte Gewichte.", "Du warst schon stark. Heute wirst du stärker.", "Keine Abkürzungen. Nur Wiederholungen.", "Atmen. Spannen. Drücken.", "Die beste Einheit ist die, die stattfindet."]};
+const LIB = D.LIB;
 const GROUPS = Object.keys(LIB);
 const S = [100,97.8,95.5,93.9,92.2,90.7,89.2,87.8,86.3,85.0,83.7,82.4,81.1,79.9,78.6,77.4,76.2,75.1,73.9,72.3,70.7,69.4,68.0,66.7,65.3,64.0,62.6,61.3,59.9,58.6,57.2,55.9,54.5,53.2,51.8];
 function pct(reps, rir){ reps=Math.max(1,Math.min(12,Math.floor(reps))); rir=Math.max(0,Math.min(6,Math.floor(rir*2)/2)); return S[2*(reps-1)+Math.round(rir*2)]/100; }
 
-const BLK = {
+const BLK_OLD = {
  1:{kbt:6,kbb:6,kbs:3,bdt:5,bdb:6,bds:3,kht:5,khb:5,khs:2,pbt:3,pbb:5,pbs:2,pkr:5,pks:3,rg:"8–10",ri:"10–12"},
  2:{kbt:5,kbb:5,kbs:3,bdt:4,bdb:5,bds:3,kht:4,khb:4,khs:2,pbt:2,pbb:4,pbs:2,pkr:4,pks:3,rg:"6–8",ri:"10–12"},
  3:{kbt:4,kbb:4,kbs:3,bdt:3,bdb:4,bds:3,kht:3,khb:3,khs:2,pbt:1,pbb:3,pbs:2,pkr:3,pks:3,rg:"5–7",ri:"8–10"}};
+const BLK = {
+ 1:{kbt:6,kbb:6,kbs:2,bdt:5,bdb:6,bds:2,kht:5,khb:5,khs:1,pbt:3,pbb:5,pbs:2,pkr:5,pks:2,rg:"8–10",ri:"10–12"},
+ 2:{kbt:5,kbb:5,kbs:2,bdt:4,bdb:5,bds:2,kht:4,khb:4,khs:1,pbt:2,pbb:4,pbs:2,pkr:4,pks:2,rg:"6–8",ri:"10–12"},
+ 3:{kbt:4,kbb:4,kbs:2,bdt:3,bdb:4,bds:2,kht:3,khb:3,khs:1,pbt:1,pbb:3,pbs:2,pkr:3,pks:2,rg:"5–7",ri:"8–10"}};
 const WK = [
  [1,"Einstieg",4,.70,4,3],[1,"Aufbau",3,.72,3,2],[1,"Steigerung",2,.74,2,2],[1,"Peak",1,.76,2,1],[1,"Deload",4,.65,4,4],
  [2,"Einstieg",4,.72,3,3],[2,"Aufbau",3,.74,3,2],[2,"Steigerung",2,.76,2,2],[2,"Peak",1,.78,1.5,1],[2,"Deload",4,.65,4,4],
@@ -288,58 +304,42 @@ const MOTTO = ["Der erste Satz legt das Fundament.","Konstanz schlägt Motivatio
 function W(w){ const r=WK[w-1]; const b=BLK[r[0]]; return {block:r[0],phase:r[1],top:r[2],bo:r[3],vr:r[4],acc:r[5],deload:r[1]==="Deload",...b}; }
 const BLOCKC = {1:"var(--gold)",2:"var(--bronze)",3:"var(--silver)"};
 
-// Plan: 3 feste Tage + optionaler UK2
-const A=(id,g,ex,wu,n,rt,p,art="Assistenz")=>({id,art,g,ex,wu,n,rt,p});
-const DAYS = [
- {id:"ok1", name:"Bank", tag:"OK1", slots:[
-  {id:"ok1t",art:"Topset",g:"Brust",ex:"Bankdrücken (LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"bd"},
-  {id:"ok1b",art:"Backoff",g:"Brust",ex:"Bankdrücken (LH)",wu:"0",p:"2–3 min",t:"BO",lift:"bd"},
-  A("ok1a","Latissimus","Klimmzüge","1–2",3,"G","2–3 min"), A("ok1c","Brust","Schrägbankdrücken (KH)","1–2",3,"G","2 min"),
-  A("ok1d","Oberer Rücken","Rudern am Kabel sitzend (eng)","1",3,"G","2 min"), A("ok1e","Schulter seitlich","Seitheben (KH)","0",3,"I","1–1,5 min"),
-  A("ok1f","Trizeps","Trizepsdrücken am Kabel (Seil)","1",2,"I","1–1,5 min"), A("ok1g","Bizeps","Bizeps-Curls (KH)","0",2,"I","1–1,5 min")]},
- {id:"uk1", name:"Beuge", tag:"UK1", slots:[
-  {id:"uk1t",art:"Topset",g:"Quadrizeps",ex:"Kniebeuge (LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"kb"},
-  {id:"uk1b",art:"Backoff",g:"Quadrizeps",ex:"Kniebeuge (LH)",wu:"0",p:"2–3 min",t:"BO",lift:"kb"},
-  A("uk1a","Beinbeuger","Rumänisches Kreuzheben (LH)","2",3,"G","2–3 min"), A("uk1c","Quadrizeps","Bulgarian Split Squat (KH)","1",2,"G","2 min"),
-  A("uk1d","Quadrizeps","Beinstrecker (Anbau)","1",2,"I","1–2 min"), A("uk1e","Beinbeuger","Beinbeuger (Anbau)","1",3,"I","1–2 min"),
-  A("uk1f","Waden","Wadenheben stehend","1",2,"I","1–1,5 min"), A("uk1g","Bauch","Cable Crunch (Kabelturm)","0",2,"I","1 min","Core"),
-  A("uk1h","Bauch","Pallof Press (Kabel)","0",2,"I","1 min","Core")]},
- {id:"ok2", name:"P-Bank", tag:"OK2", slots:[
-  {id:"ok2t",art:"Topset",g:"Brust",ex:"Pausiertes Bankdrücken (2 s, LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"pbd"},
-  {id:"ok2b",art:"Backoff",g:"Brust",ex:"Pausiertes Bankdrücken (2 s, LH)",wu:"0",p:"2–3 min",t:"BO",lift:"pbd"},
-  A("ok2a","Schulter vorne","Schulterdrücken sitzend (LH)","2",3,"G","2–3 min"), A("ok2c","Latissimus","Latzug (Kabelturm, eng/neutral)","1",3,"G","2 min"),
-  A("ok2d","Oberer Rücken","Langhantelrudern","1",3,"G","2–3 min"), A("ok2e","Schulter seitlich","Seitheben am Kabel","0",2,"I","1 min"),
-  A("ok2f","Schulter hinten","Face Pulls (Seil)","0",2,"I","1 min"), A("ok2g","Trizeps","Überkopf-Trizepsstrecken (Kabel)","0",2,"I","1–1,5 min"),
-  A("ok2h","Bizeps","Hammer Curls (KH)","0",2,"I","1–1,5 min")]},
- {id:"uk2", name:"Kreuz", tag:"UK2", optional:true, slots:[
-  {id:"uk2t",art:"Topset",g:"Gesäß",ex:"Kreuzheben (LH)",wu:"3–4",p:"3–4 min",t:"TOP",lift:"kh"},
-  {id:"uk2b",art:"Backoff",g:"Gesäß",ex:"Kreuzheben (LH)",wu:"0",p:"2–3 min",t:"BO",lift:"kh"},
-  {id:"uk2v",art:"Variante",g:"Quadrizeps",ex:"Pausierte Kniebeuge (2 s, LH)",wu:"2–3",p:"3 min",t:"VAR",lift:"pkb"},
-  A("uk2a","Gesäß","Hip Thrust (LH)","1",2,"G","2 min"), A("uk2c","Waden","Wadenheben sitzend","1",3,"I","1 min"),
-  A("uk2d","Bauch","Hängendes Beinheben","0",3,"I","1 min","Core"), A("uk2e","Bauch","Ab-Wheel Rollout","0",2,"I","1 min","Core")]}
-];
+// Plan: 3 feste Tage + optionaler UK2 (Daten gemeinsam mit Excel)
+const M_=(id,art,g,lift,t_,p,wu="–")=>({id,art,g,ex:D.MAIN[lift],wu,p,t:t_,lift});
+const BASE_DAYS = [
+ {id:"ok1", name:"Bank", pp:"Push", tag:"OK1", main:[M_("ok1t","Topset","Brust","bd","TOP","3–4 min"),M_("ok1b","Backoff","Brust","bd","BO","2–3 min","0")], mix:D.OK1_MIX, alt:D.OK1_PP},
+ {id:"uk1", name:"Beuge", tag:"UK1", main:[M_("uk1t","Topset","Quadrizeps","kb","TOP","3–4 min"),M_("uk1b","Backoff","Quadrizeps","kb","BO","2–3 min","0")], mix:D.UK1, alt:D.UK1},
+ {id:"ok2", name:"P-Bank", pp:"Pull", tag:"OK2", main:[M_("ok2t","Topset","Brust","pbd","TOP","3–4 min"),M_("ok2b","Backoff","Brust","pbd","BO","2–3 min","0")], mix:D.OK2_MIX, alt:D.OK2_PP},
+ {id:"uk2", name:"Kreuz", tag:"UK2", optional:true, main:[M_("uk2t","Topset","Gesäß","kh","TOP","3–4 min"),M_("uk2b","Backoff","Gesäß","kh","BO","2–3 min","0"),
+   M_("uk2v","Variante","Quadrizeps","pkb","VAR","3 min")], mix:D.UK2, alt:D.UK2}];
+let DAYS=[];
 const FORM=[["platt","kaum geschlafen, erschöpft."],["müde","schlecht geschlafen oder ein zäher Tag."],
  ["normal","ganz okay, nichts Besonderes."],["gut","ausgeruht und motiviert."],["top","bestens erholt, voller Energie."]];
-const SLOTDAY={}; DAYS.forEach((d,i)=>d.slots.forEach(s=>SLOTDAY[s.id]=i));
+const SLOTDAY={};
+function buildDays(){ const pp=st.set.split==="pp";
+  DAYS=BASE_DAYS.map((b,i)=>({id:b.id,name:pp&&b.pp?b.pp:b.name,tag:b.tag,optional:b.optional,slots:[...b.main,...(pp?b.alt:b.mix),...((st.extra||{})[i]||[])]}));
+  for(const k in SLOTDAY) delete SLOTDAY[k]; DAYS.forEach((d,i)=>d.slots.forEach(s=>SLOTDAY[s.id]=i)); }
 const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am Limit",-1],["überfordert",-2]]],
  ["RIR-Ziele",[["zu leicht",1],["passend",0],["zu schwer",-1]]],
  ["Gelenke & Sehnen",[["keine Probleme",0],["leichte Beschwerden",-1],["deutliche Beschwerden",-2]]],
  ["Laufumfang im Block",[["weniger als sonst",1],["normal",0],["mehr als sonst",-1]]]];
-const MAIN_NAMES = ["Bankdrücken (LH)","Kniebeuge (LH)","Kreuzheben (LH)","Pausiertes Bankdrücken (2 s, LH)","Pausierte Kniebeuge (2 s, LH)"];
+const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = 8;
+const KEY = "kraftwerk.v1"; const APPVER = 9;
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
-  round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:["Langhantelrudern","Schulterdrücken sitzend (LH)"],
+  round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70,
   bar:20 },
-  swaps:{}, custom:[], log:{}, dates:{}, ends:{}, notes:{}, body:{}, cfg:{}, form:{}, fb:{}, onboarded:false });
+  swaps:{}, custom:[], extra:{}, exnotes:{}, setov:{}, log:{}, dates:{}, ends:{}, notes:{}, body:{}, cfg:{}, form:{}, fb:{}, onboarded:false });
 let st;
 try{ st = JSON.parse(localStorage.getItem(KEY)) || DEF(); }catch(e){ st = DEF(); }
 st = Object.assign(DEF(), st); st.set = Object.assign(DEF().set, st.set);
+if(!st.mig8){ st.swaps={}; st.cfg={}; st.set.tracked=D.TRACKED.slice(); st.mig8=true; st.mig7=true; }
 if(!st.mig7){ st.set.tracked=st.set.tracked.map(n=>n==="Schulterdrücken stehend (LH)"?"Schulterdrücken sitzend (LH)":n); st.mig7=true; }
 if(!st.onboarded && Object.keys(st.log).some(k=>st.log[k].sets.some(z=>z.ok))) st.onboarded=true;
 let saveT=null;
+buildDays();
 function flush(){ clearTimeout(saveT); try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){ toast("Speichern nicht möglich – Speicher voll?"); } }
 function save(){ clearTimeout(saveT); saveT=setTimeout(flush,150); }
 window.addEventListener("pagehide",flush);
@@ -360,8 +360,11 @@ function currentWeek(){ const diff=Math.floor((new Date()-startDate())/864e5); r
 function pauseSec(p){ if(!p||/direkt/.test(p)) return 0; const m=String(p).replace(",",".").match(/[\d.]+/); return m?Math.round(parseFloat(m[0])*60):0; }
 function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),1800); }
 
-function exName(slot,w){ const list=(st.swaps[slot.id]||[]).filter(s=>s.from<=w).sort((a,b)=>a.from-b.from); return list.length?list[list.length-1].name:slot.ex; }
-function slotFor(dayIdx,slotId){ return DAYS[dayIdx].slots.find(s=>s.id===slotId); }
+function lastName(slot,w){ const list=(st.swaps[slot.id]||[]).filter(s=>s.from<=w&&s.name).sort((a,b)=>a.from-b.from); return list.length?list[list.length-1].name:slot.ex; }
+function exName(slot,w){ if(slot.from&&w<slot.from) return null; const list=(st.swaps[slot.id]||[]).filter(s=>s.from<=w).sort((a,b)=>a.from-b.from); return list.length?list[list.length-1].name:slot.ex; }
+function slotFor(d,sid){ const cur=DAYS[d].slots.find(s=>s.id===sid); if(cur) return cur; const b=BASE_DAYS[d];
+  return [...b.main,...b.mix,...b.alt,...((st.extra||{})[d]||[])].find(s=>s.id===sid); }
+function posOf(d,slot){ const b=BASE_DAYS[d]; const list=[...b.main,...(b.alt.includes(slot)&&!b.mix.includes(slot)?b.alt:b.mix),...((st.extra||{})[d]||[])]; return list.indexOf(slot)+1; }
 function lk(w,d,sid){ return w+"|"+d+"|"+sid; }
 function getLog(w,d,sid){ return st.log[lk(w,d,sid)]; }
 function ensureLog(w,d,sid,n){ const k=lk(w,d,sid); if(!st.log[k]) st.log[k]={sets:[]}; const L=st.log[k]; while(L.sets.length<n) L.sets.push({kg:"",reps:"",rir:"",ok:false}); return L; }
@@ -387,16 +390,21 @@ function topE1(lift,w){ const [d,sid]=LIFTDAY[lift]; const L=getLog(w,d,sid); if
 function rx(slot,w){
   const P=W(w), red=P.deload?1:0;
   if(slot.t==="TOP"){ const reps=P[{bd:"bdt",kb:"kbt",kh:"kht",pbd:"pbt"}[slot.lift]]; const rir=P.top+formAdj(w,SLOTDAY[slot.id]); const p=pct(reps,rir); return {sets:1,reps,rir,pct:p,kg:rnd(base1RM(slot.lift,w)*p),formUp:rir>P.top}; }
-  if(slot.t==="VAR"){ const p=pct(P.pkr,P.vr); return {sets:P.pks,reps:P.pkr,rir:P.vr,pct:p,kg:rnd(base1RM("pkb",w)*p)}; }
+  const ov=st.setov[w+"|"+slot.id];
+  if(slot.t==="VAR"){ const p=pct(P.pkr,P.vr); return {sets:ov??Math.max(1,P.pks-red),reps:P.pkr,rir:P.vr,pct:p,kg:rnd(base1RM("pkb",w)*p)}; }
   if(slot.t==="BO"){ const k={bd:["bdb","bds"],kb:["kbb","kbs"],kh:["khb","khs"],pbd:["pbb","pbs"]}[slot.lift];
-    const e=topE1(slot.lift,w); const ref=e??base1RM(slot.lift,w); return {sets:P[k[1]],reps:P[k[0]],pct:P.bo,kg:rnd(ref*P.bo),fromDay:e!=null}; }
-  const c=st.cfg[slot.id]||{}; return {sets:Math.max(1,(c.n??slot.n)-red+fbAdj(P.block)),reps:slot.rt==="I"?P.ri:P.rg,rir:P.acc};
+    const e=topE1(slot.lift,w); const ref=e??base1RM(slot.lift,w); return {sets:ov??Math.max(1,P[k[1]]-red),reps:P[k[0]],pct:P.bo,kg:rnd(ref*P.bo),fromDay:e!=null}; }
+  const c=st.cfg[slot.id]||{}; return {sets:ov??Math.max(1,(c.n??slot.n)-red+fbAdj(P.block)),reps:slot.rt==="I"?P.ri:P.rg,rir:P.acc};
 }
 function lastTime(name,w,d,sid){
-  for(let x=w-1;x>=1;x--){ for(let di=0;di<4;di++) for(const s of DAYS[di].slots){ if(exName(s,x)!==name) continue;
-    const L=getLog(x,di,s.id); if(L&&L.sets.some(z=>num(z.kg)!=null)){ const kgs=L.sets.map(z=>num(z.kg)).filter(v=>v!=null); return {w:x,kg:Math.max(...kgs),reps:L.sets.map(z=>z.reps).filter(Boolean).join(" · ")}; } } }
+  for(let x=w-1;x>=1;x--){ for(let di=0;di<DAYS.length;di++) for(const s of DAYS[di].slots){ if(exName(s,x)!==name) continue;
+    const L=getLog(x,di,s.id); if(L&&L.sets.some(z=>num(z.kg)!=null)){ const done=L.sets.filter(z=>num(z.kg)!=null); const kgs=done.map(z=>num(z.kg));
+      return {w:x,kg:Math.max(...kgs),reps:done.map(z=>z.reps).filter(Boolean).join(" · "),first:parseInt(done[0].reps),last:parseInt(done[done.length-1].reps)}; } } }
   return null;
 }
+function stepFor(name){ return /Kabel/.test(name)?1.25:/KG\)/.test(name)?0:2.5; }
+function suggest(name,lt,range){ if(!lt) return null; const [lo,hi]=String(range).split("–").map(x=>parseInt(x)); const st_=stepFor(name);
+  if(st_>0&&lt.last>=hi) return {kg:lt.kg+st_,d:"+"+fk(st_)}; if(st_>0&&lt.first<lo) return {kg:Math.max(0,lt.kg-st_),d:"−"+fk(st_)}; return {kg:lt.kg,d:"±0"}; }
 function fbAdj(block){ const f=st.fb[block]; return (f&&f.use!==false&&f.adj)?f.adj:0; }
 function formAdj(w,d){ const f=st.form[w+"|"+d]; return (f!=null&&f<=2)?1:0; }
 function fbCalc(f){ if(!f||!f.a||f.a.filter(x=>x!=null).length<4) return null; const s=f.a.reduce((acc,oi,qi)=>acc+FBQ[qi][1][oi][1],0); return s>=2?1:s<=-2?-1:0; }
@@ -404,8 +412,10 @@ function started(w,d){ return DAYS[d].slots.some(s=>{ const L=getLog(w,d,s.id); 
 function weekDone(w){ return [0,1,2].every(d=>dayDone(w,d).done) && (!started(w,3)||dayDone(w,3).done); }
 function ssInfo(slot,d){ const sl=DAYS[d].slots, i=sl.indexOf(slot); const me=(st.cfg[slot.id]||{}).ss&&i<sl.length-1; const prev=i>0&&(st.cfg[sl[i-1].id]||{}).ss;
   return me?{pos:1,other:sl[i+1]}:prev?{pos:2,other:sl[i-1]}:null; }
-function warmups(kg){ const b=st.set.bar; return [[b,10],[Math.max(b,rnd(kg*.4)),5],[rnd(kg*.6),3],[rnd(kg*.75),2],[rnd(kg*.85),1]]; }
-function dayDone(w,d){ const day=DAYS[d]; let all=0,ok=0; day.slots.forEach(s=>{ const r=rx(s,w); const L=getLog(w,d,s.id); all+=r.sets; if(L) ok+=L.sets.slice(0,r.sets).filter(z=>z.ok).length; }); return {all,ok,done:all>0&&ok>=all}; }
+function warmups(kg){ const S0=num(st.set.wustart)??70; if(kg<=S0+5) return [["Stange",10],[rnd(kg*.6),5],[rnd(kg*.8),3]];
+  const n=Math.max(1,Math.min(3,Math.round((kg-S0)/20))); const out=[[S0,5]]; const reps=[3,2,1];
+  for(let k=1;k<=n;k++) out.push([rnd(S0+(kg-S0)*k/(n+1)),reps[k-1+(3-n>0&&n<3?0:0)]]); return out; }
+function dayDone(w,d){ const day=DAYS[d]; let all=0,ok=0; day.slots.forEach(s=>{ if(exName(s,w)==null) return; const r=rx(s,w); const L=getLog(w,d,s.id); all+=r.sets; if(L) ok+=L.sets.slice(0,r.sets).filter(z=>z.ok).length; }); return {all,ok,done:all>0&&ok>=all}; }
 
 /* ============ UI-Zustand ============ */
 let ui = { tab:"train", w:currentWeek(), d:0, hint:{} };
@@ -443,7 +453,11 @@ function vTrain(){
   h+=`<section class="formsec"><div class="formhead"><span>Tagesform</span><small>Schlaf · Energie</small></div>
    <div class="scale">${FORM.map((f,i)=>`<button class="sc ${fv===i+1?"on":""} ${fv!=null&&i+1<=2&&fv===i+1?"low":""}" data-form="${i+1}"><b>${i+1}</b><span>${f[0]}</span></button>`).join("")}</div>
    <p class="lead small formtxt">${fv==null?"Wie fühlst du dich heute? Tippe auf den passenden Wert.":`<b>${FORM[fv-1][0]}:</b> ${FORM[fv-1][1]} ${fv<=2?"→ Topset heute mit einer RIR mehr Reserve. Die Backoffs passen sich über dein Tages-e1RM automatisch an.":"→ Plan wie vorgesehen."}`}</p></section>`;
+  h+=`<p class="quote">»&nbsp;${esc(D.QUOTES[(w*4+d)%D.QUOTES.length])}&nbsp;«</p>`;
   day.slots.forEach(slot=>{ h+=vSlot(slot,w,d); });
+  h+=`<button class="btn" data-act="addex">+ Übung hinzufügen</button>`;
+  const removed=day.slots.filter(s=>!s.t&&exName(s,w)==null&&!(s.from&&w<s.from));
+  if(removed.length) h+=`<div class="sec"><p class="lead small">Entfernt ab dieser oder einer früheren Woche:</p>${removed.map(s=>`<div class="row"><div class="l">${esc(lastName(s,w)||s.ex)}</div><button class="chip" data-restore="${s.id}">Zurückholen</button></div>`).join("")}</div>`;
   const nk=w+"|"+d;
   h+=`<div class="sec note"><h3>Notizen</h3><textarea data-note="${nk}" placeholder="Wie lief die Einheit? Technik, Schlaf, Besonderheiten …">${esc(st.notes[nk]||"")}</textarea></div>`;
   return h;
@@ -457,7 +471,8 @@ function vWelcome(){
    <div class="frow"><span>1RM Bankdrücken<small>kg</small></span><input inputmode="decimal" data-set="bd" value="${fk(s.bd)}"></div>
    <div class="frow"><span>1RM Kniebeuge<small>kg</small></span><input inputmode="decimal" data-set="kb" value="${fk(s.kb)}"></div>
    <div class="frow"><span>1RM Kreuzheben<small>kg</small></span><input inputmode="decimal" data-set="kh" value="${fk(s.kh)}"></div>
-   <div class="frow"><span>Hantelstange<small>kg</small></span><input inputmode="decimal" data-set="bar" value="${fk(s.bar)}"></div>
+   <div class="frow"><span>Aufwärm-Start<small>kg – erster Aufwärmsatz</small></span><input inputmode="decimal" data-set="wustart" value="${fk(s.wustart)}"></div>
+   <div class="frow"><span>Dein Name<small>optional, für die Begrüßung</small></span><input data-set="name" value="${esc(s.name||"")}" style="text-align:left"></div>
    <button class="btn gold" data-act="onboard">Plan starten</button>
    <p class="lead small" style="margin-top:12px">Alles lässt sich später unter „Einstellungen“ ändern. Deine Daten bleiben nur auf diesem Gerät.</p></div>`;
 }
@@ -471,30 +486,37 @@ function vFeedback(nb){
   return h+`</section>`;
 }
 function vSlot(slot,w,d){
-  const r=rx(slot,w), name=exName(slot,w), main=!!slot.t, L=ensureLog(w,d,slot.id,r.sets);
+  const name=exName(slot,w); if(name==null) return "";
+  const r=rx(slot,w), main=!!slot.t, L=ensureLog(w,d,slot.id,r.sets);
   const lib=libEntry(name); const tracked=!main && st.set.tracked.includes(name);
   const hasRir = slot.t==="TOP"||slot.t==="VAR"||tracked; const ss=main?null:ssInfo(slot,d);
   const kind = ss?`Supersatz ${ss.pos}/2 · ${esc(slot.g)}`:`${esc(slot.art)} · ${esc(slot.g)}`;
   const pause = ss&&ss.pos===1 ? "direkt weiter zu „"+esc(exName(ss.other,w))+"“" : "Pause "+esc(slot.p);
-  let h=`<section class="ex ${slot.t==="TOP"?"main":""} ${ss?"ss":""}" data-slot="${slot.id}">
-   <div class="exhead"><div><div class="kind">${kind}</div><div class="exname">${esc(name)}</div>
-   <div class="exmeta">${slot.t==="BO"?`<em>${r.sets} × ${r.reps}</em> · ${Math.round(r.pct*100)} % vom Tages-e1RM`:`<em>${r.sets} × ${r.reps}</em> @ RIR ${fk(r.rir)}`} · ${pause}</div></div>
+  const note=st.exnotes[name];
+  const head=`<div class="exhead"><div><div class="kind">${kind}</div><div class="exname">${esc(name)}</div>
+   <div class="exmeta">${slot.t==="BO"?`<em>${r.sets} × ${r.reps}</em> · ${Math.round(r.pct*100)} % vom Tages-e1RM`:`<em>${r.sets} × ${r.reps}</em> @ RIR ${fk(r.rir)}`} · ${pause}</div>
+   ${note?`<div class="exnote">✎ ${esc(note)}</div>`:""}</div>
    <div class="tools">${lib&&lib.h?`<button class="tbtn" data-hint="${slot.id}" aria-label="Technik-Hinweis">i</button>`:""}${main?"":`<button class="tbtn" data-swap="${slot.id}" aria-label="Übung anpassen">⇄</button>`}</div></div>`;
+  let h=`<section class="ex ${slot.t==="TOP"?"main":""} ${ss?"ss":""}" data-slot="${slot.id}">`+
+    (main?head:`<div class="swrap" data-sw="ex|${slot.id}"><div class="swin">${head}</div><button class="swdel" data-del="ex|${slot.id}">Entfernen</button></div>`);
   if(ui.hint[slot.id]&&lib&&lib.h) h+=`<div class="hint">${esc(lib.h)}</div>`;
+  let sug=null; const lt=main?null:lastTime(name,w,d,slot.id);
   if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small>kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`<b>${Math.round(r.pct*100)} %</b> vom 1RM${r.formUp?" · Form-Puffer +1 RIR":""}`}</div></div>`;
-    if(slot.t==="TOP"||slot.t==="VAR") h+=`<div class="warm">Aufwärmen: ${warmups(r.kg).map(([k,n])=>fk(k)+"×"+n).join(" · ")}</div>`; }
-  else { const lt=lastTime(name,w,d,slot.id); h+=`<div class="last">${lt?`Letztes Mal (W${lt.w}): <b>${f1(lt.kg)} kg</b>${lt.reps?" × "+esc(lt.reps):""}`:"Noch kein Eintrag – Startgewicht so wählen, dass die Ziel-RIR passt."}</div>`; }
+    if(slot.t==="TOP"||slot.t==="VAR") h+=`<div class="warm">Aufwärmen: ${warmups(r.kg).map(([k,n])=>(typeof k==="number"?fk(k):k)+"×"+n).join(" · ")}</div>`; }
+  else { sug=suggest(name,lt,r.reps);
+    h+=`<div class="last">${lt?`Vorschlag <b class="sugg">${fk(sug.kg)} kg</b> <span class="muted">(${sug.d})</span> · letztes Mal W${lt.w}: ${fk(lt.kg)} kg × ${esc(lt.reps)}`:"Noch kein Eintrag – Startgewicht so wählen, dass die Ziel-RIR passt."}</div>`; }
   h+=`<div class="sets">`;
-  const lt=main?null:lastTime(name,w,d,slot.id);
   for(let i=0;i<r.sets;i++){ const s=L.sets[i];
-    const kph = main? f1(r.kg).replace(",0","") : (lt?fk(lt.kg):"–");
-    h+=`<div class="set ${hasRir?"hasrir":""} ${s.ok?"ok":""} ${ui.pop===slot.id+"|"+i?"pop":""}" data-i="${i}">
+    const kph = main? f1(r.kg).replace(",0","") : (sug?fk(sug.kg):"–");
+    h+=`<div class="swrap" data-sw="set|${slot.id}|${i}"><div class="swin"><div class="set ${hasRir?"hasrir":""} ${s.ok?"ok":""} ${ui.pop===slot.id+"|"+i?"pop":""}" data-i="${i}">
       <div class="no">${i+1}</div>
       <div class="fld"><label>kg</label><input inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}"></div>
       <div class="fld"><label>Wdh.</label><input inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${esc(String(r.reps))}"></div>
       ${hasRir?`<div class="fld"><label>RIR</label><input inputmode="decimal" data-f="rir" value="${esc(s.rir)}" placeholder="${r.rir!=null?fk(r.rir):""}"></div>`:"<div></div>"}
-      <button class="chk" data-chk="${i}" aria-label="Satz ${i+1} erledigt">${s.ok?"✓":"○"}</button></div>`; }
+      <button class="chk" data-chk="${i}" aria-label="Satz ${i+1} erledigt">${s.ok?"✓":"○"}</button></div></div>
+      <button class="swdel" data-del="set|${slot.id}|${i}">Löschen</button></div>`; }
   h+=`</div>`;
+  if(slot.t!=="TOP") h+=`<button class="addset" data-addset="${slot.id}">+ Satz</button>`;
   if(slot.t==="TOP"||slot.t==="VAR"||tracked){ h+=`<div class="e1" data-e1="${slot.id}">${e1Text(slot,w,d)}</div>`; }
   return h+`</section>`;
 }
@@ -583,7 +605,9 @@ function vSet(){
   <div class="sec form"><h3>Startwerte</h3>
    <div class="frow"><span>Startdatum<small>ein Montag</small></span><input type="date" data-set="start" value="${esc(s.start)}"></div>
    ${inp("kb","1RM Kniebeuge","kg")}${inp("bd","1RM Bankdrücken","kg")}${inp("kh","1RM Kreuzheben","kg")}
-   ${inp("round","Rundung","kleinster Gewichtsschritt in kg")}${inp("bar","Hantelstange","kg – fürs Aufwärmschema")}</div>
+   ${inp("round","Rundung","kleinster Gewichtsschritt in kg")}${inp("wustart","Aufwärm-Start","kg – z. B. Stange + 2 × 25 kg")}
+   <div class="frow"><span>Dein Name<small>für die Begrüßung</small></span><input data-set="name" value="${esc(s.name||"")}" placeholder="optional" style="text-align:left"></div>
+   <div class="frow"><span>Oberkörper-Aufteilung<small>Hauptübungen bleiben gleich</small></span><select data-split="1"><option value="mix" ${s.split!=="pp"?"selected":""}>Gemischt</option><option value="pp" ${s.split==="pp"?"selected":""}>Push / Pull</option></select></div></div>
   <div class="sec form"><h3>Rechen-1RM Block 2 & 3</h3><p class="lead">Leer lassen = automatisch aus deinen Topsets (Block 2: W3/W4, Block 3: W8/W9).</p>
    ${inp("kb2","Kniebeuge Block 2","automatisch: "+auto("kb",2),"auto")}${inp("bd2","Bankdrücken Block 2","automatisch: "+auto("bd",2),"auto")}${inp("kh2","Kreuzheben Block 2","automatisch: "+auto("kh",2),"auto")}
    ${inp("kb3","Kniebeuge Block 3","automatisch: "+auto("kb",3),"auto")}${inp("bd3","Bankdrücken Block 3","automatisch: "+auto("bd",3),"auto")}${inp("kh3","Kreuzheben Block 3","automatisch: "+auto("kh",3),"auto")}
@@ -609,12 +633,29 @@ function openSwap(sid){
   $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung anpassen</h3><p>${esc(slot.g)} · Änderungen gelten ab Woche ${w}.</p>
    <div class="frow2"><span>Sätze (normale Woche)</span></div><div class="setsel">${[1,2,3,4,5,6].map(v=>`<button class="chip ${v===n?"on":""}" data-setn="${v}">${v}</button>`).join("")}</div>
    ${next?`<div class="frow2"><span>Supersatz mit „${esc(exName(next,w))}“<br><small class="muted">keine Pause dazwischen</small></span><button class="toggle ${c.ss?"on":""}" data-ss="1" aria-label="Supersatz"></button></div>`:""}
+   <p style="margin-top:14px">Deine Notiz zu „${esc(cur)}“ (z. B. Sitzhöhe, Griff, Pin):</p>
+   <textarea class="exnotein" data-exnote="${esc(cur)}" placeholder="Notiz – gilt für diese Übung in allen Wochen">${esc(st.exnotes[cur]||"")}</textarea>
    <p style="margin-top:18px">Übung tauschen (${esc(slot.g)}):</p>
    ${list.map(e=>`<button class="opt ${e.n===cur?"cur":""}" data-pick="${esc(e.n)}"><span class="n">${esc(e.n)}${e.n===slot.ex?' <span class="muted">· Plan</span>':''}</span><span class="o">${esc(e.o)}</span></button>`).join("")}
    <div class="addrow"><input id="customName" placeholder="Eigene Übung (${esc(slot.g)})"><button data-addcustom="1">Hinzufügen</button></div>
+   <button class="btn danger" data-del="ex|${sid}">Übung ab Woche ${w} entfernen</button>
    <button class="btn" data-act="close">Fertig</button>`;
   $("#sheet").dataset.sid=sid; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show");
 }
+function openAdd(g){
+  g=g||ui.addg||"Brust"; ui.addg=g;
+  const list=[...(LIB[g]||[]), ...st.custom.filter(x=>x.g===g).map(x=>({n:x.n,o:"eigene"}))];
+  $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung hinzufügen</h3><p>Zu „${esc(DAYS[ui.d].name)}“ ab Woche ${ui.w}.</p>
+   <div class="chips cwrap">${GROUPS.map(x=>`<button class="chip ${x===g?"on":""}" data-addg="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+   <div style="margin-top:10px">${list.map(e=>`<button class="opt" data-addpick="${esc(e.n)}"><span class="n">${esc(e.n)}</span><span class="o">${esc(e.o)}</span></button>`).join("")}</div>
+   <div class="addrow"><input id="customName2" placeholder="Eigene Übung (${esc(g)})"><button data-addcustom2="1">Hinzufügen</button></div>
+   <button class="btn" data-act="close">Abbrechen</button>`;
+  $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show");
+}
+function addExercise(name,g){ const G=["Brust","Latissimus","Oberer Rücken","Schulter vorne","Quadrizeps","Beinbeuger","Gesäß"];
+  const rt=(G.includes(g)&&/(LH|KH)\)/.test(name))?"G":"I";
+  const s={id:"x"+Date.now().toString(36),art:"Assistenz",g,ex:name,wu:rt==="G"?"1":"0",n:2,rt,p:rt==="G"?"2 min":"1–1,5 min",from:ui.w};
+  st.extra[ui.d]=(st.extra[ui.d]||[]).concat([s]); save(); buildDays(); closeSheet(); render(); toast(name+" hinzugefügt"); }
 function closeSheet(){ $("#sheet").classList.remove("show"); $("#sheetbg").classList.remove("show"); }
 function applySwap(sid,name){ const w=ui.w; const arr=(st.swaps[sid]||[]).filter(s=>s.from<w); arr.push({from:w,name}); st.swaps[sid]=arr; save(); closeSheet(); render(); toast("Ab Woche "+w+": "+name); }
 
@@ -650,6 +691,15 @@ document.addEventListener("click",e=>{
   if(t.dataset.act==="onboard"){ st.onboarded=true; save(); ui.w=currentWeek(); ui.d=0; render(); toast("Los geht’s – viel Erfolg!"); return; }
   if(t.dataset.act==="csv") return doCsv();
   if(t.dataset.act==="close"){ closeSheet(); return; }
+  if(t.dataset.act==="addex"){ openAdd(); return; }
+  if(t.dataset.addg){ openAdd(t.dataset.addg); return; }
+  if(t.dataset.addpick){ addExercise(t.dataset.addpick,ui.addg); return; }
+  if(t.dataset.addcustom2){ const n=$("#customName2").value.trim(); if(!n) return; if(!st.custom.find(c=>c.n===n)) st.custom.push({n,g:ui.addg}); addExercise(n,ui.addg); return; }
+  if(t.dataset.restore){ const sid=t.dataset.restore; st.swaps[sid]=(st.swaps[sid]||[]).filter(x=>!(x.name==null&&x.from<=ui.w)); save(); render(); return; }
+  if(t.dataset.addset){ const sid=t.dataset.addset, slot=slotFor(ui.d,sid), r=rx(slot,ui.w); st.setov[ui.w+"|"+sid]=r.sets+1; save(); render(); return; }
+  if(t.dataset.del){ const [kind,sid,i]=t.dataset.del.split("|"); const slot=slotFor(ui.d,sid);
+    if(kind==="ex"){ const w=ui.w; const arr=(st.swaps[sid]||[]).filter(s=>s.from<w); arr.push({from:w,name:null}); st.swaps[sid]=arr; save(); closeSheet(); render(); toast("Entfernt ab Woche "+w); return; }
+    const r=rx(slot,ui.w); const L=ensureLog(ui.w,ui.d,sid,r.sets); L.sets.splice(+i,1); st.setov[ui.w+"|"+sid]=Math.max(0,r.sets-1); save(); render(); toast("Satz gelöscht"); return; }
   if(t.dataset.act==="cfgreset"){ if(confirm("Satzzahlen und Supersätze auf den Ausgangsplan zurücksetzen?")){ st.cfg={}; save(); render(); toast("Plan zurückgesetzt"); } return; }
   if(t.dataset.pick){ applySwap($("#sheet").dataset.sid,t.dataset.pick); return; }
   if(t.dataset.addcustom){ const n=$("#customName").value.trim(); if(!n) return; const sid=$("#sheet").dataset.sid; const g=slotFor(ui.d,sid).g; if(!st.custom.find(c=>c.n===n)) st.custom.push({n,g}); applySwap(sid,n); return; }
@@ -684,10 +734,13 @@ document.addEventListener("input",e=>{
       const rxel=document.querySelector(`[data-slot="${bo.id}"] .target .rx`); if(rxel) rxel.textContent=rb.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"; } }
     return; }
   if(t.dataset.note){ st.notes[t.dataset.note]=t.value; save(); return; }
+  if(t.dataset.exnote!==undefined){ const n=t.dataset.exnote; if(t.value.trim()) st.exnotes[n]=t.value; else delete st.exnotes[n]; save(); return; }
   if(t.dataset.body!==undefined){ st.body[t.dataset.body]=t.value; save(); return; }
-  if(t.dataset.set){ const k=t.dataset.set; if(k==="start") st.set.start=t.value; else { const v=num(t.value); st.set[k]= (k.endsWith("2")||k.endsWith("3"))&&t.value.trim()===""?null:(v??st.set[k]); } save(); return; }
+  if(t.dataset.set){ const k=t.dataset.set; if(k==="start") st.set.start=t.value; else if(k==="name") st.set.name=t.value.trim(); else { const v=num(t.value); st.set[k]= (k.endsWith("2")||k.endsWith("3"))&&t.value.trim()===""?null:(v??st.set[k]); } save(); return; }
 });
 document.addEventListener("change",e=>{ const t=e.target;
+  if(t.dataset.split!==undefined){ st.set.split=t.value; save(); buildDays(); render(); return; }
+  if(t.dataset.exnote!==undefined){ render(); }
   if(t.dataset.track!==undefined){ const arr=[...st.set.tracked]; arr[+t.dataset.track]=t.value; st.set.tracked=arr.filter(Boolean); save(); render(); }
   if(t.id==="impfile"&&t.files[0]){ const fr=new FileReader(); fr.onload=()=>{ try{ const d=JSON.parse(fr.result); if(!d||!d.set||!d.log) throw 0; st=Object.assign(DEF(),d); st.set=Object.assign(DEF().set,d.set); save(); render(); toast("Sicherung importiert"); }catch(err){ toast("Datei ist keine Kraftwerk-Sicherung"); } }; fr.readAsText(t.files[0]); t.value=""; }
 });
@@ -698,7 +751,7 @@ async function shareFile(name,text,type){
 }
 function doCsv(){
   const rows=[["Woche","Tag","Pos","Übung","Satz","kg","Wdh","RIR","erledigt","Datum"]]; const recs=[];
-  Object.keys(st.log).forEach(k=>{ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) return; const pos=DAYS[+d].slots.indexOf(slot)+1;
+  Object.keys(st.log).forEach(k=>{ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot||exName(slot,+w)==null) return; const pos=posOf(+d,slot);
     const dt=st.dates[w+"|"+d]; const ds=dt?iso(new Date(dt)):"";
     st.log[k].sets.forEach((z,i)=>{ if(z.kg===""&&z.reps===""&&!z.ok) return; recs.push([+w,+d,pos,i+1,[w,DAYS[+d].tag,pos,exName(slot,+w),i+1,z.kg,z.reps,z.rir,z.ok?"ja":"nein",ds]]); }); });
   recs.sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]||a[3]-b[3]).forEach(r=>rows.push(r[4]));
@@ -711,11 +764,24 @@ async function doExport(){
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
 
+/* ============ Wischen zum Löschen ============ */
+let swEl=null, swX=0, swY=0, swMoved=false;
+document.addEventListener("touchstart",e=>{ const el=e.target.closest("[data-sw]"); document.querySelectorAll(".swrap.open").forEach(o=>{ if(o!==el) o.classList.remove("open"); });
+  if(!el||e.target.closest("input,textarea,.swdel")) { swEl=null; return; } swEl=el; swX=e.touches[0].clientX; swY=e.touches[0].clientY; swMoved=false; },{passive:true});
+document.addEventListener("touchmove",e=>{ if(!swEl) return; const dx=e.touches[0].clientX-swX, dy=e.touches[0].clientY-swY;
+  if(!swMoved&&Math.abs(dy)>Math.abs(dx)){ swEl=null; return; } if(Math.abs(dx)>8){ swMoved=true; const base=swEl.classList.contains("open")?-100:0;
+  swEl.querySelector(".swin").style.transition="none"; swEl.querySelector(".swin").style.transform=`translateX(${Math.min(0,Math.max(-110,base+dx))}px)`; } },{passive:true});
+document.addEventListener("touchend",e=>{ if(!swEl) return; const inner=swEl.querySelector(".swin"); inner.style.transition=""; inner.style.transform="";
+  if(swMoved){ const dx=e.changedTouches[0].clientX-swX; const open=swEl.classList.contains("open"); swEl.classList.toggle("open", open? dx<40 : dx<-50); } swEl=null; });
 /* ============ Start ============ */
 if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 if(navigator.storage&&navigator.storage.persist){ navigator.storage.persist().catch(()=>{}); }
+(function(){ const h=new Date().getHours(); const g=h<11?"Guten Morgen":h<17?"Hallo":h<22?"Guten Abend":"Späte Einheit";
+  const nm=(st.set.name||"").trim(); const sg=$("#spg"); if(sg) sg.textContent=g+(nm?", "+nm:"")+".";
+  const sd=$("#spd"); if(sd&&st.onboarded) sd.textContent="Woche "+ui.w+" · "+DAYS[ui.d].name+(W(ui.w).deload?" · Deload":"");
+  const sp=$("#splash"); if(sp) sp.addEventListener("click",()=>sp.remove()); })();
 (function(){ const el=$("#spw"); if(el) el.innerHTML="KRAFTWERK".split("").map((c,i)=>`<span style="animation-delay:${i*45}ms">${c}</span>`).join("");
-  setTimeout(()=>{ const s=$("#splash"); if(s) s.remove(); },2200); })();
+  setTimeout(()=>{ const s=$("#splash"); if(s) s.remove(); },3400); })();
 render(); wake();
 </script>
 </body>
