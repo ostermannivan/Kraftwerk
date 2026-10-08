@@ -298,6 +298,8 @@ nav.tabs button.sel{ color:var(--gold); }
 .exrow .r b{ font-family:var(--serif); font-weight:400; font-size:20px; color:var(--gold2); } .exrow em{ font-style:normal; font-size:12px; color:var(--muted); }
 .about{ margin-top:22px; padding-top:14px; border-top:1px solid var(--line); text-align:center; } .about span{ display:block; font-size:13px; color:var(--silver); } .about small{ font-size:11.5px; color:var(--muted); }
 
+.chip.x{ min-width:36px; padding:0 10px; color:var(--muted); }
+.trialpill{ display:inline-block; margin-left:8px; padding:1px 8px; border:1px solid var(--bronze); color:var(--bronze); border-radius:10px; font-size:11px; letter-spacing:.04em; vertical-align:1px; }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -433,7 +435,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = 15;
+const KEY = "kraftwerk.v1"; const APPVER = "1.0";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70,
@@ -567,7 +569,7 @@ function vTrain(){
   const from=weekDate(w), to=weekDate(w,6), fv=st.form[w+"|"+d];
   let h=`<header class="top"><div class="brand"><h1>KRAFTWERK</h1><span class="today">${dshort(from)} – ${dshort(to)}</span></div>
    <div class="weekhead"><h2>Woche ${w}${P.deload?' <span class="dl">Deload</span>':''}</h2>
-   <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase}</div></div>
+   <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}</div></div>
    <div class="formmini"><span>Form</span>${[1,2,3,4,5].map(v=>`<button class="fm ${fv===v?"on":""} ${fv===v&&v<=2?"low":""}" data-form="${v}" aria-label="Tagesform ${v} – ${FORM[v-1][0]}">${v}</button>`).join("")}
    <em>${fv==null?"Schlaf & Energie":FORM[fv-1][0]+(fv<=2?" · Topset +1 RIR":"")}</em></div></header>`;
   h+=`<div class="navsticky"><div class="weeks">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
@@ -754,6 +756,10 @@ function vSet(){
   <div class="sec form"><h3>Im Training</h3>
    <div class="frow"><span>Display wach halten<small>während die App offen ist</small></span><button class="toggle ${s.wake?"on":""}" data-toggle="wake" aria-label="Display wach halten"></button></div>
    <div class="frow"><span>Ton am Pausenende</span><button class="toggle ${s.sound?"on":""}" data-toggle="sound" aria-label="Ton am Pausenende"></button></div></div>
+  <div class="sec"><h3>Probelauf</h3>${st.trial?`<p class="lead">Probelauf aktiv – Woche 1 hat am ${new Date(st.set.start+"T00:00:00").toLocaleDateString("de-DE")} begonnen. Echter Start: ${new Date(st.trial.realStart+"T00:00:00").toLocaleDateString("de-DE")}.</p>
+   <button class="btn gold" data-act="trialend">Probelauf beenden & Testdaten löschen</button>`
+   :`<p class="lead">App vorab testen: Woche 1 beginnt dann in dieser Woche. Zum Schluss löschst du alle Testeinträge mit einem Tipp und das echte Startdatum wird wiederhergestellt.</p>
+   <button class="btn" data-act="trialstart">Probelauf ab dieser Woche starten</button>`}</div>
   <div class="sec"><h3>Sicherung</h3><p class="lead">Die Daten liegen nur auf diesem Gerät. Exportiere regelmäßig eine Sicherung – z. B. nach jedem Block.</p>
    <button class="btn gold" data-act="export">Sicherung exportieren</button>
    <button class="btn" data-act="import">Sicherung importieren</button><input type="file" id="impfile" accept="application/json,.json" hidden>
@@ -815,6 +821,7 @@ function toggleSet(sid,i,kgDefault,force){
   if(s.ok&&isMain){ const e=topE1(slot.lift,ui.w); const anyPrev=[...Array(NW)].some((_,k)=>k+1!==ui.w&&topE1(slot.lift,k+1)!=null);
     if(e!=null&&anyPrev&&(prevBest==null||e>prevBest)) showPR(exName(slot,ui.w),e); }
 }
+function clearTraining(){ st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
 /* ============ Trainingszeit ============ */
 function fmtDur(ms){ const m=Math.max(0,Math.round(ms/60000)); return m<60?m+" min":Math.floor(m/60)+" h "+String(m%60).padStart(2,"0")+" min"; }
 function fmtClock(ms){ const s=Math.max(0,Math.floor(ms/1000)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return (h?h+":"+String(m).padStart(2,"0"):m)+":"+String(x).padStart(2,"0"); }
@@ -822,10 +829,10 @@ function sessOf(w,d){ return st.sess[w+"|"+d]; }
 function vSession(w,d){ const s=sessOf(w,d);
   if(!s) return `<button class="btn gold startbtn" data-sess="start">▶  Training starten</button>`;
   if(!s.e) return `<div class="sessrow"><div><span class="muted small">Training läuft</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now()-new Date(s.s))}</b></div>
-     <div class="sessbtns"><button class="chip" data-sess="focus">Fokus-Modus</button><button class="chip" data-sess="end">Beenden</button></div></div>`;
+     <div class="sessbtns"><button class="chip" data-sess="focus">Fokus</button><button class="chip" data-sess="end">Beenden</button><button class="chip x" data-sess="discard" aria-label="Training verwerfen">✕</button></div></div>`;
   return `<div class="sessrow done"><div><span class="muted small">Trainingszeit</span><b class="clock">${fmtDur(new Date(s.e)-new Date(s.s))}</b></div>
-     <div class="sessbtns"><button class="chip" data-sess="resume">Weiter trainieren</button></div></div>`; }
-setInterval(()=>{ document.querySelectorAll("[data-clock]").forEach(el=>{ const s=st.sess[el.dataset.clock]; if(s&&!s.e) el.textContent=fmtClock(Date.now()-new Date(s.s)); }); },1000);
+     <div class="sessbtns"><button class="chip" data-sess="resume">Weiter</button><button class="chip x" data-sess="discard" aria-label="Zeit zurücksetzen">✕</button></div></div>`; }
+setInterval(()=>{ document.querySelectorAll("[data-clock]").forEach(el=>{ const s=st.sess[el.dataset.clock]; if(s&&!s.e) el.textContent=fmtClock(Date.now()-new Date(s.s)); else el.removeAttribute("data-clock"); }); },1000);
 /* ============ Fokus-Modus ============ */
 function focusQueue(){ const w=ui.w, d=ui.d, day=DAYS[d]; const q=[]; const shown=day.slots.filter(s=>exName(s,w)!=null&&(!s.opt||ui.opt[w+"|"+d]||slotStarted(w,d,s)));
   for(let k=0;k<shown.length;k++){ const s=shown[k], n=rx(s,w).sets; const ss=s.t?null:ssInfo(s,d);
@@ -948,6 +955,9 @@ document.addEventListener("click",e=>{
   if(t.dataset.fbuse){ const f=st.fb[t.dataset.fbuse]; if(f){ f.use=f.use===false; save(); render(); } return; }
   if(t.dataset.act==="onboard"){ st.onboarded=true; save(); ui.w=currentWeek(); ui.d=0; render(); toast("Los geht’s – viel Erfolg!"); return; }
   if(t.dataset.act==="csv") return doCsv();
+  if(t.dataset.act==="trialstart"){ const m=new Date(); m.setHours(0,0,0,0); m.setDate(m.getDate()-((m.getDay()+6)%7)); st.trial={realStart:st.set.start}; st.set.start=iso(m); flush(); ui.w=currentWeek(); ui.d=0; ui.tab="train"; render(); toast("Probelauf gestartet – viel Spaß beim Testen"); return; }
+  if(t.dataset.act==="trialend"){ if(!confirm("Probelauf beenden? Alle Trainingseinträge, Zeiten, Notizen und Tagesformen werden gelöscht. Plan-Anpassungen, eigene Übungen und Übungsnotizen bleiben.")) return;
+    clearTraining(); st.set.start=st.trial.realStart; delete st.trial; flush(); ui.w=currentWeek(); ui.d=0; render(); toast("Probelauf beendet – bereit für den echten Start"); return; }
   if(t.dataset.act==="close"){ closeSheet(); return; }
   if(t.dataset.act==="addex"){ openAdd(); return; }
   if(t.dataset.ptab){ ui.ptab=t.dataset.ptab; render(); return; }
@@ -957,7 +967,10 @@ document.addEventListener("click",e=>{
   if(t.dataset.sess){ const k=ui.w+"|"+ui.d, a=t.dataset.sess;
     if(a==="start"){ st.sess[k]={s:new Date().toISOString(),e:null}; save(); render(); openFocus(); return; }
     if(a==="focus"){ openFocus(); return; }
-    if(a==="end"){ if(st.sess[k]) st.sess[k].e=new Date().toISOString(); save(); render(); toast("Trainingszeit: "+fmtDur(new Date(st.sess[k].e)-new Date(st.sess[k].s))); return; }
+    if(a==="end"){ const s=st.sess[k]; if(!s) return;
+      if(!started(ui.w,ui.d)){ delete st.sess[k]; flush(); render(); toast("Training verworfen – keine Sätze erledigt"); return; }
+      s.e=new Date().toISOString(); flush(); render(); toast("Trainingszeit: "+fmtDur(new Date(s.e)-new Date(s.s))); return; }
+    if(a==="discard"){ if(confirm("Trainingszeit dieser Einheit zurücksetzen? Eingetragene Sätze bleiben erhalten.")){ delete st.sess[k]; flush(); render(); toast("Trainingszeit zurückgesetzt"); } return; }
     if(a==="resume"){ if(st.sess[k]) st.sess[k].e=null; save(); render(); return; } }
   if(t.dataset.fx){ const a=t.dataset.fx, q=focusQueue();
     if(a==="close"){ closeFocus(); return; }
@@ -989,7 +1002,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.toggle){ st.set[t.dataset.toggle]=!st.set[t.dataset.toggle]; save(); if(t.dataset.toggle==="wake"){ if(st.set.wake) wake(); else if(wl){ wl.release(); wl=null; } } render(); return; }
   if(t.dataset.act==="export") return doExport();
   if(t.dataset.act==="import") return $("#impfile").click();
-  if(t.dataset.act==="reset"){ if(confirm("Wirklich alle Trainingseinträge, Notizen und Gewichtswerte löschen? Startwerte bleiben erhalten.")){ st.log={}; st.dates={}; st.notes={}; st.body={}; st.swaps={}; save(); render(); toast("Trainingsdaten gelöscht"); } return; }
+  if(t.dataset.act==="reset"){ if(confirm("Wirklich alle Trainingseinträge, Notizen und Gewichtswerte löschen? Startwerte bleiben erhalten.")){ clearTraining(); st.body={}; st.swaps={}; save(); render(); toast("Trainingsdaten gelöscht"); } return; }
 });
 $("#sheetbg").onclick=closeSheet;
 document.addEventListener("input",e=>{
