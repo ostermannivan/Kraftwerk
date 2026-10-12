@@ -539,12 +539,16 @@ function rx(slot,w){
     const e=topE1(slot.lift,w); const ref=e??base1RM(slot.lift,w); return {sets:ov??Math.max(1,P[k[1]]-red),reps:P[k[0]],pct:P.bo,kg:rnd(ref*P.bo),fromDay:e!=null}; }
   const c=st.cfg[slot.id]||{}; const nm=exName(slot,w); const sb=nm&&stalled(nm,w)?1:0; return {setback:!!sb,sets:ov??(Math.max(1,(c.n??slot.n)-red+fbAdj(P.block))+sb),reps:(nm&&st.set.tracked.includes(nm))?"6–8":(slot.rt==="I"?P.ri:P.rg),rir:P.acc};
 }
-function lastTime(name,w,d,sid){
-  for(let x=w-1;x>=1;x--){ const DX=daysFor(x); for(let di=0;di<DX.length;di++) for(const s of DX[di].slots){ if(exName(s,x)!==name) continue;
-    const L=getLog(x,di,s.id); if(L&&L.sets.some(z=>num(z.kg)!=null)){ const done=L.sets.filter(z=>num(z.kg)!=null); const kgs=done.map(z=>num(z.kg));
-      return {w:x,kg:Math.max(...kgs),reps:done.map(z=>z.reps).filter(Boolean).join(" · "),first:parseInt(done[0].reps),last:parseInt(done[done.length-1].reps)}; } } }
-  return null;
-}
+/* Letzte Ausführung einer Übung – auch an einem früheren Tag derselben Woche (z. B. OK1 → OK2) */
+function exposures(name,w,d,sid){ const out=[]; const curS=sessDate(w,d); const cutoff=curS?curS.getTime():Infinity;
+  for(let x=w;x>=1;x--){ const DX=daysFor(x); for(let di=0;di<DX.length;di++){ if(x===w&&di===d) continue;
+      for(const s of DX[di].slots){ if(s.t||exName(s,x)!==name) continue; const L=getLog(x,di,s.id); if(!L||!L.sets.some(z=>num(z.kg)!=null)) continue;
+        const dt=sessDate(x,di); const tm=dt?dt.getTime():null; if(x===w&&(tm==null||tm>=cutoff)) continue;
+        out.push({x,di,L,tm:tm??(x*10+di)}); } } if(out.length&&out.some(o=>o.x<w)) break; }
+  out.sort((a,b)=>(b.x-a.x)||(b.tm-a.tm)); return out; }
+function lastTime(name,w,d,sid){ const e=exposures(name,w,d,sid)[0]; if(!e) return null;
+  const done=e.L.sets.filter(z=>num(z.kg)!=null); const kgs=done.map(z=>num(z.kg));
+  return {w:e.x,day:daysFor(e.x)[e.di].tag,same:e.x===w,kg:Math.max(...kgs),reps:done.map(z=>z.reps).filter(Boolean).join(" · "),first:parseInt(done[0].reps),last:parseInt(done[done.length-1].reps)}; }
 function accRir(i,n,P){ if(P.deload) return P.acc; if(n===1) return 1; if(i===0) return 1.5; if(i===n-1) return 0; return 1; }
 const rirTxt=(v)=>v===1.5?"1–2":fk(v);
 function history(name,w){ const out=[]; for(let x=w-1;x>=1&&out.length<3;x--){ if(W(x).deload) continue; const DX=daysFor(x); let hit=null;
@@ -554,9 +558,8 @@ function history(name,w){ const out=[]; for(let x=w-1;x>=1&&out.length<3;x--){ i
 function stalled(name,w){ if(W(w).deload||stepFor(name)===0) return false; const h=history(name,w); if(h.length<3) return false;
   return h[0].kg>0&&h[0].kg===h[1].kg&&h[1].kg===h[2].kg&&h[0].last<=h[2].last&&!h.some(x=>x.setback); }
 function prevSets(slot,w,d){ const name=exName(slot,w);
-  for(let x=w-1;x>=1;x--){ if(slot.t){ const L=getLog(x,d,slot.id); if(L&&L.sets.some(z=>num(z.kg)!=null)) return L.sets; continue; }
-    const DX=daysFor(x); for(let di=0;di<DX.length;di++) for(const s of DX[di].slots){ if(s.t||exName(s,x)!==name) continue; const L=getLog(x,di,s.id); if(L&&L.sets.some(z=>num(z.kg)!=null)) return L.sets; } }
-  return null; }
+  if(slot.t){ for(let x=w-1;x>=1;x--){ const L=getLog(x,d,slot.id); if(L&&L.sets.some(z=>num(z.kg)!=null)) return L.sets; } return null; }
+  const e=exposures(name,w,d,slot.id)[0]; return e?e.L.sets:null; }
 function stepFor(name){ return /Kabel/.test(name)?1.25:/KG\)/.test(name)?0:2.5; }
 function suggest(name,lt,range,w){ if(!lt) return null;
   if(w&&stalled(name,w)){ const st_=stepFor(name); return {kg:Math.floor(lt.kg*0.9/st_)*st_,d:"Setback −10 %",setback:true}; } const pr=String(range).split("–").map(x=>parseInt(x)); const lo=pr[0], hi=pr[1]??pr[0]; const st_=stepFor(name);
@@ -676,7 +679,7 @@ function vSlot(slot,w,d){
   if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`${Math.round(r.pct*100)} % vom 1RM${r.formUp?" · Form-Puffer +1 RIR":""}`}</div></div>`;
     if(slot.t==="TOP"||slot.t==="VAR") h+=`<div class="warm">Aufwärmen  ${warmups(r.kg).map(([k,n])=>(typeof k==="number"?fk(k):k)+" × "+n).join("  ·  ")}</div>`; }
   else { sug=suggest(name,lt,r.reps,w);
-    h+= sug ? `<div class="sugline ${sug.setback?"sb":""}"><span>Vorschlag</span><b>${fk(sug.kg)} kg</b><em>${esc(sug.d)}</em>${sug.setback?`<small>Drei Wochen ohne Fortschritt – neuer Anlauf mit weniger Gewicht und einem Satz mehr.</small>`:""}</div>`
+    h+= sug ? `<div class="sugline ${sug.setback?"sb":""}"><span>Vorschlag</span><b>${fk(sug.kg)} kg</b><em>${esc(sug.d)}${lt?` · zuletzt ${lt.same?"diese Woche ":"W"+lt.w+" "}${esc(lt.day)}`:""}</em>${sug.setback?`<small>Drei Wochen ohne Fortschritt – neuer Anlauf mit weniger Gewicht und einem Satz mehr.</small>`:""}</div>`
             : `<div class="sugline"><span>Erster Eintrag</span><em>Gewicht so wählen, dass die Ziel-RIR passt</em></div>`; }
   const pv=prevSets(slot,w,d); const showRir=slot.t!=="BO";
   h+=`<div class="sets"><div class="sethead ${showRir?"hasrir":""}"><span>#</span><span>Vorher</span><span>kg</span><span>Wdh.</span>${showRir?"<span>RIR</span>":""}<span></span></div>`;
