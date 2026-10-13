@@ -458,7 +458,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "1.2";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.1";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70,
@@ -544,11 +544,11 @@ function exposures(name,w,d,sid){ const out=[]; const curS=sessDate(w,d); const 
   for(let x=w;x>=1;x--){ const DX=daysFor(x); for(let di=0;di<DX.length;di++){ if(x===w&&di===d) continue;
       for(const s of DX[di].slots){ if(s.t||exName(s,x)!==name) continue; const L=getLog(x,di,s.id); if(!L||!L.sets.some(z=>num(z.kg)!=null)) continue;
         const dt=sessDate(x,di); const tm=dt?dt.getTime():null; if(x===w&&(tm==null||tm>=cutoff)) continue;
-        out.push({x,di,L,tm:tm??(x*10+di)}); } } if(out.length&&out.some(o=>o.x<w)) break; }
+        out.push({x,di,L,tm:tm??(x*10+di)}); } } if(out.length>=2&&out.some(o=>o.x<w)) break; }
   out.sort((a,b)=>(b.x-a.x)||(b.tm-a.tm)); return out; }
 function lastTime(name,w,d,sid){ const e=exposures(name,w,d,sid)[0]; if(!e) return null;
   const done=e.L.sets.filter(z=>num(z.kg)!=null); const kgs=done.map(z=>num(z.kg));
-  return {w:e.x,day:daysFor(e.x)[e.di].tag,same:e.x===w,kg:Math.max(...kgs),reps:done.map(z=>z.reps).filter(Boolean).join(" · "),first:parseInt(done[0].reps),last:parseInt(done[done.length-1].reps)}; }
+  return {w:e.x,day:daysFor(e.x)[e.di].tag,same:e.x===w,kg:Math.max(...kgs),reps:done.map(z=>z.reps).filter(Boolean).join(" · "),first:parseInt(done[0].reps),last:parseInt(done[done.length-1].reps),min:Math.min(...done.map(z=>parseInt(z.reps)||0))}; }
 function accRir(i,n,P){ if(P.deload) return P.acc; if(n===1) return 1; if(i===0) return 1.5; if(i===n-1) return 0; return 1; }
 const rirTxt=(v)=>v===1.5?"1–2":fk(v);
 function history(name,w){ const out=[]; for(let x=w-1;x>=1&&out.length<3;x--){ if(W(x).deload) continue; const DX=daysFor(x); let hit=null;
@@ -560,9 +560,15 @@ function stalled(name,w){ if(W(w).deload||stepFor(name)===0) return false; const
 function prevSets(slot,w,d){ const name=exName(slot,w);
   if(slot.t){ for(let x=w-1;x>=1;x--){ const L=getLog(x,d,slot.id); if(L&&L.sets.some(z=>num(z.kg)!=null)) return L.sets; } return null; }
   const e=exposures(name,w,d,slot.id)[0]; return e?e.L.sets:null; }
-function stepFor(name){ return /Kabel/.test(name)?1.25:/KG\)/.test(name)?0:2.5; }
-function suggest(name,lt,range,w){ if(!lt) return null;
+const SMALL=["Schulter seitlich","Schulter hinten","Bizeps","Trizeps"];
+function isSmall(name){ const e=libEntry(name); return !!(e&&SMALL.includes(e.g))||st.custom.some(c=>c.n===name&&SMALL.includes(c.g)); }
+function stepFor(name){ if(/KG\)/.test(name)) return 0; if(isSmall(name)) return 1.25; return /Kabel/.test(name)?1.25:2.5; }
+function suggest(name,lt,range,w,d){ if(!lt) return null;
   if(w&&stalled(name,w)){ const st_=stepFor(name); return {kg:Math.floor(lt.kg*0.9/st_)*st_,d:"Setback −10 %",setback:true}; } const pr=String(range).split("–").map(x=>parseInt(x)); const lo=pr[0], hi=pr[1]??pr[0]; const st_=stepFor(name);
+  if(isSmall(name)&&st_>0){ const ok=x=>x&&x.min>=hi; const ex=exposures(name,w,d??ui.d); const p2=ex[1]?(()=>{ const dn=ex[1].L.sets.filter(z=>num(z.kg)!=null); return {kg:Math.max(...dn.map(z=>num(z.kg))),min:Math.min(...dn.map(z=>parseInt(z.reps)||0))}; })():null;
+    if(ok(lt)&&p2&&p2.kg===lt.kg&&ok(p2)) return {kg:lt.kg+st_,d:"+"+fk(st_)};
+    if(ok(lt)) return {kg:lt.kg,d:"±0 · noch einmal bestätigen"};
+    if(lt.first<lo) return {kg:Math.max(0,lt.kg-st_),d:"−"+fk(st_)}; return {kg:lt.kg,d:"±0"}; }
   if(st_>0&&lt.last>=hi) return {kg:lt.kg+st_,d:"+"+fk(st_)}; if(st_>0&&lt.first<lo) return {kg:Math.max(0,lt.kg-st_),d:"−"+fk(st_)}; return {kg:lt.kg,d:"±0"}; }
 function fbAdj(block){ const f=st.fb[block]; return (f&&f.use!==false&&f.adj)?f.adj:0; }
 function formAdj(w,d){ const f=st.form[w+"|"+d]; return (f!=null&&f<=2)?1:0; }
@@ -671,14 +677,14 @@ function vSlot(slot,w,d){
   const head=`<div class="exhead"><div class="exl"><div class="kind">${esc(kind)} · ${esc(slot.g)}</div><div class="exname">${esc(name)}</div>
    <div class="exmeta"><b>${r.sets} × ${esc(String(r.reps))}</b><span>${rirInfo}</span><span>Pause ${pause}</span></div>
    ${note?`<div class="exnote">✎ ${esc(note)}</div>`:""}</div>
-   <div class="tools">${lib&&lib.h?`<button class="tbtn" data-hint="${slot.id}" aria-label="Technik-Hinweis">i</button>`:""}${main?"":`<button class="tbtn" data-swap="${slot.id}" aria-label="Übung anpassen">⋯</button>`}</div></div>`;
+   <div class="tools">${lib&&lib.h?`<button class="tbtn" data-hint="${slot.id}" aria-label="Technik-Hinweis">i</button>`:""}${main?`<button class="tbtn" data-mnote="${slot.id}" aria-label="Notiz">✎</button>`:`<button class="tbtn" data-swap="${slot.id}" aria-label="Übung anpassen">⋯</button>`}</div></div>`;
   let h=`<section class="ex ${slot.t==="TOP"?"main":""} ${ss?"ss":""}" data-slot="${slot.id}">`+
     (main?head:`<div class="swrap" data-sw="ex|${slot.id}"><div class="swin">${head}</div><button class="swdel" data-del="ex|${slot.id}">Entfernen</button></div>`);
   if(ui.hint[slot.id]&&lib&&lib.h) h+=`<div class="hint">${esc(lib.h)}</div>`;
   let sug=null; const lt=main?null:lastTime(name,w,d,slot.id);
   if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`${Math.round(r.pct*100)} % vom 1RM${r.formUp?" · Form-Puffer +1 RIR":""}`}</div></div>`;
     if(slot.t==="TOP"||slot.t==="VAR") h+=`<div class="warm">Aufwärmen  ${warmups(r.kg).map(([k,n])=>(typeof k==="number"?fk(k):k)+" × "+n).join("  ·  ")}</div>`; }
-  else { sug=suggest(name,lt,r.reps,w);
+  else { sug=suggest(name,lt,r.reps,w,d);
     h+= sug ? `<div class="sugline ${sug.setback?"sb":""}"><span>Vorschlag</span><b>${fk(sug.kg)} kg</b><em>${esc(sug.d)}${lt?` · zuletzt ${lt.same?"diese Woche ":"W"+lt.w+" "}${esc(lt.day)}`:""}</em>${sug.setback?`<small>Drei Wochen ohne Fortschritt – neuer Anlauf mit weniger Gewicht und einem Satz mehr.</small>`:""}</div>`
             : `<div class="sugline"><span>Erster Eintrag</span><em>Gewicht so wählen, dass die Ziel-RIR passt</em></div>`; }
   const pv=prevSets(slot,w,d); const showRir=slot.t!=="BO";
@@ -911,7 +917,7 @@ function renderFocus(){ const el=$("#focus"); if(!el) return; const w=ui.w, d=ui
     el.innerHTML=h; return; }
   const [sid,i]=q[ui.fi]; const slot=slotFor(d,sid), r=rx(slot,w), name=exName(slot,w), L=ensureLog(w,d,sid,r.sets), s=L.sets[i];
   const main=!!slot.t, tracked=!main&&st.set.tracked.includes(name), hasRir=slot.t!=="BO";
-  const lt=main?null:lastTime(name,w,d,sid), sug=main?null:suggest(name,lt,r.reps,w); const kg=main?r.kg:(sug?sug.kg:null);
+  const lt=main?null:lastTime(name,w,d,sid), sug=main?null:suggest(name,lt,r.reps,w,d); const kg=main?r.kg:(sug?sug.kg:null);
   const exIdx=[...new Set(q.map(x=>x[0]))].indexOf(sid)+1, exN=new Set(q.map(x=>x[0])).size;
   const nxt=q[ui.fi+1]; const nxtTxt=nxt?(nxt[0]===sid?"Satz "+(nxt[1]+1)+" · gleiche Übung":(()=>{ const ns=slotFor(d,nxt[0]); return exName(ns,w)+(ns.t?" · "+ns.art:"")+" · Satz "+(nxt[1]+1); })()):"Letzter Satz der Einheit";
   const ss=main?null:ssInfo(slot,d);
@@ -987,9 +993,14 @@ function openSessDetail(w,d){ const day=daysFor(w)[d]; const s=st.sess[w+"|"+d],
   $("#sheet").innerHTML=h; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
-function beep(){ if(!st.set.sound) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); [0,.28,.56].forEach(o=>{ const g=actx.createGain(), osc=actx.createOscillator(); osc.frequency.value=988; osc.type="sine"; g.gain.setValueAtTime(0.0001,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(0.8,actx.currentTime+o+0.02); g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+o+0.22); osc.connect(g).connect(actx.destination); osc.start(actx.currentTime+o); osc.stop(actx.currentTime+o+0.25); }); }catch(e){} }
-function unlockAudio(){ try{ if(navigator.audioSession) navigator.audioSession.type="playback"; }catch(e){} try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){} }
-function startTimer(sec,label){ if(!sec) return; tTot=sec; tEnd=Date.now()+sec*1000; $("#tlbl").textContent=label; $("#timer").classList.add("show"); $("#timer").classList.remove("end"); clearInterval(tInt); tInt=setInterval(tick,250); tick(); }
+function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
+setAudioType("ambient");
+let actxIdle=null;
+function ensureCtx(){ try{ setAudioType("ambient"); actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){} }
+function releaseCtx(){ clearTimeout(actxIdle); actxIdle=setTimeout(()=>{ try{ if(actx&&actx.state==="running") actx.suspend(); }catch(e){} setAudioType("ambient"); },2500); }
+function beep(){ if(!st.set.sound) return; try{ setAudioType("transient"); ensureCtx(); [0,.28,.56].forEach(o=>{ const g=actx.createGain(), osc=actx.createOscillator(); osc.frequency.value=988; osc.type="sine"; g.gain.setValueAtTime(0.0001,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(0.8,actx.currentTime+o+0.02); g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+o+0.22); osc.connect(g).connect(actx.destination); osc.start(actx.currentTime+o); osc.stop(actx.currentTime+o+0.25); }); releaseCtx(); }catch(e){} }
+function unlockAudio(){ /* Audio erst beim Pausentimer anlegen – sonst stoppt iOS laufende Musik */ }
+function startTimer(sec,label){ if(!sec) return; if(st.set.sound){ ensureCtx(); releaseCtx(); } tTot=sec; tEnd=Date.now()+sec*1000; $("#tlbl").textContent=label; $("#timer").classList.add("show"); $("#timer").classList.remove("end"); clearInterval(tInt); tInt=setInterval(tick,250); tick(); }
 function tick(){ const r=Math.max(0,Math.round((tEnd-Date.now())/1000)); $("#tval").textContent=Math.floor(r/60)+":"+String(r%60).padStart(2,"0"); $("#tbar").style.width=(100*(1-r/tTot))+"%";
   if(r<=0&&!$("#timer").classList.contains("end")){ $("#timer").classList.add("end"); $("#tlbl").textContent="Pause vorbei – nächster Satz"; beep(); setTimeout(beep,900); try{ navigator.vibrate&&navigator.vibrate([300,150,300]); }catch(e){}
     const f=$("#flash"); f.classList.remove("on"); void f.offsetWidth; f.classList.add("on"); } }
@@ -1021,8 +1032,12 @@ document.addEventListener("click",e=>{
   if(t.dataset.act==="trialstart"){ const m=new Date(); m.setHours(0,0,0,0); m.setDate(m.getDate()-((m.getDay()+6)%7)); st.trial={realStart:st.set.start}; st.set.start=iso(m); flush(); ui.w=currentWeek(); ui.d=0; ui.tab="train"; render(); toast("Probelauf gestartet – viel Spaß beim Testen"); return; }
   if(t.dataset.act==="trialend"){ if(!confirm("Probelauf beenden? Alle Trainingseinträge, Zeiten, Notizen und Tagesformen werden gelöscht. Plan-Anpassungen, eigene Übungen und Übungsnotizen bleiben.")) return;
     clearTraining(); st.set.start=st.trial.realStart; delete st.trial; flush(); ui.w=currentWeek(); ui.d=0; render(); toast("Probelauf beendet – bereit für den echten Start"); return; }
-  if(t.dataset.act==="close"){ closeSheet(); return; }
+  if(t.dataset.act==="close"){ closeSheet(); render(); return; }
   if(t.dataset.act==="addex"){ openAdd(); return; }
+  if(t.dataset.mnote){ const sl=slotFor(ui.d,t.dataset.mnote), nm=exName(sl,ui.w);
+    $("#sheet").innerHTML=`<div class="grab"></div><h3>Notiz</h3><p>${esc(nm)} – gilt für Topset und Backoffs in allen Wochen.</p>
+     <textarea class="exnotein" data-exnote="${esc(nm)}" placeholder="z. B. Griffbreite, Fußstellung, Pin-Höhe, Technik-Fokus …">${esc(st.exnotes[nm]||"")}</textarea>
+     <button class="btn" data-act="close">Fertig</button>`; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); return; }
   if(t.dataset.ptab){ ui.ptab=t.dataset.ptab; render(); return; }
   if(t.dataset.exd){ openExDetail(t.dataset.exd); return; }
   if(t.dataset.sessOpen){ const [w,d]=t.dataset.sessOpen.split("|").map(Number); openSessDetail(w,d); return; }
