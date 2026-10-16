@@ -332,6 +332,12 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .placewrap{ order:3; flex-basis:100%; margin-top:6px; }
 .placelink{ font-size:12px; color:var(--muted); padding:2px 0; } .placelink i{ font-style:normal; color:var(--gold); margin-left:2px; }
 .placelink.fixed{ display:inline-block; }
+.day.done{ border-color:#2F4A37; background:#101A14; } .day.done b,.day.done span{ color:var(--sage); }
+.day.done.sel{ border-color:var(--sage); }
+.wk.done{ color:var(--sage); } .wk.done i{ background:var(--sage) !important; }
+.trialpill.studio{ border-color:var(--steel); color:var(--steel); }
+.ex.skipped{ padding:10px 14px; opacity:.6; } .skiprow .chip{ white-space:nowrap; flex:0 0 auto; }
+.skiprow{ display:flex; justify-content:space-between; align-items:center; gap:10px; } .skiprow b{ display:block; font-size:14px; font-weight:500; text-decoration:line-through; color:var(--muted); }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -481,6 +487,8 @@ st = Object.assign(DEF(), st); st.set = Object.assign(DEF().set, st.set);
 if(!st.wsplit) st.wsplit={};
 if(!st.order) st.order={};
 if(!st.studio) st.studio={};
+if(!st.skip) st.skip={};
+const isSkipped=(w,d,sid)=>!!(st.skip||{})[w+"|"+d+"|"+sid];
 if(!st.hiddenEx) st.hiddenEx=[];
 if(!st.mig12){ const ren=n=>n==="Fliegende (schräg; KH)"?"Fliegende (Schrägbank 20°; KH)":n;
   for(const k in st.swaps) st.swaps[k].forEach(x=>{ if(x.name) x.name=ren(x.name); });
@@ -599,7 +607,7 @@ function warmups(kg){ const {S0,R,big}=warmPlates(kg); if(kg<=S0+5) return [["St
   const steps=[S0]; let cum=0, hit=false; big.forEach(a=>{ cum+=a; if(cum<R-0.01) steps.push(S0+2*cum); else hit=true; });
   if(hit&&kg-10>steps[steps.length-1]) steps.push(kg-10);
   const reps=[5,3,2,1,1]; return steps.map((s,k)=>[s,reps[k]]); }
-function dayDone(w,d){ const day=daysFor(w)[d]; if(!day) return {all:0,ok:0,done:false}; let all=0,ok=0; day.slots.forEach(s=>{ if(exName(s,w)==null) return; if(s.opt&&!slotStarted(w,d,s)) return; const r=rx(s,w); const L=getLog(w,d,s.id); all+=r.sets; if(L) ok+=L.sets.slice(0,r.sets).filter(z=>z.ok).length; }); return {all,ok,done:all>0&&ok>=all}; }
+function dayDone(w,d){ const day=daysFor(w)[d]; if(!day) return {all:0,ok:0,done:false}; let all=0,ok=0; day.slots.forEach(s=>{ if(exName(s,w)==null) return; if(isSkipped(w,d,s.id)) return; if(s.opt&&!slotStarted(w,d,s)) return; const r=rx(s,w); const L=getLog(w,d,s.id); all+=r.sets; if(L) ok+=L.sets.slice(0,r.sets).filter(z=>z.ok).length; }); const se=(st.sess||{})[w+"|"+d]; return {all,ok,done:(all>0&&ok>=all)||!!(se&&se.e&&ok>0)}; }
 
 /* ============ UI-Zustand ============ */
 var ui = { tab:"train", w:currentWeek(), d:0, hint:{}, opt:{} };
@@ -624,7 +632,7 @@ function vTrain(){
   const from=weekDate(w), to=weekDate(w,6), fv=st.form[w+"|"+d];
   let h=`<header class="top"><div class="brand"><h1>KRAFTWERK</h1><span class="today">${dshort(from)} – ${dshort(to)}</span></div>
    <div class="weekhead"><h2>Woche ${w}${P.deload?' <span class="dl">Deload</span>':''}</h2>
-   <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}</div></div>
+   <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}${(st.studio||{})[w+"|"+d]&&!DAYS[d].split&&!DAYS[d].pull?' <span class="trialpill studio">Studio</span>':""}</div></div>
    <div class="formmini"><span>Form</span>${[1,2,3,4,5].map(v=>`<button class="fm ${fv===v?"on":""} ${fv===v&&v<=2?"low":""}" data-form="${v}" aria-label="Tagesform ${v} – ${FORM[v-1][0]}">${v}</button>`).join("")}
    <em>${fv==null?"Schlaf & Energie":FORM[fv-1][0]+(fv<=2?" · Topset +1 RIR":"")}</em></div></header>`;
   const ss0=sessOf(w,d);
@@ -638,7 +646,7 @@ function vTrain(){
   if(day.optional && !started(w,d)) h+=`<p class="lead small">Optionaler Tag – zählt erst, sobald du den ersten Satz abhakst.</p>`;
   if(day.pull) h+=`<p class="lead small">Zusätzliche Pull-Einheit dieser Woche.</p>`;
   const canPlace=!day.pull&&!day.split&&BASE_DAYS[d].studio; const onS=!!st.studio[w+"|"+d];
-  h+=vStatus(canPlace?(started(w,d)?`<span class="placelink fixed">${onS?"Studio":"Homegym"}</span>`:`<button class="placelink" data-place="${onS?"home":"studio"}" aria-label="Ort wechseln">${onS?"Studio":"Homegym"} <i>⇄</i></button>`):"");
+  h+=vStatus("");
   h+=vSession(w,d);
   const ok_=ui.opt[w+"|"+d]; let optShown=false;
   day.slots.forEach(slot=>{ if(slot.opt&&exName(slot,w)!=null&&!ok_&&!slotStarted(w,d,slot)){ if(!optShown){ const n=day.slots.filter(s=>s.opt&&exName(s,w)!=null).length;
@@ -650,6 +658,7 @@ function vTrain(){
   h+=`<div class="sec note"><h3>Notizen</h3><textarea data-note="${nk}" placeholder="Technik, Schlaf, Besonderheiten …">${esc(st.notes[nk]||"")}</textarea></div>`;
   h+=vSessionFoot(w,d);
   h+=`<p class="quote">${esc(D.QUOTES[(w*4+d)%D.QUOTES.length])}</p>`;
+  if(canPlace&&!started(w,d)) h+= onS ? `<button class="linkbtn" data-place="home">Zurück zur Homegym-Variante</button>` : `<button class="linkbtn" data-place="studio">Heute im Studio trainieren?</button>`;
   if(d===0||d===2){ const sp=st.wsplit[w]; h+= sp===d ? `<button class="linkbtn" data-wsplit="off">Push/Pull-Split dieser Woche aufheben</button>`
       : `<button class="linkbtn" data-wsplit="${d}">Mehr Zeit diese Woche? ${day.tag} in Push + Pull aufteilen</button>`; }
   return h;
@@ -679,6 +688,7 @@ function vFeedback(nb){
 }
 function vSlot(slot,w,d){
   const name=exName(slot,w); if(name==null) return "";
+  if(isSkipped(w,d,slot.id)) return `<section class="ex skipped"><div class="skiprow"><div><span class="kind">${esc(slot.art)} · heute übersprungen</span><b>${esc(name)}</b></div><button class="chip" data-unskip="${slot.id}">Doch machen</button></div></section>`;
   const r=rx(slot,w), P=W(w), main=!!slot.t, L=ensureLog(w,d,slot.id,r.sets);
   const lib=libEntry(name); const tracked=!main && st.set.tracked.includes(name);
   const ss=main?null:ssInfo(slot,d), note=st.exnotes[name];
@@ -839,6 +849,7 @@ function openSwap(sid){
    <p style="margin-top:18px">Übung tauschen (${esc(slot.g)}):</p>
    ${list.map(e=>`<div class="swrap" data-sw="lib|${esc(e.n)}"><div class="swin"><button class="opt ${e.n===cur?"cur":""}" data-pick="${esc(e.n)}"><span class="n">${esc(e.n)}${e.n===slot.ex?' <span class="muted">· Plan</span>':''}</span><span class="o">${esc(e.o)}</span></button></div><button class="swdel" data-del="lib|${esc(e.n)}">Löschen</button></div>`).join("")}
    <div class="addrow"><input id="customName" placeholder="Eigene Übung (${esc(slot.g)} · ${loc})"><button data-addcustom="1">Hinzufügen</button></div>
+   <button class="btn" data-skip="${sid}">Heute überspringen</button>
    <button class="btn danger" data-del="ex|${sid}">Übung ab Woche ${w} entfernen</button>
    <button class="btn" data-act="close">Fertig</button>`;
   $("#sheet").dataset.sid=sid; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show");
@@ -878,7 +889,7 @@ function toggleSet(sid,i,kgDefault,force){
   if(s.ok&&isMain){ const e=topE1(slot.lift,ui.w); const anyPrev=[...Array(NW)].some((_,k)=>k+1!==ui.w&&topE1(slot.lift,k+1)!=null);
     if(e!=null&&anyPrev&&(prevBest==null||e>prevBest)) showPR(exName(slot,ui.w),e); }
 }
-function clearTraining(){ st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
+function clearTraining(){ st.skip={}; st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
 function prefillRow(inp){ const row=inp.closest(".set"), box=inp.closest(".finputs"); const host=row||box; if(!host) return;
   const sid=row?inp.closest("[data-slot]").dataset.slot:box.dataset.slot; const i=row?+row.dataset.i:+box.dataset.i; const attr=row?"data-f":"data-ff";
   const slot=slotFor(ui.d,sid); if(!slot) return; const r=rx(slot,ui.w); const L=ensureLog(ui.w,ui.d,sid,r.sets); const s=L.sets[i]; if(s.ok) return;
@@ -911,7 +922,7 @@ function showDone(w,d){ const s=sessOf(w,d), dd=dayDone(w,d); const day=daysFor(
   o.classList.remove("show"); void o.offsetWidth; o.classList.add("show"); }
 setInterval(()=>{ document.querySelectorAll("[data-clock]").forEach(el=>{ const s=st.sess[el.dataset.clock]; if(s&&!s.e) el.textContent=fmtClock(Date.now()-new Date(s.s)); else el.removeAttribute("data-clock"); }); },1000);
 /* ============ Fokus-Modus ============ */
-function focusQueue(){ const w=ui.w, d=ui.d, day=DAYS[d]; const q=[]; const shown=day.slots.filter(s=>exName(s,w)!=null&&(!s.opt||ui.opt[w+"|"+d]||slotStarted(w,d,s)));
+function focusQueue(){ const w=ui.w, d=ui.d, day=DAYS[d]; const q=[]; const shown=day.slots.filter(s=>exName(s,w)!=null&&!isSkipped(w,d,s.id)&&(!s.opt||ui.opt[w+"|"+d]||slotStarted(w,d,s)));
   for(let k=0;k<shown.length;k++){ const s=shown[k], n=rx(s,w).sets; const ss=s.t?null:ssInfo(s,d);
     if(ss&&ss.pos===1&&shown[k+1]===ss.other){ const o=shown[k+1], m=rx(o,w).sets; for(let i=0;i<Math.max(n,m);i++){ if(i<n) q.push([s.id,i]); if(i<m) q.push([o.id,i]); } k++; }
     else for(let i=0;i<n;i++) q.push([s.id,i]); }
@@ -1045,11 +1056,14 @@ document.addEventListener("click",e=>{
     clearTraining(); st.set.start=st.trial.realStart; delete st.trial; flush(); ui.w=currentWeek(); ui.d=0; render(); toast("Probelauf beendet – bereit für den echten Start"); return; }
   if(t.dataset.act==="close"){ closeSheet(); render(); return; }
   if(t.dataset.act==="addex"){ openAdd(); return; }
+  if(t.dataset.skip){ st.skip[ui.w+"|"+ui.d+"|"+t.dataset.skip]=true; save(); closeSheet(); render(); return; }
+  if(t.dataset.unskip){ delete st.skip[ui.w+"|"+ui.d+"|"+t.dataset.unskip]; save(); render(); return; }
   if(t.dataset.place){ const k=ui.w+"|"+ui.d; if(started(ui.w,ui.d)){ toast("Erst möglich, wenn noch kein Satz abgehakt ist"); return; }
     if(t.dataset.place==="studio") st.studio[k]=true; else delete st.studio[k]; save(); buildDays(); render(); toast(st.studio[k]?"Studio-Variante für "+DAYS[ui.d].tag:"Homegym-Variante"); return; }
   if(t.dataset.mnote){ const sl=slotFor(ui.d,t.dataset.mnote), nm=exName(sl,ui.w);
     $("#sheet").innerHTML=`<div class="grab"></div><h3>Notiz</h3><p>${esc(nm)} – gilt für Topset und Backoffs in allen Wochen.</p>
      <textarea class="exnotein" data-exnote="${esc(nm)}" placeholder="z. B. Griffbreite, Fußstellung, Pin-Höhe, Technik-Fokus …">${esc(st.exnotes[nm]||"")}</textarea>
+     <button class="btn" data-skip="${t.dataset.mnote}">Heute überspringen</button>
      <button class="btn" data-act="close">Fertig</button>`; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); return; }
   if(t.dataset.ptab){ ui.ptab=t.dataset.ptab; render(); return; }
   if(t.dataset.exd){ openExDetail(t.dataset.exd); return; }
@@ -1060,14 +1074,14 @@ document.addEventListener("click",e=>{
     if(a==="focus"){ openFocus(); return; }
     if(a==="end"){ const s=st.sess[k]; if(!s) return;
       if(!started(ui.w,ui.d)){ delete st.sess[k]; flush(); render(); toast("Training verworfen – keine Sätze erledigt"); return; }
-      if(!confirm("Training jetzt beenden?")) return; s.e=new Date().toISOString(); flush(); render(); clearInterval(tInt); $("#timer").classList.remove("show"); showDone(ui.w,ui.d); return; }
+      if(!confirm("Training beenden? Nicht abgehakte Sätze werden einfach ausgelassen.")) return; s.e=new Date().toISOString(); flush(); render(); clearInterval(tInt); $("#timer").classList.remove("show"); showDone(ui.w,ui.d); return; }
     if(a==="discard"){ if(confirm("Trainingszeit dieser Einheit zurücksetzen? Eingetragene Sätze bleiben erhalten.")){ delete st.sess[k]; flush(); render(); toast("Trainingszeit zurückgesetzt"); } return; }
     if(a==="resume"){ if(st.sess[k]) st.sess[k].e=null; save(); render(); return; } }
   if(t.dataset.fx){ const a=t.dataset.fx, q=focusQueue();
     if(a==="close"){ closeFocus(); return; }
     if(a==="prev"){ ui.fi=Math.max(0,ui.fi-1); renderFocus(); return; }
     if(a==="next"){ ui.fi=Math.min(q.length,ui.fi+1); renderFocus(); return; }
-    if(a==="end"){ const k=ui.w+"|"+ui.d; if(!confirm("Training jetzt beenden?")) return; if(st.sess[k]) st.sess[k].e=new Date().toISOString(); flush(); closeFocus(); clearInterval(tInt); $("#timer").classList.remove("show"); showDone(ui.w,ui.d); return; }
+    if(a==="end"){ const k=ui.w+"|"+ui.d; if(!confirm("Training beenden? Nicht abgehakte Sätze werden einfach ausgelassen.")) return; if(st.sess[k]) st.sess[k].e=new Date().toISOString(); flush(); closeFocus(); clearInterval(tInt); $("#timer").classList.remove("show"); showDone(ui.w,ui.d); return; }
     if(a==="ok"){ const [sid,i]=q[ui.fi]; const box=$("#focus .finputs"); const L=ensureLog(ui.w,ui.d,sid,rx(slotFor(ui.d,sid),ui.w).sets);
       box.querySelectorAll("[data-ff]").forEach(inp=>{ L.sets[i][inp.dataset.ff]=inp.value; });
       const ph=num(box.querySelector('[data-ff=kg]').placeholder); if(!L.sets[i].ok) toggleSet(sid,i,ph,true);
