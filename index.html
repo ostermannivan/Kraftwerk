@@ -155,7 +155,7 @@ header.top{ padding:14px 0 6px; }
 /* Tabs */
 nav.tabs{ position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(10,11,13,.94); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
   border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px); }
-nav.tabs .in{ max-width:560px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); height:64px; }
+nav.tabs .in{ max-width:560px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); height:64px; }
 nav.tabs button{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:11px; color:var(--muted); }
 nav.tabs button svg{ width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.6; }
 nav.tabs button.sel{ color:var(--gold); }
@@ -423,7 +423,6 @@ header.top{ padding:12px 2px 4px; }
 <nav class="tabs"><div class="in">
   <button data-tab="train"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>Training</button>
   <button data-tab="rec"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Fortschritt</button>
-  <button data-tab="body"><svg viewBox="0 0 24 24"><path d="M4 20l4-7 4 3 4-8 4 5"/></svg>Gewicht</button>
   <button data-tab="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Einstellungen</button>
 </div></nav>
 <div class="sheetbg" id="sheetbg"></div>
@@ -639,7 +638,7 @@ function render(){ buildDays();
   const app=$("#app");
   if(ui.tab==="train") app.innerHTML=vTrain();
   if(ui.tab==="rec") app.innerHTML=vProg();
-  if(ui.tab==="body") app.innerHTML=vBody();
+  if(ui.tab==="body"){ ui.tab="set"; app.innerHTML=vSet(); }
   if(ui.tab==="set") app.innerHTML=vSet();
   if(ui.tab==="train"){ const s=document.querySelector(".wk.sel"); if(s) s.scrollIntoView({inline:"center",block:"nearest"}); }
 }
@@ -781,7 +780,7 @@ function vRec(){
   const bw=bodyNow(); const dots = bw? total*500/(-307.75076+24.0900756*bw-0.1918759221*bw**2+0.0007391293*bw**3-0.000001093*bw**4):null;
   h+=`<div class="sec"><h3>Total & Relativkraft</h3>
    <div class="row"><div class="l">Total<small>Kniebeuge + Bankdrücken + Kreuzheben (ohne Eintrag: Start-1RM)</small></div><div class="r"><b>${f1(total)}</b><small>kg</small></div></div>
-   <div class="row"><div class="l">Total ÷ Körpergewicht<small>${bw?"bei "+f1(bw)+" kg":"Körpergewicht im Tab „Gewicht“ eintragen"}</small></div><div class="r"><b>${bw?(total/bw).toLocaleString("de-DE",{maximumFractionDigits:2}):"–"}</b><small>× Körpergewicht</small></div></div>
+   <div class="row"><div class="l">Total ÷ Körpergewicht<small>${bw?"bei "+f1(bw)+" kg":"Körpergewicht unter Einstellungen eintragen"}</small></div><div class="r"><b>${bw?(total/bw).toLocaleString("de-DE",{maximumFractionDigits:2}):"–"}</b><small>× Körpergewicht</small></div></div>
    <div class="row"><div class="l">DOTS-Punkte<small>Vergleichswert über Gewichtsklassen hinweg</small></div><div class="r"><b>${dots?Math.round(dots):"–"}</b><small>Punkte</small></div></div></div>`;
   const hv=heaviest();
   h+=`<div class="sec"><h3>Assistenz – schwerstes Gewicht</h3>${hv.length?hv.map(([n,v])=>`<div class="row"><div class="l">${esc(n)}<small>${esc(v.g)} · W${v.w}</small></div><div class="r"><b>${f1(v.kg)}</b><small>kg</small></div></div>`).join(""):`<p class="lead">Erscheint, sobald du Gewichte einträgst.</p>`}</div>`;
@@ -803,14 +802,14 @@ function chartE1(){
 
 /* ============ Körpergewicht ============ */
 function vBody(){
-  let h=`<header class="top"><div class="brand"><h1>KRAFTWERK</h1></div><div class="weekhead"><h2>Gewicht</h2><div class="sub">Einmal im Monat – am besten morgens nüchtern.</div></div></header>`;
+  let h=`<div class="sec"><h3>Körpergewicht</h3><p class="lead small">Einmal im Monat, morgens nüchtern. Wird für Relativkraft und DOTS-Punkte genutzt.</p>`;
   const ms=bodyMonths(); const vals=ms.map((k,i)=>[i,num(st.bodyM[k])]).filter(v=>v[1]);
   if(vals.length>=2){ const a=vals[0][1], b=vals[vals.length-1][1]; h+=`<div class="row"><div class="l">Veränderung<small>${f1(a)} kg → ${f1(b)} kg</small></div><div class="r"><b>${(b-a>=0?"+":"")+f1(b-a)}</b><small>kg</small></div></div>`; h+=chartBody(vals,ms.length-1); }
   h+=`<div class="sec form">`; let prev=null;
   ms.forEach(k=>{ const v=num(st.bodyM[k]); const dl=(v&&prev)?v-prev:null; if(v) prev=v; const [y,mo]=k.split("-");
     h+=`<div class="frow"><span>${new Date(+y,+mo-1,1).toLocaleDateString("de-DE",{month:"long",year:"numeric"})}${dl!=null?`<small>${(dl>=0?"+":"")+f1(dl)} kg</small>`:""}</span>
     <input inputmode="decimal" data-bodym="${k}" value="${esc(st.bodyM[k]??"")}" placeholder="kg"></div>`; });
-  h+=`</div><p class="lead small" style="margin-top:14px">Aus Apple Health übernehmen: über einen Kurzbefehl, der deine App mit dem Gewicht öffnet (Anleitung im Chat). Der Wert landet automatisch im aktuellen Monat.</p>`;
+  h+=`</div><p class="lead small" style="margin-top:10px">Aus Apple Health: per Kurzbefehl, der die App mit dem Gewicht öffnet – der Wert landet automatisch im aktuellen Monat.</p></div>`;
   return h;
 }
 function chartBody(vals,nx){ nx=nx||NW; const Wd=340,Hd=140,px=30,py=12; let mn=Math.min(...vals.map(v=>v[1]))-1, mx=Math.max(...vals.map(v=>v[1]))+1;
@@ -834,6 +833,7 @@ function vSet(){
    ${inp("round","Rundung","kleinster Gewichtsschritt in kg")}${inp("wustart","Aufwärm-Start","kg – z. B. Stange + 2 × 25 kg")}
    <div class="frow"><span>Dein Name<small>für die Begrüßung</small></span><input data-set="name" value="${esc(s.name||"")}" placeholder="optional" style="text-align:left"></div>
 </div>
+  ${vBody()}
   <div class="sec form"><h3>Rechen-1RM Block 2 & 3</h3><p class="lead">Leer lassen = automatisch aus deinen Topsets (Block 2: W3/W4, Block 3: W8/W9).</p>
    ${inp("kb2","Kniebeuge Block 2","automatisch: "+auto("kb",2),"auto")}${inp("bd2","Bankdrücken Block 2","automatisch: "+auto("bd",2),"auto")}${inp("kh2","Kreuzheben Block 2","automatisch: "+auto("kh",2),"auto")}
    ${inp("kb3","Kniebeuge Block 3","automatisch: "+auto("kb",3),"auto")}${inp("bd3","Bankdrücken Block 3","automatisch: "+auto("bd",3),"auto")}${inp("kh3","Kreuzheben Block 3","automatisch: "+auto("kh",3),"auto")}
