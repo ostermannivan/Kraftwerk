@@ -352,6 +352,7 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .fp{ background:var(--s2); border:1px solid var(--line); border-radius:12px; padding:12px 2px; display:flex; flex-direction:column; align-items:center; gap:3px; }
 .fp b{ font-family:var(--serif); font-weight:400; font-size:24px; } .fp span{ font-size:11px; color:var(--muted); } .fp.low b{ color:var(--bronze); }
 .timer button{ padding:0 10px; }
+.weeks.locked{ display:none; }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -578,7 +579,8 @@ function rx(slot,w){
 }
 /* Letzte Ausführung einer Übung – auch an einem früheren Tag derselben Woche (z. B. OK1 → OK2) */
 function exposures(name,w,d,sid){ const out=[]; const curS=sessDate(w,d); const cutoff=curS?curS.getTime():Infinity;
-  for(let x=w;x>=1;x--){ const DX=daysFor(x); for(let di=0;di<DX.length;di++){ if(x===w&&di===d) continue;
+  const legDay=(d===1||d===3);
+  for(let x=w;x>=1;x--){ const DX=daysFor(x); for(let di=0;di<DX.length;di++){ if(x===w&&di===d) continue; if(legDay&&di!==d) continue;
       for(const s of DX[di].slots){ if(s.t||exName(s,x)!==name) continue; const L=getLog(x,di,s.id); if(!L||!L.sets.some(z=>num(z.kg)!=null)) continue;
         const dt=sessDate(x,di); const tm=dt?dt.getTime():null; if(x===w&&(tm==null||tm>=cutoff)) continue;
         out.push({x,di,L,tm:tm??(x*10+di)}); } } if(out.length>=2&&out.some(o=>o.x<w)) break; }
@@ -618,7 +620,8 @@ function ssInfo(slot,d){ const sl=visSlots(d), i=sl.indexOf(slot); if(i<0) retur
   const me=(st.cfg[slot.id]||{}).ss&&nx&&!nx.t; const prev=pv&&!pv.t&&(st.cfg[pv.id]||{}).ss;
   return me?{pos:1,other:nx}:prev?{pos:2,other:pv}:null; }
 function warmPlates(kg){ const S0=num(st.set.wustart)??70; const R=(kg-S0)/2; const big=[]; let rest=R, cap=R>=45?20:15;
-  for(let k=0;k<3;k++){ if(rest<10) break; const a=Math.min(cap,Math.floor(rest/5)*5); if(a<10) break; big.push(a); rest-=a; cap=Math.min(a,15); }
+  if(kg>150&&rest>=25){ big.push(25); rest-=25; cap=15; }
+  for(let k=big.length;k<3;k++){ if(rest<10) break; const a=Math.min(cap,Math.floor(rest/5)*5); if(a<10) break; big.push(a); rest-=a; cap=Math.min(a,15); }
   return {S0,R,big}; }
 function warmups(kg){ const {S0,R,big}=warmPlates(kg); if(kg<=S0+5) return [["Stange",10],[rnd(kg*.6),5],[rnd(kg*.8),3]];
   const steps=[S0]; let cum=0, hit=false; big.forEach(a=>{ cum+=a; if(cum<R-0.01) steps.push(S0+2*cum); else hit=true; });
@@ -652,7 +655,7 @@ function vTrain(){
    <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}${(st.studio||{})[w+"|"+d]&&!DAYS[d].split&&!DAYS[d].pull?' <span class="trialpill studio">Studio</span>':""}</div></div>
 </header>`;
   const ss0=sessOf(w,d);
-  h+=`<div class="navsticky">${ss0&&!ss0.e?`<div class="stickclock"><span>Training läuft</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now()-new Date(ss0.s))}</b><button class="chip" data-sess="focus">Fokus</button></div>`:""}<div class="weeks">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
+  h+=`<div class="navsticky">${ss0&&!ss0.e?`<div class="stickclock"><span>Training läuft</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now()-new Date(ss0.s))}</b><button class="chip" data-sess="focus">Fokus</button></div>`:""}<div class="weeks ${ss0&&!ss0.e?"locked":""}">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
     return `<button class="wk ${x===w?"sel":""} ${weekDone(x)?"done":""} ${x===currentWeek()?"now":""}" style="--c:${c}" data-week="${x}" aria-label="Woche ${x}">${x}<i></i></button>`; }).join("")+`</div>`;
   const sp_=st.wsplit[w]; const disp=DAYS.length===5?(sp_===0?[0,4,1,2,3]:[0,1,2,4,3]):[0,1,2,3];
   h+=`<div class="days" style="grid-template-columns:repeat(${DAYS.length},1fr)">`+disp.map(i=>[DAYS[i],i]).map(([dd,i])=>{ const s=dayDone(w,i); const opt=dd.optional&&!started(w,i)&&i!==d;
@@ -673,7 +676,6 @@ function vTrain(){
   const nk=w+"|"+d;
   h+=`<div class="sec note"><h3>Notizen</h3><textarea data-note="${nk}" placeholder="Technik, Schlaf, Besonderheiten …">${esc(st.notes[nk]||"")}</textarea></div>`;
   h+=vSessionFoot(w,d);
-  h+=`<p class="quote">${esc(D.QUOTES[(w*4+d)%D.QUOTES.length])}</p>`;
   if(canPlace&&!started(w,d)) h+= onS ? `<button class="linkbtn" data-place="home">Zurück zur Homegym-Variante</button>` : `<button class="linkbtn" data-place="studio">Heute im Studio trainieren?</button>`;
   if(d===0||d===2){ const sp=st.wsplit[w]; h+= sp===d ? `<button class="linkbtn" data-wsplit="off">Push/Pull-Split dieser Woche aufheben</button>`
       : `<button class="linkbtn" data-wsplit="${d}">Mehr Zeit diese Woche? ${day.tag} in Push + Pull aufteilen</button>`; }
@@ -719,7 +721,7 @@ function vSlot(slot,w,d){
     (main?head:`<div class="swrap" data-sw="ex|${slot.id}"><div class="swin">${head}</div><button class="swdel" data-del="ex|${slot.id}">Entfernen</button></div>`);
   if(ui.hint[slot.id]&&lib&&lib.h) h+=`<div class="hint">${esc(lib.h)}</div>`;
   let sug=null; const lt=main?null:lastTime(name,w,d,slot.id);
-  if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`${Math.round(r.pct*100)} % vom 1RM${r.formUp?" · Form-Puffer +1 RIR":""}`}</div></div>`;
+  if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`${Math.round(r.pct*100)} % vom 1RM`}</div></div>`;
     if(slot.t==="TOP"||slot.t==="VAR") h+=`<div class="warm">Aufwärmen  ${warmups(r.kg).map(([k,n])=>(typeof k==="number"?fk(k):k)+" × "+n).join("  ·  ")}</div>`; }
   else { sug=suggest(name,lt,r.reps,w,d);
     h+= sug ? `<div class="sugline ${sug.setback?"sb":""}"><span>Vorschlag</span><b>${fk(sug.kg)} kg</b><em>${esc(sug.d)}${lt?` · zuletzt ${lt.same?"diese Woche ":"W"+lt.w+" "}${esc(lt.day)}`:""}</em>${sug.setback?`<small>Drei Wochen ohne Fortschritt – neuer Anlauf mit weniger Gewicht und einem Satz mehr.</small>`:""}</div>`
@@ -1099,7 +1101,7 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,[data-pick]"); if(!t) return; unlockAudio();
   if(t.dataset.tab){ ui.tab=t.dataset.tab; render(); window.scrollTo(0,0); return; }
-  if(t.dataset.week){ ui.w=+t.dataset.week; ui.d=0; for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; break; } } render(); return; }
+  if(t.dataset.week){ if(t.closest(".weeks.locked")){ toast("Während des Trainings ist die Woche fest"); return; } ui.w=+t.dataset.week; ui.d=0; for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; break; } } render(); return; }
   if(t.dataset.day!==undefined){ ui.d=+t.dataset.day; render(); window.scrollTo({top:0}); return; }
   if(t.dataset.hint){ ui.hint[t.dataset.hint]=!ui.hint[t.dataset.hint]; render(); return; }
   if(t.dataset.swap){ openSwap(t.dataset.swap); return; }
@@ -1118,7 +1120,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.act==="close"){ closeSheet(); render(); return; }
   if(t.dataset.act==="addex"){ openAdd(); return; }
   if(t.dataset.formstart!==undefined){ const k=ui.w+"|"+ui.d, v=+t.dataset.formstart; if(v) st.form[k]=v; else delete st.form[k];
-    st.sess[k]={s:new Date().toISOString(),e:null}; save(); closeSheet(); render(); openFocus(); if(v&&v<=2) toast("Heute konservativ: Topset +1 RIR"); return; }
+    st.sess[k]={s:new Date().toISOString(),e:null}; save(); closeSheet(); render(); openFocus(); return; }
   if(t.dataset.sess==="endnow"){ const k=ui.w+"|"+ui.d, s=st.sess[k]; if(s){ s.e=new Date().toISOString(); flush(); } closeSheet(); render(); clearInterval(tInt); $("#timer").classList.remove("show"); showDone(ui.w,ui.d); return; }
   if(t.dataset.adjok){ const sid=t.dataset.adjok, key=ui.w+"|"+ui.d+"|"+sid, a=ui.adj[key]; if(a){ const slot=slotFor(ui.d,sid); const L=ensureLog(ui.w,ui.d,sid,rx(slot,ui.w).sets);
       L.sets.forEach((z,j)=>{ if(j>0&&!z.ok) z.kg=String(a.kg).replace(".",","); }); delete ui.adj[key]; save(); render(); if(ui.focus) renderFocus(); toast("Restliche Sätze: "+fk(a.kg)+" kg"); } return; }
@@ -1139,8 +1141,9 @@ document.addEventListener("click",e=>{
   if(t.dataset.sessOpen){ const [w,d]=t.dataset.sessOpen.split("|").map(Number); openSessDetail(w,d); return; }
   if(t.dataset.jump){ const [w,d]=t.dataset.jump.split("|").map(Number); closeSheet(); ui.tab="train"; ui.w=w; ui.d=d; render(); window.scrollTo(0,0); return; }
   if(t.dataset.sess&&t.dataset.sess!=="endnow"){ const k=ui.w+"|"+ui.d, a=t.dataset.sess;
-    if(a==="start"){ $("#sheet").innerHTML=`<div class="grab"></div><h3>Wie fühlst du dich heute?</h3><p>Schlaf und Energie. Bei 1–2 plant das Topset eine RIR mehr Reserve ein.</p>
-      <div class="formpick">${FORM.map((f,i)=>`<button class="fp ${i<2?"low":""}" data-formstart="${i+1}"><b>${i+1}</b><span>${f[0]}</span></button>`).join("")}</div>
+    if(a==="start"){ $("#sheet").innerHTML=`<div class="grab"></div><h3>Wie fühlst du dich heute?</h3><p>Schlaf und Energie</p>
+      <div class="formpick">${FORM.map((f,i)=>`<button class="fp" data-formstart="${i+1}"><b>${i+1}</b><span>${f[0]}</span></button>`).join("")}</div>
+      <p class="quote">${esc(D.QUOTES[(ui.w*4+ui.d)%D.QUOTES.length])}</p>
       <button class="btn" data-formstart="0">Ohne Angabe starten</button>`; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); return; }
     if(a==="focus"){ openFocus(); return; }
     if(a==="end"){ const s=st.sess[k]; if(!s) return;
