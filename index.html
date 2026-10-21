@@ -351,8 +351,15 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .formpick{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:6px 0 10px; }
 .fp{ background:var(--s2); border:1px solid var(--line); border-radius:12px; padding:12px 2px; display:flex; flex-direction:column; align-items:center; gap:3px; }
 .fp b{ font-family:var(--serif); font-weight:400; font-size:24px; } .fp span{ font-size:11px; color:var(--muted); } .fp.low b{ color:var(--bronze); }
-.timer button{ padding:0 10px; }
+.timer button{ padding:0 8px; white-space:nowrap; font-size:13px; } .timer .in{ gap:8px; } .timer .t{ min-width:78px; }
 .weeks.locked{ display:none; }
+.stickclock{ position:relative; } .stickbar{ position:absolute; left:0; bottom:-3px; height:2px; background:var(--sage); border-radius:1px; transition:width .3s; }
+.wkpick{ font:inherit; color:inherit; padding:0; } .wkpick i{ font-style:normal; font-size:16px; color:var(--muted); vertical-align:middle; }
+.vopts{ display:grid; gap:6px; margin:8px 0 2px; }
+.vopt{ text-align:left; background:var(--s2); border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:13px; color:var(--silver); }
+.vopt b{ color:var(--gold); margin-right:4px; } .vopt em{ display:block; font-style:normal; font-size:11.5px; color:var(--muted); margin-top:2px; }
+.vopt.on{ border-color:var(--gold); background:#1A1712; color:var(--text); }
+.vsug>b{ display:block; font-size:14px; } .vsug>span{ display:block; font-size:12.5px; color:var(--muted); margin-top:2px; }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -651,11 +658,11 @@ function vTrain(){
   const w=ui.w, P=W(w), d=ui.d, day=DAYS[d];
   const from=weekDate(w), to=weekDate(w,6), fv=st.form[w+"|"+d];
   let h=`<header class="top"><div class="brand"><h1>KRAFTWERK</h1><span class="today">${dshort(from)} – ${dshort(to)}</span></div>
-   <div class="weekhead"><h2>Woche ${w}${P.deload?' <span class="dl">Deload</span>':''}</h2>
+   <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button>${P.deload?' <span class="dl">Deload</span>':''}</h2>
    <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}${(st.studio||{})[w+"|"+d]&&!DAYS[d].split&&!DAYS[d].pull?' <span class="trialpill studio">Studio</span>':""}</div></div>
 </header>`;
   const ss0=sessOf(w,d);
-  h+=`<div class="navsticky">${ss0&&!ss0.e?`<div class="stickclock"><span>Training läuft</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now()-new Date(ss0.s))}</b><button class="chip" data-sess="focus">Fokus</button></div>`:""}<div class="weeks ${ss0&&!ss0.e?"locked":""}">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
+  h+=`<div class="navsticky">${ss0&&!ss0.e?`<div class="stickclock"><span>${(dd_=>`${dd_.ok} / ${dd_.all} Sätze · ${dd_.all?Math.round(100*dd_.ok/dd_.all):0} %`)(dayDone(w,d))}</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now()-new Date(ss0.s))}</b><button class="chip" data-sess="focus">Fokus</button><i class="stickbar" style="width:${(dd_=>dd_.all?100*dd_.ok/dd_.all:0)(dayDone(w,d))}%"></i></div>`:runBanner(w,d)}<div class="weeks ${ss0&&!ss0.e?"locked":""}">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
     return `<button class="wk ${x===w?"sel":""} ${weekDone(x)?"done":""} ${x===currentWeek()?"now":""}" style="--c:${c}" data-week="${x}" aria-label="Woche ${x}">${x}<i></i></button>`; }).join("")+`</div>`;
   const sp_=st.wsplit[w]; const disp=DAYS.length===5?(sp_===0?[0,4,1,2,3]:[0,1,2,4,3]):[0,1,2,3];
   h+=`<div class="days" style="grid-template-columns:repeat(${DAYS.length},1fr)">`+disp.map(i=>[DAYS[i],i]).map(([dd,i])=>{ const s=dayDone(w,i); const opt=dd.optional&&!started(w,i)&&i!==d;
@@ -675,6 +682,7 @@ function vTrain(){
   h+=`<button class="addex" data-act="addex">+ Übung hinzufügen</button>`;
   const nk=w+"|"+d;
   h+=`<div class="sec note"><h3>Notizen</h3><textarea data-note="${nk}" placeholder="Technik, Schlaf, Besonderheiten …">${esc(st.notes[nk]||"")}</textarea></div>`;
+  h+=`<p class="quote">${esc(D.QUOTES[(w*4+d)%D.QUOTES.length])}</p>`;
   h+=vSessionFoot(w,d);
   if(canPlace&&!started(w,d)) h+= onS ? `<button class="linkbtn" data-place="home">Zurück zur Homegym-Variante</button>` : `<button class="linkbtn" data-place="studio">Heute im Studio trainieren?</button>`;
   if(d===0||d===2){ const sp=st.wsplit[w]; h+= sp===d ? `<button class="linkbtn" data-wsplit="off">Push/Pull-Split dieser Woche aufheben</button>`
@@ -961,7 +969,7 @@ function openFocus(){ ui.focus=true; const q=focusQueue(); const i=q.findIndex((
 function closeFocus(){ ui.focus=false; $("#focus").classList.remove("show"); document.body.style.overflow=""; render(); }
 function renderFocus(){ const el=$("#focus"); if(!el) return; const w=ui.w, d=ui.d, q=focusQueue(); const s0=sessOf(w,d);
   const done=q.filter(([sid,k])=>{ const L=getLog(w,d,sid); return L&&L.sets[k]&&L.sets[k].ok; }).length;
-  let h=`<div class="fhead"><button class="fclose" data-fx="close" aria-label="Schließen">✕</button><b class="clock" ${s0&&!s0.e?`data-clock="${w}|${d}"`:""}>${s0?(s0.e?fmtDur(new Date(s0.e)-new Date(s0.s)):fmtClock(Date.now()-new Date(s0.s))):"0:00"}</b><span class="muted small">W${w} · ${esc(DAYS[d].name)}</span></div>
+  let h=`<div class="fhead"><button class="fclose" data-fx="close" aria-label="Schließen">✕</button><b class="clock" ${s0&&!s0.e?`data-clock="${w}|${d}"`:""}>${s0?(s0.e?fmtDur(new Date(s0.e)-new Date(s0.s)):fmtClock(Date.now()-new Date(s0.s))):"0:00"}</b><span class="muted small">${done}/${q.length} · ${q.length?Math.round(100*done/q.length):0} %</span></div>
     <div class="fprog"><i style="width:${q.length?100*done/q.length:0}%"></i></div>`;
   if(ui.fi>=q.length){ const s=sessOf(w,d);
     h+=`<div class="fdone"><div class="fbig">Geschafft.</div><p class="muted">${done} von ${q.length} Sätzen erledigt${s?" · "+fmtDur((s.e?new Date(s.e):new Date())-new Date(s.s)):""}</p>
@@ -1057,24 +1065,35 @@ function weekVolume(w){ const plan={}, done={}; const add=(o,k,v)=>{ o[k]=(o[k]|
       add(plan,pm,r.sets); sec.forEach(x=>add(plan,x,r.sets*.5)); add(done,pm,k); sec.forEach(x=>add(done,x,k*.5)); }); });
   return {plan,done}; }
 function volSuggestions(w){ const {plan}=weekVolume(w), out=[]; const P=W(w); if(P.deload) return out;
-  const daySets=d=>dayDone(w,d).all;
   Object.entries(TARGET).forEach(([mu,[lo,hi]])=>{ const v=plan[mu]||0; const dir=v<lo?1:v>hi?-1:0; if(!dir) return;
-    if((st.volNo||{})[mu+"|"+dir]) return;
-    let best=null; daysFor(w).forEach((day,d)=>{ if(d>3||day.optional) return; day.slots.forEach(s=>{ const n=exName(s,w); if(s.t||!n||s.opt) return; if(exPrimary(n,s)!==mu) return;
-      const n0=(st.cfg[s.id]||{}).n??s.n; if(dir>0&&(n0>=4||daySets(d)>=20)) return; if(dir<0&&n0<=1) return;
-      if(!best||(dir>0?n0<best.n0:n0>best.n0)) best={s,d,n,n0}; }); });
-    if(best) out.push({mu,dir,v,lo,hi,...best}); });
+    if((st.volNo||{})[mu+"|"+dir]) return; const cands=[];
+    daysFor(w).forEach((day,d)=>{ if(d>3) return; const tot=dayDone(w,d).all; day.slots.forEach(s=>{ const n=exName(s,w); if(s.t||!n||s.opt) return; if(exPrimary(n,s)!==mu) return;
+      const n0=(st.cfg[s.id]||{}).n??s.n; if(dir>0&&n0>=4) return; if(dir<0&&n0<=1) return;
+      cands.push({s,d,n,n0,tag:day.tag,tot,opt:!!day.optional}); }); });
+    cands.sort((a,b)=>dir>0?((a.opt-b.opt)||(a.tot-b.tot)||(a.n0-b.n0)):((b.tot-a.tot)||(b.n0-a.n0)));
+    if(cands.length) out.push({mu,dir,v,lo,hi,cands:cands.slice(0,5)}); });
   return out; }
 function vVolume(){ const w=ui.w, {plan,done}=weekVolume(w);
   let h=`<p class="lead small">Woche ${w}: geplante Sätze je Muskelgruppe (mitarbeitende Muskeln zählen halb). Hell = schon erledigt, Rahmen = Zielbereich.</p>`;
   Object.entries(TARGET).forEach(([mu,[lo,hi]])=>{ const v=plan[mu]||0, dn=done[mu]||0, mx=24; const st_=v<lo?"low":v>hi?"high":"ok";
     h+=`<div class="vrow"><div class="vl">${mu}</div><div class="vbar"><span class="vt" style="left:${lo/mx*100}%;width:${(hi-lo)/mx*100}%"></span><i class="${st_}" style="width:${Math.min(100,v/mx*100)}%"></i><em style="width:${Math.min(100,dn/mx*100)}%"></em></div>
       <div class="vn ${st_}">${fk(v)}</div></div>`; });
-  const sg=volSuggestions(w);
-  h+=`<div class="sec"><h3>Vorschläge</h3>${sg.length?sg.map(x=>`<div class="vsug"><div><b>${esc(x.mu)}: ${fk(x.v)} Sätze</b><span>${x.dir>0?"unter":"über"} dem Zielbereich (${x.lo}–${x.hi}) · ${x.dir>0?"+1":"−1"} Satz bei ${esc(x.n)} (${esc(daysFor(w)[x.d].tag)}) → ${x.n0+x.dir} Sätze</span></div>
-      <div class="vbtn"><button class="chip on" data-volok="${x.s.id}|${x.dir}">Übernehmen</button><button class="chip" data-volno="${esc(x.mu)}|${x.dir}">Ablehnen</button></div></div>`).join("")
+  const sg=volSuggestions(w); ui.volPick=ui.volPick||{};
+  h+=`<div class="sec"><h3>Vorschläge</h3>${sg.length?sg.map(x=>{ const key=x.mu+"|"+x.dir; const pick=ui.volPick[key]??0; const c=x.cands[Math.min(pick,x.cands.length-1)];
+      return `<div class="vsug"><b>${esc(x.mu)}: ${fk(x.v)} → ${fk(x.v+x.dir)} Sätze</b><span>${x.dir>0?"unter":"über"} dem Zielbereich (${x.lo}–${x.hi}). Wähle, wo ${x.dir>0?"ein Satz dazukommt":"ein Satz wegfällt"}:</span>
+      <div class="vopts">${x.cands.map((o,k)=>`<button class="vopt ${k===pick?"on":""}" data-volpick="${esc(key)}|${k}"><b>${esc(o.tag)}</b> ${esc(o.n)}<em>${o.n0} → ${o.n0+x.dir} Sätze · Tag ${o.tot} → ${o.tot+x.dir}${x.dir>0&&o.tot+1>20?" · über 20":""}${o.opt?" · optionaler Tag":""}</em></button>`).join("")}</div>
+      <div class="vbtn"><button class="chip on" data-volok="${c.s.id}|${x.dir}">Übernehmen</button><button class="chip" data-volno="${esc(key)}">Ablehnen</button></div></div>`; }).join("")
       :`<p class="lead small">Alle Muskelgruppen liegen im Zielbereich – nichts zu tun.</p>`}</div>`;
   return h; }
+function runningSess(){ for(const k in st.sess){ const s=st.sess[k]; if(s&&s.s&&!s.e) return k; } return null; }
+function runBanner(w,d){ const k=runningSess(); if(!k||k===w+"|"+d) return ""; const [rw,rd]=k.split("|").map(Number);
+  return `<div class="stickclock"><span>Training läuft · W${rw} ${esc((daysFor(rw)[rd]||{}).tag||"")}</span><b class="clock" data-clock="${k}">${fmtClock(Date.now()-new Date(st.sess[k].s))}</b><button class="chip" data-jump="${rw}|${rd}">Zurück</button></div>`; }
+function openWeekPick(){ const cw=currentWeek();
+  $("#sheet").innerHTML=`<div class="grab"></div><h3>Woche wählen</h3><p>Zum Ansehen oder Nachtragen – dein laufendes Training bleibt erhalten.</p>
+   ${WK.map((r,i)=>{ const x=i+1, dl=r[1]==="Deload", n=[0,1,2].filter(d=>dayDone(x,d).done).length;
+     return `<button class="opt ${x===ui.w?"cur":""}" data-weekgo="${x}"><span class="n">Woche ${x} · ${dl?"Deload":"Block "+r[0]+" · "+r[1]}${x===cw?' <span class="muted">· aktuell</span>':""}</span><span class="o ${weekDone(x)?"gain":""}">${dshort(weekDate(x))} · ${n}/3</span></button>`; }).join("")}
+   <button class="btn" data-act="close">Schließen</button>`;
+  $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
@@ -1119,13 +1138,16 @@ document.addEventListener("click",e=>{
     clearTraining(); st.set.start=st.trial.realStart; delete st.trial; flush(); ui.w=currentWeek(); ui.d=0; render(); toast("Probelauf beendet – bereit für den echten Start"); return; }
   if(t.dataset.act==="close"){ closeSheet(); render(); return; }
   if(t.dataset.act==="addex"){ openAdd(); return; }
+  if(t.dataset.wkpick){ openWeekPick(); return; }
+  if(t.dataset.weekgo){ closeSheet(); ui.w=+t.dataset.weekgo; ui.d=0; for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; break; } } render(); window.scrollTo(0,0); return; }
   if(t.dataset.formstart!==undefined){ const k=ui.w+"|"+ui.d, v=+t.dataset.formstart; if(v) st.form[k]=v; else delete st.form[k];
     st.sess[k]={s:new Date().toISOString(),e:null}; save(); closeSheet(); render(); openFocus(); return; }
   if(t.dataset.sess==="endnow"){ const k=ui.w+"|"+ui.d, s=st.sess[k]; if(s){ s.e=new Date().toISOString(); flush(); } closeSheet(); render(); clearInterval(tInt); $("#timer").classList.remove("show"); showDone(ui.w,ui.d); return; }
   if(t.dataset.adjok){ const sid=t.dataset.adjok, key=ui.w+"|"+ui.d+"|"+sid, a=ui.adj[key]; if(a){ const slot=slotFor(ui.d,sid); const L=ensureLog(ui.w,ui.d,sid,rx(slot,ui.w).sets);
       L.sets.forEach((z,j)=>{ if(j>0&&!z.ok) z.kg=String(a.kg).replace(".",","); }); delete ui.adj[key]; save(); render(); if(ui.focus) renderFocus(); toast("Restliche Sätze: "+fk(a.kg)+" kg"); } return; }
   if(t.dataset.adjno){ delete ui.adj[ui.w+"|"+ui.d+"|"+t.dataset.adjno]; render(); if(ui.focus) renderFocus(); return; }
-  if(t.dataset.volok){ const [sid,dir]=t.dataset.volok.split("|"); let sl=null; for(let d=0;d<4&&!sl;d++) sl=slotFor(d,sid); if(sl){ const c=st.cfg[sid]||{}; c.n=Math.max(1,(c.n??sl.n)+(+dir)); st.cfg[sid]=c; save(); render(); toast("Sätze angepasst – gilt ab jetzt für alle Wochen"); } return; }
+  if(t.dataset.volok){ const [sid,dir]=t.dataset.volok.split("|"); let sl=null; for(let d=0;d<5&&!sl;d++) sl=slotFor(d,sid); if(sl){ const c=st.cfg[sid]||{}; c.n=Math.max(1,(c.n??sl.n)+(+dir)); st.cfg[sid]=c; save(); render(); toast("Sätze angepasst – gilt ab jetzt für alle Wochen"); } return; }
+  if(t.dataset.volpick){ const s_=t.dataset.volpick, k=s_.lastIndexOf("|"); ui.volPick[s_.slice(0,k)]=+s_.slice(k+1); render(); return; }
   if(t.dataset.volno){ st.volNo=st.volNo||{}; st.volNo[t.dataset.volno]=true; save(); render(); return; }
   if(t.dataset.skip){ st.skip[ui.w+"|"+ui.d+"|"+t.dataset.skip]=true; save(); closeSheet(); render(); return; }
   if(t.dataset.unskip){ delete st.skip[ui.w+"|"+ui.d+"|"+t.dataset.unskip]; save(); render(); return; }
