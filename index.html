@@ -360,6 +360,18 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .vopt b{ color:var(--gold); margin-right:4px; } .vopt em{ display:block; font-style:normal; font-size:11.5px; color:var(--muted); margin-top:2px; }
 .vopt.on{ border-color:var(--gold); background:#1A1712; color:var(--text); }
 .vsug>b{ display:block; font-size:14px; } .vsug>span{ display:block; font-size:12.5px; color:var(--muted); margin-top:2px; }
+.techrow{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:6px 0 2px; } .techrow span{ font-size:12px; color:var(--muted); margin-right:2px; }
+.techrow .chip{ height:28px; padding:0 10px; font-size:12.5px; }
+.techbox{ margin:8px 0 2px; border:1px dashed rgba(201,164,92,.45); border-radius:12px; padding:9px 10px 6px; }
+.techbox .th{ display:flex; justify-content:space-between; align-items:center; } .techbox .th b{ font-size:13px; color:var(--gold); letter-spacing:.02em; }
+.techbox .th .linkbtn{ margin:0; padding:2px; font-size:12px; } .techbox p{ font-size:12px; color:var(--muted); margin:2px 0 6px; }
+.techbox .set{ margin-top:4px; } .tset .no{ color:var(--gold); font-weight:600; }
+.goal{ background:var(--s1); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:8px; }
+.goal .gh{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; } .goal .gh b{ font-size:16px; } .goal .gh span{ font-size:13px; color:var(--silver); }
+.gbar{ height:6px; background:var(--s2); border-radius:3px; margin:8px 0 6px; overflow:hidden; } .gbar i{ display:block; height:100%; background:var(--gold); border-radius:3px; }
+.glines{ display:grid; gap:4px; font-size:13px; color:var(--silver); } .glines b{ color:var(--text); } .glines .muted{ color:var(--muted); font-size:12.5px; }
+.glines .gold{ color:var(--gold2); }
+.gadj{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:4px; } .gadj span{ font-size:12px; color:var(--muted); }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -496,10 +508,10 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.1";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.3";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
-  round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70,
+  round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
   bar:20 },
   swaps:{}, custom:[], extra:{}, wsplit:{}, order:{}, sess:{}, studio:{}, exnotes:{}, setov:{}, log:{}, dates:{}, ends:{}, notes:{}, body:{}, cfg:{}, form:{}, fb:{}, onboarded:false });
 let st;
@@ -507,6 +519,7 @@ try{ st = JSON.parse(localStorage.getItem(KEY)) || DEF(); }catch(e){ st = DEF();
 st = Object.assign(DEF(), st); st.set = Object.assign(DEF().set, st.set);
 if(!st.wsplit) st.wsplit={};
 if(!st.order) st.order={};
+if(st.trial&&!st.mig13){ delete st.trial; st.mig13=true; st._trialKept=true; }
 if(!st.studio) st.studio={};
 function monthKey(dt){ return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0"); }
 if(!st.skip) st.skip={};
@@ -544,7 +557,12 @@ const rdn = x=>Math.floor(x/st.set.round)*st.set.round;
 function startDate(){ const d=new Date(st.set.start+"T00:00:00"); return isNaN(d)?new Date():d; }
 function weekDate(w,add=0){ const d=startDate(); d.setDate(d.getDate()+7*(w-1)+add); return d; }
 const dshort = d=>d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"});
-function currentWeek(){ const diff=Math.floor((new Date()-startDate())/864e5); return Math.max(1,Math.min(NW,Math.floor(diff/7)+1)); }
+function calWeek(){ const diff=Math.floor((new Date()-startDate())/864e5); return Math.max(1,Math.min(NW,Math.floor(diff/7)+1)); }
+function currentWeek(){ let last=0; for(const k in (st.log||{})){ const w=+k.split("|")[0]; if(w>last&&st.log[k].sets.some(z=>z.ok)) last=w; }
+  for(const k in (st.sess||{})){ const w=+k.split("|")[0]; if(w>last) last=w; }
+  if(!last) return calWeek();
+  const done=[0,1,2].every(d=>dayDone(last,d).done)&&(!started(last,3)||dayDone(last,3).done);
+  return Math.min(NW, done?last+1:last); }
 function pauseSec(p){ if(!p||/direkt/.test(p)) return 0; const m=String(p).replace(",",".").match(/[\d.]+/); return m?Math.round(parseFloat(m[0])*60):0; }
 function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),1800); }
 
@@ -581,7 +599,7 @@ function rx(slot,w){
   const ov=st.setov[w+"|"+slot.id];
   if(slot.t==="VAR"){ const p=pct(P.pkr,P.vr); return {sets:ov??Math.max(1,P.pks-red),reps:P.pkr,rir:P.vr,pct:p,kg:rnd(base1RM("pkb",w)*p)}; }
   if(slot.t==="BO"){ const k={bd:["bdb","bds"],kb:["kbb","kbs"],kh:["khb","khs"],pbd:["pbb","pbs"]}[slot.lift];
-    const e=topE1(slot.lift,w); const ref=e??base1RM(slot.lift,w); return {sets:ov??Math.max(1,P[k[1]]-red),reps:P[k[0]],pct:P.bo,kg:rnd(ref*P.bo),fromDay:e!=null}; }
+    const e=topE1(slot.lift,w); const ref=e??base1RM(slot.lift,w); return {sets:ov??(Math.max(1,P[k[1]]-red)+(P.deload?0:((st.boAdd||{})[slot.lift]||0))),reps:P[k[0]],pct:P.bo,kg:rnd(ref*P.bo),fromDay:e!=null}; }
   const c=st.cfg[slot.id]||{}; const nm=exName(slot,w); const sb=nm&&stalled(nm,w)?1:0; return {setback:!!sb,sets:ov??(Math.max(1,(c.n??slot.n)-red+fbAdj(P.block))+sb),reps:(nm&&st.set.tracked.includes(nm))?"6–8":(slot.rt==="I"?P.ri:P.rg),rir:P.acc};
 }
 /* Letzte Ausführung einer Übung – auch an einem früheren Tag derselben Woche (z. B. OK1 → OK2) */
@@ -750,6 +768,7 @@ function vSlot(slot,w,d){
       <button class="swdel" data-del="set|${slot.id}|${i}">Löschen</button></div>`; }
   h+=`</div>`;
   if(slot.t!=="TOP") h+=`<button class="addset" data-addset="${slot.id}">+ Satz</button>`;
+  if(!main&&!P.deload&&(slot.rt==="I"||(libEntry(name)&&["Schulter seitlich","Schulter hinten","Bizeps","Trizeps","Waden","Bauch"].includes(libEntry(name).g)))) h+=vTech(slot,w,d,r,L);
   if(slot.t==="TOP"||slot.t==="VAR"||tracked){ h+=`<div class="e1" data-e1="${slot.id}">${e1Text(slot,w,d)}</div>`; }
   return h+`</section>`;
 }
@@ -844,6 +863,9 @@ function vSet(){
    <div class="frow"><span>Dein Name<small>für die Begrüßung</small></span><input data-set="name" value="${esc(s.name||"")}" placeholder="optional" style="text-align:left"></div>
 </div>
   ${vBody()}
+  <div class="sec form"><h3>Ziele</h3><p class="lead">Ziel-1RM je Hauptübung. Optional mit Zieldatum – sonst gilt das Ende von Woche 15.</p>
+   ${[["goalkb","Kniebeuge"],["goalbd","Bankdrücken"],["goalkh","Kreuzheben"]].map(([k,l])=>`<div class="frow"><span>${l}</span><input inputmode="decimal" data-set="${k}" value="${esc(st.set[k]??"")}" placeholder="kg"></div>`).join("")}
+   <div class="frow"><span>Zieldatum<small>leer = Ende Woche 15</small></span><input type="date" data-set="goaldate" value="${esc(st.set.goaldate||"")}"></div></div>
   <div class="sec form"><h3>Rechen-1RM Block 2 & 3</h3><p class="lead">Leer lassen = automatisch aus deinen Topsets (Block 2: W3/W4, Block 3: W8/W9).</p>
    ${inp("kb2","Kniebeuge Block 2","automatisch: "+auto("kb",2),"auto")}${inp("bd2","Bankdrücken Block 2","automatisch: "+auto("bd",2),"auto")}${inp("kh2","Kreuzheben Block 2","automatisch: "+auto("kh",2),"auto")}
    ${inp("kb3","Kniebeuge Block 3","automatisch: "+auto("kb",3),"auto")}${inp("bd3","Bankdrücken Block 3","automatisch: "+auto("bd",3),"auto")}${inp("kh3","Kreuzheben Block 3","automatisch: "+auto("kh",3),"auto")}
@@ -927,7 +949,7 @@ function toggleSet(sid,i,kgDefault,force){
   if(s.ok&&isMain){ const e=topE1(slot.lift,ui.w); const anyPrev=[...Array(NW)].some((_,k)=>k+1!==ui.w&&topE1(slot.lift,k+1)!=null);
     if(e!=null&&anyPrev&&(prevBest==null||e>prevBest)) showPR(exName(slot,ui.w),e); }
 }
-function clearTraining(){ st.skip={}; st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
+function clearTraining(){ st.tech={}; st.skip={}; st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
 function prefillRow(inp){ const row=inp.closest(".set"), box=inp.closest(".finputs"); const host=row||box; if(!host) return;
   const sid=row?inp.closest("[data-slot]").dataset.slot:box.dataset.slot; const i=row?+row.dataset.i:+box.dataset.i; const attr=row?"data-f":"data-ff";
   const slot=slotFor(ui.d,sid); if(!slot) return; const r=rx(slot,ui.w); const L=ensureLog(ui.w,ui.d,sid,r.sets); const s=L.sets[i]; if(s.ok) return;
@@ -1024,6 +1046,7 @@ function vProg(){
   const per=[...Array(NW)].map((_,i)=>all.filter(s=>s.w===i+1).length); const mx=Math.max(4,...per);
   h+=`<div class="sec"><h3>Konstanz</h3><p class="lead small">Einheiten pro Woche · Ø ${(per.slice(0,cw).reduce((a,b)=>a+b,0)/cw).toLocaleString("de-DE",{maximumFractionDigits:1})}</p>
    <div class="bars">${per.map((n,i)=>`<div class="bar ${i+1===cw?"now":""} ${W(i+1).deload?"dl":""}"><i style="height:${n/mx*100}%"></i><b>${n||""}</b><span>${i+1}</span></div>`).join("")}</div></div>`;
+  h+=vGoals();
   return h+vRec().replace(/^[\s\S]*?<\/header>/,"");
 }
 function vExList(){ const ex=exStats(); if(!ex.length) return `<p class="lead" style="margin-top:16px">Sobald du Sätze abhakst, erscheinen hier deine Übungen mit Verlauf.</p>`;
@@ -1094,6 +1117,49 @@ function openWeekPick(){ const cw=currentWeek();
      return `<button class="opt ${x===ui.w?"cur":""}" data-weekgo="${x}"><span class="n">Woche ${x} · ${dl?"Deload":"Block "+r[0]+" · "+r[1]}${x===cw?' <span class="muted">· aktuell</span>':""}</span><span class="o ${weekDone(x)?"gain":""}">${dshort(weekDate(x))} · ${n}/3</span></button>`; }).join("")}
    <button class="btn" data-act="close">Schließen</button>`;
   $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
+
+/* ============ Ziele & Prognose ============ */
+/* Einstiegswochen (RIR 4) schätzen das e1RM ungenauer → halbes Gewicht in der Trendlinie */
+function liftSeries(l){ const pts=[]; for(let w=1;w<=NW;w++){ if(W(w).deload) continue; const e=topE1(l,w); if(e!=null) pts.push([w,e,WK[w-1][1]==="Einstieg"?0.5:1]); } return pts; }
+function linTrend(pts){ if(pts.length<2) return null; const sw=pts.reduce((a,q)=>a+q[2],0), mx=pts.reduce((a,q)=>a+q[0]*q[2],0)/sw, my=pts.reduce((a,q)=>a+q[1]*q[2],0)/sw;
+  let a=0,b=0; pts.forEach(([x,y,g])=>{ a+=g*(x-mx)*(y-my); b+=g*(x-mx)**2; }); const s=b?a/b:0; return {s,c:my-s*mx}; }
+const monthTxt=dt=>dt.toLocaleDateString("de-DE",{month:"long",year:"numeric"});
+function goalInfo(l){ const key={kb:"goalkb",bd:"goalbd",kh:"goalkh"}[l]; const goal=num(st.set[key]); const pts=liftSeries(l); if(!pts.length) return {goal,pts};
+  const tr=linTrend(pts), lastW=pts[pts.length-1][0]; const cur=tr&&pts.length>=3?tr.c+tr.s*lastW:Math.max(...pts.slice(-2).map(q=>q[1]));
+  const endW=weekDate(NW,6), tgt=st.set.goaldate?new Date(st.set.goaldate+"T12:00:00"):endW; const weeksLeft=Math.max(1,(tgt-new Date())/6048e5);
+  const fcEnd=tr&&pts.length>=3?tr.c+tr.s*NW:null; const perWk=tr&&pts.length>=3?tr.s:null;
+  if(!goal) return {goal,pts,cur,fcEnd,perWk};
+  const need=Math.max(0,goal-cur), needWk=need/weeksLeft, pct=needWk/cur*100;
+  const rating=need<=0?["erreicht","gain"]:pct<=0.25?["realistisch","gain"]:pct<=0.5?["ambitioniert, aber machbar","gold"]:pct<=0.8?["sehr ambitioniert","neg"]:["im Zeitraum unrealistisch","neg"];
+  const etaTrend=perWk&&perWk>0&&need>0?new Date(Date.now()+need/perWk*6048e5):null;
+  const etaRef=need>0?new Date(Date.now()+Math.log(goal/cur)/Math.log(1.0025)*6048e5):null;
+  return {goal,pts,cur,fcEnd,perWk,need,needWk,pct,rating,tgt,etaTrend,etaRef}; }
+function vGoals(){ const L=[["kb","Kniebeuge"],["bd","Bankdrücken"],["kh","Kreuzheben"]]; let h=`<div class="sec"><h3>Ziele & Prognose</h3>`;
+  L.forEach(([l,n])=>{ const g=goalInfo(l); if(!g.pts.length){ h+=`<div class="goal"><b>${n}</b><span class="muted">Prognose ab dem ersten Topset${g.goal?" · Ziel "+fk(g.goal)+" kg":""}</span></div>`; return; }
+    h+=`<div class="goal"><div class="gh"><b>${n}</b><span>aktuell ≈ ${f1(g.cur)} kg${g.goal?` · Ziel ${fk(g.goal)} kg`:""}</span></div>`;
+    if(g.goal){ const prog=Math.max(0,Math.min(100,g.cur/g.goal*100)); h+=`<div class="gbar"><i style="width:${prog}%"></i></div>`; }
+    h+=`<div class="glines">`;
+    h+= g.perWk!=null?`<div>Tempo bisher <b>${(g.perWk>=0?"+":"")+f1(g.perWk)} kg/Woche</b> · Prognose Ende W${NW}: <b>${f1(g.fcEnd)} kg</b></div>`:`<div class="muted">Prognose wird ab 3 Wochen mit Topset aussagekräftig.</div>`;
+    if(g.goal&&g.need>0){ h+=`<div>Nötig bis ${g.tgt.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"})}: <b>+${f1(g.needWk)} kg/Woche</b> (${g.pct.toFixed(2).replace(".",",")} %/Woche) · <span class="${g.rating[1]}">${g.rating[0]}</span></div>`;
+      h+=`<div class="muted">Bei deinem Tempo: ${g.etaTrend?"≈ "+monthTxt(g.etaTrend):"noch offen"} · bei üblichem Tempo für Fortgeschrittene (≈1 %/Monat): ≈ ${monthTxt(g.etaRef)}</div>`;
+      if(g.pct>0.25){ const on=(st.boAdd||{})[l]; h+=`<div class="gadj"><span>Mögliche Anpassung:</span>
+        <button class="chip ${on?"on":""}" data-boadd="${l}">${on?"✓ ":""}+1 Backoff-Satz ${n}</button></div>
+        <div class="muted small">${l==="kh"?"Und: UK2 jede Woche machen – Kreuzheben nur alle zwei Wochen reicht für dieses Ziel kaum.":l==="kb"?"Und: an UK2 die pausierte Kniebeuge konsequent mitnehmen – das ist deine zweite Kniebeuge-Einheit.":"Und: Trizeps-Assistenz schwer halten, das pausierte Bankdrücken nicht auslassen."}</div>`; } }
+    else if(g.goal) h+=`<div class="gain">Ziel erreicht – Zeit für ein neues.</div>`;
+    h+=`</div></div>`; });
+  return h+`<p class="lead small">Die Einschätzung vergleicht das nötige Tempo mit typischen Werten: bis ≈0,25 %/Woche realistisch, bis 0,5 % ambitioniert. Je stärker du wirst, desto langsamer geht es – das ist normal.</p></div>`; }
+
+/* ============ Intensitätstechniken ============ */
+const TECH={drop:["Drop-Satz","Direkt nach dem letzten Satz ~25 % leichter, ohne Pause bis kurz vors Versagen."],
+            myo:["Myo-Reps","Gleiches Gewicht, 3 Mini-Sätze à 3–5 Wdh. mit je 5 tiefen Atemzügen Pause."]};
+function vTech(slot,w,d,r,L){ const k=w+"|"+d+"|"+slot.id, tk=(st.tech||{})[k];
+  if(!tk) return `<div class="techrow"><span>Letzter Satz extra:</span><button class="chip" data-tech="drop|${slot.id}">Drop-Satz</button><button class="chip" data-tech="myo|${slot.id}">Myo-Reps</button></div>`;
+  let h=`<div class="techbox"><div class="th"><b>${TECH[tk.type][0]}</b><button class="linkbtn" data-tech="off|${slot.id}">entfernen</button></div><p>${TECH[tk.type][1]}</p>`;
+  tk.e.forEach((z,j)=>{ h+=`<div class="set tset ${z.ok?"ok":""}"><div class="no">${tk.type==="drop"?"D":"M"+(j+1)}</div><div class="prev"></div>
+      <input class="cell" inputmode="decimal" data-tk="${slot.id}|${j}|kg" value="${esc(z.kg)}" placeholder="${esc(z.pkg||"–")}">
+      <input class="cell" inputmode="numeric" data-tk="${slot.id}|${j}|reps" value="${esc(z.reps)}" placeholder="${tk.type==="drop"?"max":"3–5"}">
+      <button class="chk" data-tkok="${slot.id}|${j}">${z.ok?"✓":""}</button></div>`; });
+  return h+`</div>`; }
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
@@ -1138,6 +1204,15 @@ document.addEventListener("click",e=>{
     clearTraining(); st.set.start=st.trial.realStart; delete st.trial; flush(); ui.w=currentWeek(); ui.d=0; render(); toast("Probelauf beendet – bereit für den echten Start"); return; }
   if(t.dataset.act==="close"){ closeSheet(); render(); return; }
   if(t.dataset.act==="addex"){ openAdd(); return; }
+  if(t.dataset.boadd){ st.boAdd=st.boAdd||{}; const l=t.dataset.boadd; if(st.boAdd[l]) delete st.boAdd[l]; else st.boAdd[l]=1; save(); buildDays(); render(); toast(st.boAdd[l]?"+1 Backoff-Satz ab sofort":"Backoff-Sätze wieder wie geplant"); return; }
+  if(t.dataset.tech){ const [ty,sid]=t.dataset.tech.split("|"), k=ui.w+"|"+ui.d+"|"+sid; st.tech=st.tech||{};
+    if(ty==="off") delete st.tech[k]; else { const slot=slotFor(ui.d,sid), r=rx(slot,ui.w), L=ensureLog(ui.w,ui.d,sid,r.sets); const nm=exName(slot,ui.w), stp=Math.max(stepFor(nm),1.25);
+      const ls=[...L.sets].reverse().find(z=>num(z.kg)!=null); const base=ls?num(ls.kg):num(suggest(nm,lastTime(nm,ui.w,ui.d,sid),r.reps,ui.w,ui.d)?.kg);
+      const dk=base?Math.max(0,Math.round(base*0.75/stp)*stp):null, fmt=v=>v==null?"":String(v).replace(".",",");
+      st.tech[k]=ty==="drop"?{type:"drop",e:[{kg:"",reps:"",ok:false,pkg:fmt(dk)}]}:{type:"myo",e:[0,1,2].map(()=>({kg:"",reps:"",ok:false,pkg:fmt(base)}))}; }
+    save(); render(); return; }
+  if(t.dataset.tkok){ const [sid,j]=t.dataset.tkok.split("|"), k=ui.w+"|"+ui.d+"|"+sid, z=st.tech[k].e[+j]; z.ok=!z.ok;
+    if(z.ok&&z.kg==="") z.kg=z.pkg||""; save(); render(); if(z.ok&&st.tech[k].type==="myo"&&+j<st.tech[k].e.length-1) startTimer(15,"Myo-Reps · 5 Atemzüge"); return; }
   if(t.dataset.wkpick){ openWeekPick(); return; }
   if(t.dataset.weekgo){ closeSheet(); ui.w=+t.dataset.weekgo; ui.d=0; for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; break; } } render(); window.scrollTo(0,0); return; }
   if(t.dataset.formstart!==undefined){ const k=ui.w+"|"+ui.d, v=+t.dataset.formstart; if(v) st.form[k]=v; else delete st.form[k];
@@ -1219,10 +1294,11 @@ document.addEventListener("input",e=>{
       const rxel=document.querySelector(`[data-slot="${bo.id}"] .target .rx`); if(rxel) rxel.textContent=rb.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"; } }
     return; }
   if(t.dataset.note){ st.notes[t.dataset.note]=t.value; save(); return; }
+  if(t.dataset.tk){ const [sid,j,f]=t.dataset.tk.split("|"); const k=ui.w+"|"+ui.d+"|"+sid; if(st.tech&&st.tech[k]){ st.tech[k].e[+j][f]=t.value; save(); } return; }
   if(t.dataset.ff){ const box=t.closest(".finputs"); const sid=box.dataset.slot, i=+box.dataset.i; const L=ensureLog(ui.w,ui.d,sid,rx(slotFor(ui.d,sid),ui.w).sets); L.sets[i][t.dataset.ff]=t.value; save(); return; }
   if(t.dataset.exnote!==undefined){ const n=t.dataset.exnote; if(t.value.trim()) st.exnotes[n]=t.value; else delete st.exnotes[n]; save(); return; }
   if(t.dataset.bodym!==undefined){ st.bodyM[t.dataset.bodym]=t.value; save(); return; }
-  if(t.dataset.set){ const k=t.dataset.set; if(k==="start") st.set.start=t.value; else if(k==="name") st.set.name=t.value.trim(); else { const v=num(t.value); st.set[k]= (k.endsWith("2")||k.endsWith("3"))&&t.value.trim()===""?null:(v??st.set[k]); } save(); return; }
+  if(t.dataset.set){ const k=t.dataset.set; if(k==="start") st.set.start=t.value; else if(k==="goaldate") st.set.goaldate=t.value; else if(k==="name") st.set.name=t.value.trim(); else { const v=num(t.value); st.set[k]= (k.endsWith("2")||k.endsWith("3"))&&t.value.trim()===""?null:(v??st.set[k]); } save(); return; }
 });
 document.addEventListener("change",e=>{ const t=e.target;
   if(t.dataset.exnote!==undefined){ render(); }
@@ -1269,6 +1345,7 @@ if(navigator.storage&&navigator.storage.persist){ navigator.storage.persist().ca
 (function(){ const el=$("#spw"); if(el) el.innerHTML="KRAFTWERK".split("").map((c,i)=>`<span style="animation-delay:${i*45}ms">${c}</span>`).join("");
   setTimeout(()=>{ const s=$("#splash"); if(s) s.remove(); },3400); })();
 render(); wake();
+if(st._trialKept){ delete st._trialKept; save(); setTimeout(()=>toast("Probelauf übernommen – dein Plan läuft einfach weiter"),3600); }
 </script>
 </body>
 </html>
