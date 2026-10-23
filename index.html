@@ -387,6 +387,7 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .pausepick{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:6px 0 10px; } .fp.on{ border-color:var(--gold); background:#1A1712; } .fp.on b{ color:var(--gold2); }
 .newrow{ display:flex; gap:8px; margin:8px 0; } .newrow input{ flex:1; height:40px; border-radius:10px; border:1px solid var(--line); background:var(--s2); color:var(--text); padding:0 12px; font-size:15px; }
 .exnotein{ width:100%; }
+.cue[data-cuetog]{ cursor:pointer; } .cuefold{ display:block; font-size:12px; color:#5E6168; margin-top:6px; padding:2px 0; }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -523,7 +524,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.6";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.7";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -896,6 +897,7 @@ function vSet(){
    ${inp("fpkb","Faktor pausierte Kniebeuge","Anteil vom Kniebeuge-1RM")}${inp("fpbd","Faktor pausiertes Bankdrücken","Anteil vom Bank-1RM")}</div>
   <div class="sec form"><h3>Zusatz-Rekorde</h3>${[0,1,2,3].map(sel).join("")}</div>
   <div class="sec form"><h3>Im Training</h3>
+   <div class="frow"><span>Technik-Hinweise anzeigen<small>einzeln ausblenden: auf den Hinweis tippen</small></span><button class="toggle ${s.hideHints?"":"on"}" data-toggle="hideHints" aria-label="Technik-Hinweise anzeigen"></button></div>
    <div class="frow"><span>Display wach halten<small>während die App offen ist</small></span><button class="toggle ${s.wake?"on":""}" data-toggle="wake" aria-label="Display wach halten"></button></div>
    <div class="frow"><span>Ton am Pausenende</span><button class="toggle ${s.sound?"on":""}" data-toggle="sound" aria-label="Ton am Pausenende"></button></div></div>
   ${vStudios()}
@@ -986,6 +988,7 @@ function prefillRow(inp){ const row=inp.closest(".set"), box=inp.closest(".finpu
   if(calibLast) vals.reps=null;
   ["kg","reps","rir"].forEach(f=>{ const el=host.querySelector(`[${attr}=${f}]`); if(!el||el.value!==""||vals[f]==null||!isFinite(vals[f])) return; const v=String(vals[f]).replace(".",","); el.value=v; s[f]=v; });
   save(); }
+document.addEventListener("click",e=>{ const c=e.target.closest("[data-cuetog]"); if(!c) return; st.hintHide=st.hintHide||{}; const k=c.dataset.cuetog; if(st.hintHide[k]) delete st.hintHide[k]; else st.hintHide[k]=true; save(); render(); if(ui.focus) renderFocus(); });
 document.addEventListener("focusin",e=>{ const el=e.target; if(el.matches&&el.matches("input[data-f],input[data-ff]")){ document.body.classList.add("typing"); prefillRow(el); setTimeout(()=>{ try{ el.select(); }catch(_){} },30); } });
 document.addEventListener("focusout",e=>{ setTimeout(()=>{ if(!document.activeElement||!document.activeElement.matches("input,textarea")) document.body.classList.remove("typing"); },150); });
 /* ============ Trainingszeit ============ */
@@ -1231,7 +1234,9 @@ const isMachine=n=>/Maschine/.test(n||"");
 function studioName(id){ if(!id||id==="std") return "Studio"; const s=(st.studios||[]).find(x=>x.id===id); return s?s.name:"Studio"; }
 function noteKey(name,w,d){ const l=locOf(w,d); return isMachine(name)&&l!=="home"?name+"@"+l:name; }
 function hintText(name,w,d){ const k=noteKey(name,w,d); if(st.hints[k]!=null) return st.hints[k]; const lib=libEntry(name); return [lib&&lib.h, st.exnotes[k]||st.exnotes[name]].filter(Boolean).join("\n"); }
-function hintHtml(name,w,d){ const h=hintText(name,w,d); return h?`<div class="cue">${h.split("\n").map(x=>x.trim()).filter(Boolean).map(x=>"↳ "+esc(x)).join("<br>")}</div>`:""; }
+function hintHtml(name,w,d){ if(st.set.hideHints) return ""; const h=hintText(name,w,d); if(!h) return ""; const hk=noteKey(name,w,d);
+  if((st.hintHide||{})[hk]) return `<button class="cuefold" data-cuetog="${esc(hk)}">↳ Hinweise einblenden</button>`;
+  return h?`<div class="cue" data-cuetog="${esc(hk)}" role="button" aria-label="Hinweise ausblenden">${h.split("\n").map(x=>x.trim()).filter(Boolean).map(x=>"↳ "+esc(x)).join("<br>")}</div>`:""; }
 function hidList(){ const l=locOf(ui.w,ui.d); if(l==="home") return st.hiddenEx; if(!st.hiddenBy[l]) st.hiddenBy[l]=st.hiddenEx.slice(); return st.hiddenBy[l]; }
 function studioSlotIds(){ const ids=[]; BASE_DAYS.forEach(b=>(b.studio||[]).forEach(s=>ids.push(s.id))); return ids; }
 function switchStudio(id){ const prev=st.curStudio||"std"; if(prev===id) return; const ids=studioSlotIds(); st.swapsBy[prev]={};
