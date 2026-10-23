@@ -372,6 +372,21 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .glines{ display:grid; gap:4px; font-size:13px; color:var(--silver); } .glines b{ color:var(--text); } .glines .muted{ color:var(--muted); font-size:12.5px; }
 .glines .gold{ color:var(--gold2); }
 .gadj{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:4px; } .gadj span{ font-size:12px; color:var(--muted); }
+.calib{ font-size:12.5px; color:var(--gold2); background:#1A1712; border:1px solid rgba(201,164,92,.4); border-radius:10px; padding:8px 10px; margin:8px 0 2px; }
+.cyclecard{ display:flex; flex-direction:column; gap:6px; background:#101A14; border:1px solid var(--sage); border-radius:14px; padding:12px 14px; margin:0 0 10px; }
+.cyclecard b{ color:var(--sage); font-size:15px; } .cyclecard span{ font-size:13px; color:var(--silver); } .cyclecard .chip{ align-self:flex-start; }
+.exno{ font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:10.5px; letter-spacing:.02em; color:var(--gold); margin-right:8px; }
+.exno i{ font-style:normal; color:#5E6168; }
+.exmeta.mono{ font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:12px; letter-spacing:.01em; margin-top:6px; }
+.exmeta.mono b{ font-weight:600; }
+.cue{ font-size:12.5px; color:var(--muted); margin-top:6px; line-height:1.4; }
+.acts{ display:flex; gap:16px; margin-top:9px; padding-top:8px; border-top:1px solid var(--line); }
+.acts button{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--silver); padding:2px 0; }
+.acts button:active{ color:var(--gold); }
+.setbtns{ display:flex; gap:18px; }
+.pausepick{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:6px 0 10px; } .fp.on{ border-color:var(--gold); background:#1A1712; } .fp.on b{ color:var(--gold2); }
+.newrow{ display:flex; gap:8px; margin:8px 0; } .newrow input{ flex:1; height:40px; border-radius:10px; border:1px solid var(--line); background:var(--s2); color:var(--text); padding:0 12px; font-size:15px; }
+.exnotein{ width:100%; }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -496,7 +511,7 @@ const SLOTDAY={};
 const _dc={};
 function daysFor(w){ const sp=st.wsplit[w]; const key=w+"|"+(sp??"")+"|"+JSON.stringify(st.extra||{}).length+"|"+JSON.stringify(st.order||{})+"|"+[0,1,2,3].map(i=>(st.studio||{})[w+"|"+i]?1:0).join(""); if(_dc[key]) return _dc[key];
   const ord=(key,list)=>{ const o=(st.order||{})[key]; if(!o) return list; return [...list].sort((a,b)=>{ const ia=o.indexOf(a.id), ib=o.indexOf(b.id); return (ia<0?999:ia)-(ib<0?999:ib); }); };
-  const out=BASE_DAYS.slice(0,4).map((b,i)=>{ const stu=sp!==i&&!!(st.studio||{})[w+"|"+i]&&b.studio; const okey=sp===i?b.id+"-push":stu?b.id+"-studio":b.id;
+  const out=BASE_DAYS.slice(0,4).map((b,i)=>{ const stu=sp!==i&&!!(st.studio||{})[w+"|"+i]&&b.studio; const okey=sp===i?b.id+"-push":stu?b.id+"-studio-"+((st.studioId||{})[w+"|"+i]||"std"):b.id;
     return {id:b.id,okey,name:sp===i?"Push":b.name,tag:b.tag,optional:b.optional,split:sp===i,studio:stu,slots:[...b.main,...ord(okey,[...(sp===i?b.push:stu?b.studio:b.mix),...((st.extra||{})[i]||[])])]}; });
   if(sp===0||sp===2){ const b=BASE_DAYS[4]; out.push({id:b.id,okey:"pul",name:"Pull",tag:"PULL",pull:true,slots:ord("pul",[...b.mix,...((st.extra||{})[4]||[])])}); }
   return _dc[key]=out; }
@@ -508,7 +523,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.3";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.6";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -528,6 +543,7 @@ if(!st.bodyM){ st.bodyM={}; for(let w=0;w<=NW;w++){ const v=_num((st.body||{})[w
 (function(){ try{ const q=new URLSearchParams(location.search); const v=_num(q.get("kg")||q.get("gewicht")); if(v&&v>30&&v<300){ st.bodyM[monthKey(new Date())]=String(Math.round(v*10)/10).replace(".",","); localStorage.setItem(KEY,JSON.stringify(st)); history.replaceState(null,"",location.pathname); setTimeout(()=>toast("Gewicht aus Health übernommen: "+String(Math.round(v*10)/10).replace(".",",")+" kg"),1200); } }catch(e){} })();
 const isSkipped=(w,d,sid)=>!!(st.skip||{})[w+"|"+d+"|"+sid];
 if(!st.hiddenEx) st.hiddenEx=[];
+if(!st.studios) st.studios=[]; if(!st.studioId) st.studioId={}; if(!st.swapsBy) st.swapsBy={}; if(!st.curStudio) st.curStudio="std"; if(!st.hints) st.hints={}; if(!st.hiddenBy) st.hiddenBy={};
 if(!st.mig12){ const ren=n=>n==="Fliegende (schräg; KH)"?"Fliegende (Schrägbank 20°; KH)":n;
   for(const k in st.swaps) st.swaps[k].forEach(x=>{ if(x.name) x.name=ren(x.name); });
   if(st.exnotes["Fliegende (schräg; KH)"]){ st.exnotes["Fliegende (Schrägbank 20°; KH)"]=st.exnotes["Fliegende (schräg; KH)"]; delete st.exnotes["Fliegende (schräg; KH)"]; }
@@ -563,6 +579,9 @@ function currentWeek(){ let last=0; for(const k in (st.log||{})){ const w=+k.spl
   if(!last) return calWeek();
   const done=[0,1,2].every(d=>dayDone(last,d).done)&&(!started(last,3)||dayDone(last,3).done);
   return Math.min(NW, done?last+1:last); }
+function slotPause(slot){ const c=(st.cfg||{})[slot.id]||{}; return c.ps!=null?c.ps:pauseSec(slot.p); }
+const mmss=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+function pauseTxt(slot){ const c=(st.cfg||{})[slot.id]||{}; return c.ps!=null?mmss(c.ps)+" min":String(slot.p||""); }
 function pauseSec(p){ if(!p||/direkt/.test(p)) return 0; const m=String(p).replace(",",".").match(/[\d.]+/); return m?Math.round(parseFloat(m[0])*60):0; }
 function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),1800); }
 
@@ -587,6 +606,8 @@ function base1RM(lift,w){
   if(lift==="pbd") return B.bd*s.fpbd;
   return B[lift];
 }
+const isCalibW=w=>WK[w-1]&&WK[w-1][1]==="Peak";
+const isCalib=(slot,w)=>slot&&slot.t==="BO"&&["kb","bd","kh"].includes(slot.lift)&&isCalibW(w);
 const LIFTDAY = {bd:[0,"ok1t"],kb:[1,"uk1t"],kh:[3,"uk2t"],pbd:[2,"ok2t"],pkb:[3,"uk2v"]};
 function setE1(set,defReps,defRir){ const kg=num(set.kg); if(!kg) return null; const r=num(set.reps)??num(defReps); const q=num(set.rir)??num(defRir); if(!r||q==null) return null; return Math.round(kg/pct(r,q)*10)/10; }
 function topE1(lift,w){ const [d,sid]=LIFTDAY[lift]; const L=getLog(w,d,sid); if(!L||!L.sets[0]) return null; const P=W(w);
@@ -606,7 +627,8 @@ function rx(slot,w){
 function exposures(name,w,d,sid){ const out=[]; const curS=sessDate(w,d); const cutoff=curS?curS.getTime():Infinity;
   const legDay=(d===1||d===3);
   for(let x=w;x>=1;x--){ const DX=daysFor(x); for(let di=0;di<DX.length;di++){ if(x===w&&di===d) continue; if(legDay&&di!==d) continue;
-      for(const s of DX[di].slots){ if(s.t||exName(s,x)!==name) continue; const L=getLog(x,di,s.id); if(!L||!L.sets.some(z=>num(z.kg)!=null)) continue;
+      for(const s of DX[di].slots){ if(s.t) continue; const L=getLog(x,di,s.id); if(!L||((L.name||exName(s,x))!==name)||!L.sets.some(z=>num(z.kg)!=null)) continue;
+        if(isMachine(name)&&(L.loc||locOf(x,di))!==locOf(w,d)) continue;
         const dt=sessDate(x,di); const tm=dt?dt.getTime():null; if(x===w&&(tm==null||tm>=cutoff)) continue;
         out.push({x,di,L,tm:tm??(x*10+di)}); } } if(out.length>=2&&out.some(o=>o.x<w)) break; }
   out.sort((a,b)=>(b.x-a.x)||(b.tm-a.tm)); return out; }
@@ -677,7 +699,7 @@ function vTrain(){
   const from=weekDate(w), to=weekDate(w,6), fv=st.form[w+"|"+d];
   let h=`<header class="top"><div class="brand"><h1>KRAFTWERK</h1><span class="today">${dshort(from)} – ${dshort(to)}</span></div>
    <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button>${P.deload?' <span class="dl">Deload</span>':''}</h2>
-   <div class="sub">Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}${(st.studio||{})[w+"|"+d]&&!DAYS[d].split&&!DAYS[d].pull?' <span class="trialpill studio">Studio</span>':""}</div></div>
+   <div class="sub">${(st.cycle||1)>1?"Zyklus "+st.cycle+" · ":""}Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}${(st.studio||{})[w+"|"+d]&&!DAYS[d].split&&!DAYS[d].pull?` <span class="trialpill studio">${esc(studioName(locOf(w,d)))}</span>`:""}</div></div>
 </header>`;
   const ss0=sessOf(w,d);
   h+=`<div class="navsticky">${ss0&&!ss0.e?`<div class="stickclock"><span>${(dd_=>`${dd_.ok} / ${dd_.all} Sätze · ${dd_.all?Math.round(100*dd_.ok/dd_.all):0} %`)(dayDone(w,d))}</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now()-new Date(ss0.s))}</b><button class="chip" data-sess="focus">Fokus</button><i class="stickbar" style="width:${(dd_=>dd_.all?100*dd_.ok/dd_.all:0)(dayDone(w,d))}%"></i></div>`:runBanner(w,d)}<div class="weeks ${ss0&&!ss0.e?"locked":""}">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
@@ -690,6 +712,7 @@ function vTrain(){
   if(day.optional && !started(w,d)) h+=`<p class="lead small">Optionaler Tag – zählt erst, sobald du den ersten Satz abhakst.</p>`;
   if(day.pull) h+=`<p class="lead small">Zusätzliche Pull-Einheit dieser Woche.</p>`;
   const canPlace=!day.pull&&!day.split&&BASE_DAYS[d].studio; const onS=!!st.studio[w+"|"+d];
+  if(weekDone(NW)) h+=`<div class="cyclecard"><b>Zyklus ${st.cycle||1} geschafft.</b><span>Bereit für die nächste Runde mit neuen Startwerten?</span><button class="chip on" data-act="cycle">Nächsten Zyklus starten</button></div>`;
   h+=vStatus("");
   h+=vSession(w,d);
   const ok_=ui.opt[w+"|"+d]; let optShown=false;
@@ -735,24 +758,25 @@ function vSlot(slot,w,d){
   if(isSkipped(w,d,slot.id)) return `<section class="ex skipped"><div class="skiprow"><div><span class="kind">${esc(slot.art)} · heute übersprungen</span><b>${esc(name)}</b></div><button class="chip" data-unskip="${slot.id}">Doch machen</button></div></section>`;
   const r=rx(slot,w), P=W(w), main=!!slot.t, L=ensureLog(w,d,slot.id,r.sets);
   const lib=libEntry(name); const tracked=!main && st.set.tracked.includes(name);
-  const ss=main?null:ssInfo(slot,d), note=st.exnotes[name];
+  const ss=main?null:ssInfo(slot,d);
   const kind = ss?`Supersatz ${ss.pos}/2`:slot.art;
-  const rirInfo = slot.t==="BO"?`${Math.round(r.pct*100)} % Tages-e1RM`:main?`RIR ${fk(r.rir)}`:P.deload?`RIR ${fk(P.acc)}`:(r.sets>1?"RIR 1–2 → 0":"RIR 1");
-  const pause = ss&&ss.pos===1 ? "direkt weiter" : esc(slot.p);
-  const head=`<div class="exhead"><div class="exl"><div class="kind">${esc(kind)} · ${esc(slot.g)}</div><div class="exname">${esc(name)}</div>
-   <div class="exmeta"><b>${r.sets} × ${esc(String(r.reps))}</b><span>${rirInfo}</span><span>Pause ${pause}</span></div>
-   ${note?`<div class="exnote">✎ ${esc(note)}</div>`:""}</div>
-   <div class="tools">${lib&&lib.h?`<button class="tbtn" data-hint="${slot.id}" aria-label="Technik-Hinweis">i</button>`:""}${main?`<button class="tbtn" data-mnote="${slot.id}" aria-label="Notiz">✎</button>`:`<button class="tbtn" data-swap="${slot.id}" aria-label="Übung anpassen">⋯</button>`}</div></div>`;
+  const rirInfo = slot.t==="BO"?"":main?`RIR ${fk(r.rir)}`:P.deload?`RIR ${fk(P.acc)}`:(r.sets>1?"RIR 1–2 → 0":"RIR 1");
+  const pause = ss&&ss.pos===1 ? "direkt weiter" : esc(pauseTxt(slot));
+  const vis=visSlots(d,w), idx=vis.indexOf(slot)+1;
+  const head=`<div class="exhead"><div class="exl"><div class="kind"><span class="exno">${String(idx).padStart(2,"0")}<i>/${String(vis.length).padStart(2,"0")}</i></span>${esc(kind)} · ${esc(slot.g)}</div><div class="exname">${esc(name)}</div>
+   <div class="exmeta mono"><b>${r.sets}×${esc(String(r.reps))}</b>${rirInfo?`<span>${rirInfo}</span>`:""}<span>⏱ ${pause}</span></div>
+   ${hintHtml(name,w,d)}
+   <div class="acts">${main?"":`<button data-swap="${slot.id}">Tauschen</button>`}<button data-mnote="${slot.id}">Hinweise</button><button data-pause="${slot.id}">Pause</button></div></div></div>`;
   let h=`<section class="ex ${slot.t==="TOP"?"main":""} ${ss?"ss":""}" data-slot="${slot.id}">`+
     (main?head:`<div class="swrap" data-sw="ex|${slot.id}"><div class="swin">${head}</div><button class="swdel" data-del="ex|${slot.id}">Entfernen</button></div>`);
-  if(ui.hint[slot.id]&&lib&&lib.h) h+=`<div class="hint">${esc(lib.h)}</div>`;
   let sug=null; const lt=main?null:lastTime(name,w,d,slot.id);
-  if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div><div class="rx">${slot.t==="BO"?(r.fromDay?"aus deinem Tages-e1RM":"aus dem Rechen-1RM"):`${Math.round(r.pct*100)} % vom 1RM`}</div></div>`;
+  if(main){ h+=`<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div></div>`;
     if(slot.t==="TOP"||slot.t==="VAR") h+=`<div class="warm">Aufwärmen  ${warmups(r.kg).map(([k,n])=>(typeof k==="number"?fk(k):k)+" × "+n).join("  ·  ")}</div>`; }
   else { sug=suggest(name,lt,r.reps,w,d);
     h+= sug ? `<div class="sugline ${sug.setback?"sb":""}"><span>Vorschlag</span><b>${fk(sug.kg)} kg</b><em>${esc(sug.d)}${lt?` · zuletzt ${lt.same?"diese Woche ":"W"+lt.w+" "}${esc(lt.day)}`:""}</em>${sug.setback?`<small>Drei Wochen ohne Fortschritt – neuer Anlauf mit weniger Gewicht und einem Satz mehr.</small>`:""}</div>`
             : `<div class="sugline"><span>Erster Eintrag</span><em>Gewicht so wählen, dass die Ziel-RIR passt</em></div>`; }
   const ak=ui.adj[w+"|"+d+"|"+slot.id]; if(ak&&!L.sets.slice(1).every(z=>z.ok)) h+=`<div class="adjbox"><span>${esc(ak.why)} – restliche Sätze mit <b>${fk(ak.kg)} kg</b>?</span><div><button class="chip on" data-adjok="${slot.id}">Übernehmen</button><button class="chip" data-adjno="${slot.id}">Nein</button></div></div>`;
+  if(isCalib(slot,w)) h+=`<div class="calib">Kalibrierung: letzter Backoff-Satz so viele saubere Wiederholungen wie möglich (RIR 0). So prüft die App, wie genau deine RIR-Schätzungen sind.</div>`;
   const pv=prevSets(slot,w,d); const showRir=slot.t!=="BO";
   h+=`<div class="sets"><div class="sethead ${showRir?"hasrir":""}"><span>#</span><span>Vorher</span><span>kg</span><span>Wdh.</span>${showRir?"<span>RIR</span>":""}<span></span></div>`;
   for(let i=0;i<r.sets;i++){ const s=L.sets[i];
@@ -762,12 +786,12 @@ function vSlot(slot,w,d){
     h+=`<div class="swrap" data-sw="set|${slot.id}|${i}"><div class="swin"><div class="set ${showRir?"hasrir":""} ${s.ok?"ok":""} ${ui.pop===slot.id+"|"+i?"pop":""}" data-i="${i}">
       <div class="no">${i+1}</div><div class="prev">${p}</div>
       <input class="cell" inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}" aria-label="Gewicht Satz ${i+1}">
-      <input class="cell" inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${esc(String(r.reps))}" aria-label="Wiederholungen Satz ${i+1}">
+      <input class="cell" inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${isCalib(slot,w)&&i===r.sets-1?"max":esc(String(r.reps))}" aria-label="Wiederholungen Satz ${i+1}">
       ${showRir?`<input class="cell" inputmode="decimal" data-f="rir" value="${esc(s.rir)}" placeholder="${rt!=null?rirTxt(rt):""}" aria-label="RIR Satz ${i+1}">`:""}
       <button class="chk" data-chk="${i}" aria-label="Satz ${i+1} erledigt">${s.ok?"✓":""}</button></div></div>
       <button class="swdel" data-del="set|${slot.id}|${i}">Löschen</button></div>`; }
   h+=`</div>`;
-  if(slot.t!=="TOP") h+=`<button class="addset" data-addset="${slot.id}">+ Satz</button>`;
+  if(slot.t!=="TOP") h+=`<div class="setbtns"><button class="addset" data-addset="${slot.id}">+ Satz</button>${r.sets>1?`<button class="addset" data-subset="${slot.id}">− Satz</button>`:""}</div>`;
   if(!main&&!P.deload&&(slot.rt==="I"||(libEntry(name)&&["Schulter seitlich","Schulter hinten","Bizeps","Trizeps","Waden","Bauch"].includes(libEntry(name).g)))) h+=vTech(slot,w,d,r,L);
   if(slot.t==="TOP"||slot.t==="VAR"||tracked){ h+=`<div class="e1" data-e1="${slot.id}">${e1Text(slot,w,d)}</div>`; }
   return h+`</section>`;
@@ -775,7 +799,7 @@ function vSlot(slot,w,d){
 function e1Text(slot,w,d){
   const r=rx(slot,w), L=getLog(w,d,slot.id); if(!L) return "";
   let best=null; L.sets.forEach((s,i)=>{ const e=setE1(s, slot.t?r.reps:parseInt(String(s.reps).split(/[\/·]/)[0]), slot.t?r.rir:accRir(i,L.sets.length,W(w))); if(e!=null&&(best==null||e>best)) best=e; });
-  if(best==null) return slot.t==="TOP"?"Gewicht, Wdh. und RIR eintragen → Tages-e1RM und Backoffs passen sich an.":"";
+  if(best==null) return "";
   let pr=""; if(slot.t==="TOP"&&["kb","bd","kh"].includes(slot.lift)){ const prev=bestMain(slot.lift,w); if(prev==null||best>prev.e) pr=` <span class="pr">· neuer Rekord</span>`; }
   return `e1RM heute <b>${f1(best)} kg</b>${pr}`;
 }
@@ -874,6 +898,8 @@ function vSet(){
   <div class="sec form"><h3>Im Training</h3>
    <div class="frow"><span>Display wach halten<small>während die App offen ist</small></span><button class="toggle ${s.wake?"on":""}" data-toggle="wake" aria-label="Display wach halten"></button></div>
    <div class="frow"><span>Ton am Pausenende</span><button class="toggle ${s.sound?"on":""}" data-toggle="sound" aria-label="Ton am Pausenende"></button></div></div>
+  ${vStudios()}
+  ${vCycles()}
   <div class="sec"><h3>Probelauf</h3>${st.trial?`<p class="lead">Probelauf aktiv – Woche 1 hat am ${new Date(st.set.start+"T00:00:00").toLocaleDateString("de-DE")} begonnen. Echter Start: ${new Date(st.trial.realStart+"T00:00:00").toLocaleDateString("de-DE")}.</p>
    <button class="btn gold" data-act="trialend">Probelauf beenden & Testdaten löschen</button>`
    :`<p class="lead">App vorab testen: Woche 1 beginnt dann in dieser Woche. Zum Schluss löschst du alle Testeinträge mit einem Tipp und das echte Startdatum wird wiederhergestellt.</p>
@@ -891,13 +917,13 @@ function vSet(){
 function openSwap(sid){
   const d=ui.d, slot=slotFor(d,sid), w=ui.w, cur=exName(slot,w), c=st.cfg[sid]||{}, n=c.n??slot.n;
   const sl=visSlots(d), i=sl.indexOf(slot), next=sl[i+1]&&!sl[i+1].t?sl[i+1]:null;
-  const loc=DAYS[d].studio?"Studio":"Homegym"; const list=[...(LIB[slot.g]||[]).filter(e=>e.o===loc), ...st.custom.filter(x=>x.g===slot.g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!st.hiddenEx.includes(e.n)||e.n===cur); ui.sheetCtx=["swap",sid];
+  const loc=DAYS[d].studio?"Studio":"Homegym"; const list=[...(LIB[slot.g]||[]).filter(e=>e.o===loc), ...st.custom.filter(x=>x.g===slot.g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!hidList().includes(e.n)||e.n===cur); ui.sheetCtx=["swap",sid];
   $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung anpassen</h3><p>${esc(slot.g)} · Änderungen gelten ab Woche ${w}.</p>
    <div class="frow2"><span>Sätze (normale Woche)</span></div><div class="setsel">${[1,2,3,4,5,6].map(v=>`<button class="chip ${v===n?"on":""}" data-setn="${v}">${v}</button>`).join("")}</div>
    ${next?`<div class="frow2"><span>Supersatz mit „${esc(exName(next,w))}“<br><small class="muted">keine Pause dazwischen</small></span><button class="toggle ${c.ss?"on":""}" data-ss="1" aria-label="Supersatz"></button></div>`:""}
    <div class="frow2"><span>Reihenfolge</span><div class="chips"><button class="chip" data-move="-1">↑ nach oben</button><button class="chip" data-move="1">↓ nach unten</button></div></div>
    <p style="margin-top:14px">Deine Notiz zu „${esc(cur)}“ (z. B. Sitzhöhe, Griff, Pin):</p>
-   <textarea class="exnotein" data-exnote="${esc(cur)}" placeholder="Notiz – gilt für diese Übung in allen Wochen">${esc(st.exnotes[cur]||"")}</textarea>
+   <textarea class="exnotein" rows="4" data-hintedit="${esc(noteKey(cur,ui.w,ui.d))}" placeholder="Hinweise – Technik und eigene Notizen">${esc(hintText(cur,ui.w,ui.d))}</textarea>
    <p style="margin-top:18px">Übung tauschen (${esc(slot.g)}):</p>
    ${list.map(e=>`<div class="swrap" data-sw="lib|${esc(e.n)}"><div class="swin"><button class="opt ${e.n===cur?"cur":""}" data-pick="${esc(e.n)}"><span class="n">${esc(e.n)}${e.n===slot.ex?' <span class="muted">· Plan</span>':''}</span><span class="o">${esc(e.o)}</span></button></div><button class="swdel" data-del="lib|${esc(e.n)}">Löschen</button></div>`).join("")}
    <div class="addrow"><input id="customName" placeholder="Eigene Übung (${esc(slot.g)} · ${loc})"><button data-addcustom="1">Hinzufügen</button></div>
@@ -908,7 +934,7 @@ function openSwap(sid){
 }
 function openAdd(g){
   g=g||ui.addg||"Brust"; ui.addg=g;
-  const loc=DAYS[ui.d].studio?"Studio":"Homegym"; const list=[...(LIB[g]||[]).filter(e=>e.o===loc), ...st.custom.filter(x=>x.g===g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!st.hiddenEx.includes(e.n)); ui.sheetCtx=["add",g];
+  const loc=DAYS[ui.d].studio?"Studio":"Homegym"; const list=[...(LIB[g]||[]).filter(e=>e.o===loc), ...st.custom.filter(x=>x.g===g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!hidList().includes(e.n)); ui.sheetCtx=["add",g];
   $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung hinzufügen</h3><p>Zu „${esc(DAYS[ui.d].name)}“ ab Woche ${ui.w}.</p>
    <div class="chips cwrap">${GROUPS.map(x=>`<button class="chip ${x===g?"on":""}" data-addg="${esc(x)}">${esc(x)}</button>`).join("")}</div>
    <div style="margin-top:10px">${list.map(e=>`<div class="swrap" data-sw="lib|${esc(e.n)}"><div class="swin"><button class="opt" data-addpick="${esc(e.n)}"><span class="n">${esc(e.n)}</span><span class="o">${esc(e.o)}</span></button></div><button class="swdel" data-del="lib|${esc(e.n)}">Löschen</button></div>`).join("")}</div>
@@ -934,6 +960,7 @@ function toggleSet(sid,i,kgDefault,force){
     if(s.reps===""&&/^\d+$/.test(String(r.reps))) s.reps=String(r.reps);
     if((slot.t==="TOP"||slot.t==="VAR")&&s.rir==="") s.rir=String(r.rir).replace(".",",");
     if(!slot.t&&r.setback) L.setback=true;
+    L.name=exName(slot,ui.w); L.loc=locOf(ui.w,ui.d);
     if(!slot.t&&i===0){ const rp=parseInt(s.reps), kg=num(s.kg), rr=String(r.reps).split("–").map(x=>parseInt(x)), lo=rr[0], hi=rr[1]??rr[0], stp=stepFor(exName(slot,ui.w)), ri=num(s.rir);
       const key=ui.w+"|"+ui.d+"|"+sid; let nk=null, why="";
       if(kg&&stp>0&&isFinite(rp)){ if(rp<lo||(ri!=null&&ri<0.5&&rp<=lo)){ nk=Math.max(0,kg-(rp<=lo-3?2:1)*stp); why=`Satz 1 war schwer (${rp} Wdh.)`; }
@@ -941,7 +968,7 @@ function toggleSet(sid,i,kgDefault,force){
       if(nk!=null&&r.sets>1) ui.adj[key]={kg:nk,why}; else delete ui.adj[key]; }
     const dk=ui.w+"|"+ui.d; if(!st.dates[dk]) st.dates[dk]=new Date().toISOString(); st.ends[dk]=new Date().toISOString();
     if(!st.sess[dk]) st.sess[dk]={s:new Date().toISOString(),e:null};
-    const ss=slot.t?null:ssInfo(slot,ui.d); if(!(ss&&ss.pos===1)) startTimer(pauseSec(slot.p), exName(slot,ui.w)); else toast("Weiter: "+exName(ss.other,ui.w)); }
+    const ss=slot.t?null:ssInfo(slot,ui.d); if(!(ss&&ss.pos===1)) startTimer(slotPause(slot), exName(slot,ui.w)); else toast("Weiter: "+exName(ss.other,ui.w)); }
   save(); render(); if(ui.focus) renderFocus(); setTimeout(()=>{ ui.pop=null; },500);
   { const dk2=ui.w+"|"+ui.d, se=st.sess[dk2], dd=dayDone(ui.w,ui.d); if(s.ok&&se&&!se.e&&dd.all>0&&dd.ok>=dd.all&&!ui.focus&&!(ui.asked||{})[dk2]){ ui.asked=ui.asked||{}; ui.asked[dk2]=true;
     setTimeout(()=>{ $("#sheet").innerHTML=`<div class="grab"></div><h3>Alle Sätze geschafft</h3><p>Möchtest du das Training beenden oder noch etwas dranhängen?</p>
@@ -952,10 +979,11 @@ function toggleSet(sid,i,kgDefault,force){
 function clearTraining(){ st.tech={}; st.skip={}; st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
 function prefillRow(inp){ const row=inp.closest(".set"), box=inp.closest(".finputs"); const host=row||box; if(!host) return;
   const sid=row?inp.closest("[data-slot]").dataset.slot:box.dataset.slot; const i=row?+row.dataset.i:+box.dataset.i; const attr=row?"data-f":"data-ff";
-  const slot=slotFor(ui.d,sid); if(!slot) return; const r=rx(slot,ui.w); const L=ensureLog(ui.w,ui.d,sid,r.sets); const s=L.sets[i]; if(s.ok) return;
+  const slot=slotFor(ui.d,sid); if(!slot) return; const r=rx(slot,ui.w); const L=ensureLog(ui.w,ui.d,sid,r.sets); const s=L.sets[i]; if(s.ok) return; const calibLast=isCalib(slot,ui.w)&&i===r.sets-1;
   const pv=prevSets(slot,ui.w,ui.d); const pr=pv&&pv[i]?parseInt(pv[i].reps):NaN; const rng=String(r.reps).split("–").map(x=>parseInt(x));
   const vals={kg:num(host.querySelector(`[${attr}=kg]`)?.placeholder), reps:/^\d+$/.test(String(r.reps))?+r.reps:(isFinite(pr)?Math.min(Math.max(pr,rng[0]),rng[1]??rng[0]):rng[0]),
     rir:slot.t==="BO"?null:(slot.t?r.rir:accRir(i,r.sets,W(ui.w)))};
+  if(calibLast) vals.reps=null;
   ["kg","reps","rir"].forEach(f=>{ const el=host.querySelector(`[${attr}=${f}]`); if(!el||el.value!==""||vals[f]==null||!isFinite(vals[f])) return; const v=String(vals[f]).replace(".",","); el.value=v; s[f]=v; });
   save(); }
 document.addEventListener("focusin",e=>{ const el=e.target; if(el.matches&&el.matches("input[data-f],input[data-ff]")){ document.body.classList.add("typing"); prefillRow(el); setTimeout(()=>{ try{ el.select(); }catch(_){} },30); } });
@@ -972,7 +1000,7 @@ function vSession(w,d){ const s=sessOf(w,d);
 function vSessionFoot(w,d){ const s=sessOf(w,d); if(!s) return "";
   if(!s.e) return `<button class="linkbtn" data-sess="discard">Trainingszeit zurücksetzen</button>`;
   const ds=new Date(s.s), de=new Date(s.e); const tf=x=>x.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
-  return `<div class="donefoot"><span>✓ Abgeschlossen am ${ds.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"})} · ${tf(ds)}–${tf(de)} Uhr · ${fmtDur(de-ds)}${st.studio[w+"|"+d]?" · Studio":""}</span><button class="linkbtn" data-sess="resume">Training fortsetzen</button><button class="linkbtn" data-sess="discard">Zeit zurücksetzen</button></div>`; }
+  return `<div class="donefoot"><span>✓ Abgeschlossen am ${ds.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"})} · ${tf(ds)}–${tf(de)} Uhr · ${fmtDur(de-ds)}${st.studio[w+"|"+d]?" · "+esc(studioName(locOf(w,d))):""}</span><button class="linkbtn" data-sess="resume">Training fortsetzen</button><button class="linkbtn" data-sess="discard">Zeit zurücksetzen</button></div>`; }
 function showDone(w,d){ const s=sessOf(w,d), dd=dayDone(w,d); const day=daysFor(w)[d]; const top=day.slots.find(x=>x.t==="TOP");
   const e=top?topE1(top.lift,w):null; const pr=top&&e!=null&&["kb","bd","kh"].includes(top.lift)&&(()=>{ const b=bestMain(top.lift,w); return !b||e>b.e; })();
   const o=$("#done"); o.innerHTML=`<div class="card"><div class="ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52"/><path d="M38 62 l15 15 l30 -32"/></svg></div>
@@ -1007,9 +1035,9 @@ function renderFocus(){ const el=$("#focus"); if(!el) return; const w=ui.w, d=ui
     <div class="fname">${esc(name)}</div>
     <div class="fset">Satz ${i+1} von ${r.sets}${s.ok?' · <span class="gain">erledigt</span>':""}</div>
     <div class="fbig">${kg!=null?fk(kg)+'<small> kg</small>':"–"}</div>
-    <div class="frx">× ${esc(String(r.reps))}${slot.t==="BO"?"":" @ RIR "+(main?fk(r.rir):rirTxt(accRir(i,r.sets,W(w))))}${slot.t==="BO"?" · "+Math.round(r.pct*100)+" % Tages-e1RM":""}${sug?` · <span class="muted">${esc(sug.d)} zur Vorwoche</span>`:""}</div>
+    <div class="frx">× ${esc(String(r.reps))}${slot.t==="BO"?"":" @ RIR "+(main?fk(r.rir):rirTxt(accRir(i,r.sets,W(w))))}${sug?` · <span class="muted">${esc(sug.d)} zur Vorwoche</span>`:""}</div>
     ${(slot.t==="TOP"||slot.t==="VAR")&&i===0?`<div class="warm">Aufwärmen: ${warmups(r.kg).map(([k,n])=>(typeof k==="number"?fk(k):k)+"×"+n).join(" · ")}</div>`:""}
-    ${st.exnotes[name]?`<div class="exnote">✎ ${esc(st.exnotes[name])}</div>`:""}
+    ${hintHtml(name,w,d)}
     ${(()=>{ const ak=ui.adj[w+"|"+d+"|"+sid]; return ak&&i>0&&!s.ok?`<div class="adjbox"><span>${esc(ak.why)} – mit <b>${fk(ak.kg)} kg</b> weiter?</span><div><button class="chip on" data-adjok="${sid}">Übernehmen</button><button class="chip" data-adjno="${sid}">Nein</button></div></div>`:""; })()}
     <div class="finputs ${hasRir?"r3":""}" data-slot="${sid}" data-i="${i}">
       <div class="fld"><label>kg</label><input inputmode="decimal" data-ff="kg" value="${esc(s.kg)}" placeholder="${kg!=null?esc(fk(kg)):"–"}"></div>
@@ -1030,7 +1058,8 @@ function vStatus(place){ const all=sessionsAll(); const cw=currentWeek(); const 
   return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last?relDay(last.date)+" · "+esc(last.tag):"noch nie – los geht’s"}</b></div>
    <div class="r2"><span>Woche ${cw}</span><b>${done} / 3</b></div>${place?`<div class="placewrap">${place}</div>`:""}</div>`; }
 function weekStreak(){ const cw=currentWeek(); let n=0; for(let w=cw;w>=1;w--){ if(weekDone(w)) n++; else if(w===cw) continue; else break; } return n; }
-function exStats(){ const m={}; for(const k in st.log){ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) continue; const name=exName(slot,+w); if(!name) continue;
+function exStats(){ const m={}; for(const k in st.log){ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) continue; const L0=st.log[k]; let name=L0.name||exName(slot,+w); if(!name) continue;
+    const lo=L0.loc||locOf(+w,+d); if(isMachine(name)&&lo!=="home") name+=" · "+studioName(lo);
     st.log[k].sets.forEach(z=>{ const kg=num(z.kg); if(!z.ok||kg==null) return; const e=m[name]||(m[name]={name,g:slot.g,weeks:{},best:0,n:0}); e.n++;
       const cur=e.weeks[w]; if(!cur||kg>cur.kg) e.weeks[w]={kg,reps:z.reps}; if(kg>e.best) e.best=kg; }); }
   return Object.values(m).sort((a,b)=>GROUPS.indexOf(a.g)-GROUPS.indexOf(b.g)||a.name.localeCompare(b.name)); }
@@ -1047,6 +1076,7 @@ function vProg(){
   h+=`<div class="sec"><h3>Konstanz</h3><p class="lead small">Einheiten pro Woche · Ø ${(per.slice(0,cw).reduce((a,b)=>a+b,0)/cw).toLocaleString("de-DE",{maximumFractionDigits:1})}</p>
    <div class="bars">${per.map((n,i)=>`<div class="bar ${i+1===cw?"now":""} ${W(i+1).deload?"dl":""}"><i style="height:${n/mx*100}%"></i><b>${n||""}</b><span>${i+1}</span></div>`).join("")}</div></div>`;
   h+=vGoals();
+  h+=vCalib();
   return h+vRec().replace(/^[\s\S]*?<\/header>/,"");
 }
 function vExList(){ const ex=exStats(); if(!ex.length) return `<p class="lead" style="margin-top:16px">Sobald du Sätze abhakst, erscheinen hier deine Übungen mit Verlauf.</p>`;
@@ -1066,7 +1096,7 @@ function openExDetail(name){ const e=exStats().find(x=>x.name===name); if(!e) re
   $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
 function vHistory(){ const all=sessionsAll(); if(!all.length) return `<p class="lead" style="margin-top:16px">Abgeschlossene Einheiten erscheinen hier – antippen zum Ansehen.</p>`;
   let m0="", h=""; all.forEach(s=>{ const m=s.date?s.date.toLocaleDateString("de-DE",{month:"long",year:"numeric"}):"Ohne Datum"; if(m!==m0){ h+=`<div class="grp">${esc(m)}</div>`; m0=m; }
-    h+=`<button class="exrow" data-sess-open="${s.w}|${s.d}"><div><b>${esc(s.tag)} · Woche ${s.w}${st.studio[s.w+"|"+s.d]?" · Studio":""}</b><span>${s.date?s.date.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"}):""}${s.dur?" · "+fmtDur(s.dur):""}</span></div>
+    h+=`<button class="exrow" data-sess-open="${s.w}|${s.d}"><div><b>${esc(s.tag)} · Woche ${s.w}${st.studio[s.w+"|"+s.d]?" · "+esc(studioName(locOf(s.w,s.d))):""}</b><span>${s.date?s.date.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"}):""}${s.dur?" · "+fmtDur(s.dur):""}</span></div>
       <div class="r"><b class="${s.done?"gain":""}">${s.done?"✓":s.ok+"/"+s.all}</b></div></button>`; });
   return h; }
 function openSessDetail(w,d){ const day=daysFor(w)[d]; const s=st.sess[w+"|"+d], dt=sessDate(w,d), fv=st.form[w+"|"+d];
@@ -1082,7 +1112,7 @@ const TARGET={"Brust":[10,20],"Latissimus":[8,20],"Oberer Rücken":[8,20],"Schul
  "Bizeps":[6,16],"Trizeps":[6,16],"Quadrizeps":[10,16],"Beinbeuger":[8,16],"Gesäß":[6,16],"Waden":[4,12],"Bauch":[6,12]};
 function exPrimary(name,slot){ const e=libEntry(name); if(e&&e.g) return e.g; const c=st.custom.find(x=>x.n===name); return c?c.g:slot.g; }
 function weekVolume(w){ const plan={}, done={}; const add=(o,k,v)=>{ o[k]=(o[k]||0)+v; };
-  daysFor(w).forEach((day,d)=>{ if(day.optional&&!started(w,d)) return;
+  daysFor(w).forEach((day,d)=>{
     day.slots.forEach(s=>{ const n=exName(s,w); if(!n||isSkipped(w,d,s.id)) return; if(s.opt&&!slotStarted(w,d,s)) return;
       const r=rx(s,w), pm=exPrimary(n,s), sec=D.SEC[n]||[], L=getLog(w,d,s.id), k=L?L.sets.filter(z=>z.ok).length:0;
       add(plan,pm,r.sets); sec.forEach(x=>add(plan,x,r.sets*.5)); add(done,pm,k); sec.forEach(x=>add(done,x,k*.5)); }); });
@@ -1160,6 +1190,62 @@ function vTech(slot,w,d,r,L){ const k=w+"|"+d+"|"+slot.id, tk=(st.tech||{})[k];
       <input class="cell" inputmode="numeric" data-tk="${slot.id}|${j}|reps" value="${esc(z.reps)}" placeholder="${tk.type==="drop"?"max":"3–5"}">
       <button class="chk" data-tkok="${slot.id}|${j}">${z.ok?"✓":""}</button></div>`; });
   return h+`</div>`; }
+
+/* ============ RIR-Kalibrierung ============ */
+function calibResults(){ const out=[]; for(let w=1;w<=NW;w++){ if(!isCalibW(w)) continue;
+    [["kb","Kniebeuge",1,"uk1b"],["bd","Bankdrücken",0,"ok1b"],["kh","Kreuzheben",3,"uk2b"]].forEach(([l,n,d,sid])=>{ const eT=topE1(l,w), L=getLog(w,d,sid); if(!eT||!L) return;
+      const z=[...L.sets].reverse().find(x=>x.ok&&num(x.kg)&&parseInt(x.reps)); if(!z) return; const kg=num(z.kg), act=parseInt(z.reps);
+      let pred=0; for(let k=1;k<=20;k++){ if(eT*pct(k,0)>=kg) pred=k; } const diff=act-pred;
+      out.push({w,n,kg,act,pred,diff}); }); }
+  return out; }
+function vCalib(){ const res=calibResults(); let h=`<div class="sec"><h3>RIR-Kalibrierung</h3>`;
+  if(!res.length) return h+`<p class="lead small">In den Peak-Wochen (W4, W9, W14) machst du den letzten Backoff-Satz von Kniebeuge, Bankdrücken und Kreuzheben als Maximal-Satz. Die App vergleicht das mit deiner RIR-Angabe im Topset.</p></div>`;
+  res.forEach(x=>{ const v=x.diff>=2?["zu vorsichtig","Im Topset war mehr drin – du kannst die RIR mutiger angeben.","gold"]:x.diff<=-2?["zu optimistisch","Die Reserve war kleiner als gedacht – im Topset lieber etwas konservativer schätzen.","neg"]:["passt","Deine Schätzung ist gut kalibriert.","gain"];
+    h+=`<div class="goal"><div class="gh"><b>${x.n} · W${x.w}</b><span class="${v[2]}">${v[0]}</span></div><div class="glines"><div>Backoff ${fk(x.kg)} kg: erwartet ≈ ${x.pred} Wdh., geschafft <b>${x.act}</b> (${x.diff>=0?"+":""}${x.diff})</div><div class="muted">${v[1]}</div></div></div>`; });
+  return h+`</div>`; }
+
+/* ============ Zyklen ============ */
+function cycleProposal(){ const o={}; ["kb","bd","kh"].forEach(l=>{ let best=null; for(let w=NW;w>=1;w--){ if(W(w).deload) continue; const e=topE1(l,w); if(e!=null&&(best==null||e>best)) best=e; if(best!=null&&w<=NW-4) break; }
+    o[l]=best!=null?Math.floor(best/2.5)*2.5:num(st.set[l]); }); return o; }
+function nextMonday(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+((8-d.getDay())%7||7)); return d; }
+function openCycle(){ const pr=cycleProposal(), cy=st.cycle||1;
+  $("#sheet").innerHTML=`<div class="grab"></div><h3>Zyklus ${cy+1} starten</h3><p>Neue Startwerte aus deinen besten e1RMs (abgerundet). Übungsauswahl, Reihenfolge, Satzzahlen, Notizen und Ziele bleiben. Die Trainingsdaten von Zyklus ${cy} werden archiviert.</p>
+   <div class="form">${[["kb","Kniebeuge"],["bd","Bankdrücken"],["kh","Kreuzheben"]].map(([l,n])=>`<div class="frow"><span>${n}<small>bisher ${fk(num(st.set[l]))} kg</small></span><input inputmode="decimal" id="nc_${l}" value="${fk(pr[l])}"></div>`).join("")}
+   <div class="frow"><span>Start Woche 1</span><input type="date" id="nc_start" value="${iso(nextMonday())}"></div></div>
+   <button class="btn gold" data-act="cyclego">Zyklus ${cy+1} starten</button><button class="btn" data-act="close">Abbrechen</button>`;
+  $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
+function startCycle(){ const cy=st.cycle||1, vals={}; for(const l of ["kb","bd","kh"]){ const v=num($("#nc_"+l).value); if(!v){ toast("Bitte alle Startwerte eintragen"); return; } vals[l]=v; }
+  const best={}; ["kb","bd","kh"].forEach(l=>{ const b=bestMain(l); best[l]=b?b.e:null; });
+  st.archive=st.archive||[]; st.archive.push({n:cy,start:st.set.start,end:iso(new Date()),start1RM:{kb:st.set.kb,bd:st.set.bd,kh:st.set.kh},best,sessions:sessionsAll().length,
+    data:JSON.parse(JSON.stringify({log:st.log,sess:st.sess,notes:st.notes,dates:st.dates,ends:st.ends,form:st.form,skip:st.skip,tech:st.tech,studio:st.studio,setov:st.setov,wsplit:st.wsplit,fb:st.fb}))});
+  clearTraining(); st.studio={}; Object.assign(st.set,vals,{kb2:null,bd2:null,kh2:null,kb3:null,bd3:null,kh3:null,start:$("#nc_start").value||iso(nextMonday())});
+  st.cycle=cy+1; flush(); closeSheet(); ui.w=1; ui.d=0; ui.tab="train"; buildDays(); render(); window.scrollTo(0,0); toast("Zyklus "+(cy+1)+" gestartet – viel Erfolg!"); }
+function vCycles(){ const cy=st.cycle||1; let h=`<div class="sec"><h3>Zyklus</h3><p class="lead">Aktuell Zyklus ${cy} · Woche 1 ab ${new Date(st.set.start+"T00:00:00").toLocaleDateString("de-DE")}</p>
+   <button class="btn" data-act="cycle">Nächsten Zyklus starten</button>`;
+  (st.archive||[]).slice().reverse().forEach(a=>{ h+=`<div class="row"><div class="l">Zyklus ${a.n}<small>${new Date(a.start+"T00:00:00").toLocaleDateString("de-DE")} – ${new Date(a.end+"T00:00:00").toLocaleDateString("de-DE")} · ${a.sessions} Einheiten</small></div>
+     <div class="r"><small style="font-size:12px;color:var(--silver)">KB ${fk(a.start1RM.kb)} → ${a.best.kb?f1(a.best.kb):"–"} · BD ${fk(a.start1RM.bd)} → ${a.best.bd?f1(a.best.bd):"–"} · KH ${fk(a.start1RM.kh)} → ${a.best.kh?f1(a.best.kh):"–"}</small></div></div>`; });
+  return h+`</div>`; }
+/* ============ Orte, Studios, Hinweise ============ */
+function locOf(w,d){ return (st.studio||{})[w+"|"+d]?((st.studioId||{})[w+"|"+d]||"std"):"home"; }
+const isMachine=n=>/Maschine/.test(n||"");
+function studioName(id){ if(!id||id==="std") return "Studio"; const s=(st.studios||[]).find(x=>x.id===id); return s?s.name:"Studio"; }
+function noteKey(name,w,d){ const l=locOf(w,d); return isMachine(name)&&l!=="home"?name+"@"+l:name; }
+function hintText(name,w,d){ const k=noteKey(name,w,d); if(st.hints[k]!=null) return st.hints[k]; const lib=libEntry(name); return [lib&&lib.h, st.exnotes[k]||st.exnotes[name]].filter(Boolean).join("\n"); }
+function hintHtml(name,w,d){ const h=hintText(name,w,d); return h?`<div class="cue">${h.split("\n").map(x=>x.trim()).filter(Boolean).map(x=>"↳ "+esc(x)).join("<br>")}</div>`:""; }
+function hidList(){ const l=locOf(ui.w,ui.d); if(l==="home") return st.hiddenEx; if(!st.hiddenBy[l]) st.hiddenBy[l]=st.hiddenEx.slice(); return st.hiddenBy[l]; }
+function studioSlotIds(){ const ids=[]; BASE_DAYS.forEach(b=>(b.studio||[]).forEach(s=>ids.push(s.id))); return ids; }
+function switchStudio(id){ const prev=st.curStudio||"std"; if(prev===id) return; const ids=studioSlotIds(); st.swapsBy[prev]={};
+  ids.forEach(x=>{ if(st.swaps[x]){ st.swapsBy[prev][x]=st.swaps[x]; delete st.swaps[x]; } }); Object.assign(st.swaps,st.swapsBy[id]||{}); st.curStudio=id; }
+function applyStudio(id){ const k=ui.w+"|"+ui.d; switchStudio(id); st.studio[k]=true; st.studioId[k]=id; save(); closeSheet(); buildDays(); render(); toast(studioName(id)+" · "+DAYS[ui.d].tag); }
+function openStudioPick(){ const list=st.studios||[];
+  $("#sheet").innerHTML=`<div class="grab"></div><h3>Wo trainierst du heute?</h3><p>Maschinen haben pro Studio eigene Gewichte, Hinweise und Geräteliste.</p>
+   ${list.map(s=>`<button class="opt" data-studiopick="${s.id}"><span class="n">${esc(s.name)}</span><span class="o">${s.id===st.curStudio?"zuletzt":""}</span></button>`).join("")}
+   <div class="newrow"><input id="newStudio" placeholder="Neues Studio, z. B. FitX Nordhorn"><button class="chip on" data-act="studionew">Anlegen</button></div>
+   ${list.length?"":`<button class="btn" data-studiopick="std">Ohne Namen weiter</button>`}<button class="btn" data-act="close">Abbrechen</button>`;
+  $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
+function vStudios(){ const list=st.studios||[]; return `<div class="sec"><h3>Studios</h3><p class="lead small">Maschinen führen pro Studio eigene Gewichte, Hinweise und eine eigene Geräteliste.</p>
+   ${list.map(s=>`<div class="row"><div class="l">${esc(s.name)}</div><button class="chip" data-studiodel="${s.id}">Entfernen</button></div>`).join("")}
+   <div class="newrow"><input id="newStudio2" placeholder="Neues Studio"><button class="chip on" data-act="studioadd">Anlegen</button></div></div>`; }
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
@@ -1197,6 +1283,8 @@ document.addEventListener("click",e=>{
   if(t.dataset.fbuse){ const f=st.fb[t.dataset.fbuse]; if(f){ f.use=f.use===false; save(); render(); } return; }
   if(t.dataset.act==="onboard"){ st.onboarded=true; save(); ui.w=currentWeek(); ui.d=0; render(); toast("Los geht’s – viel Erfolg!"); return; }
   if(t.dataset.act==="csv") return doCsv();
+  if(t.dataset.act==="cycle"){ openCycle(); return; }
+  if(t.dataset.act==="cyclego"){ if(confirm("Neuen Zyklus starten? Die Trainingsdaten des aktuellen Zyklus werden archiviert.")) startCycle(); return; }
   if(t.dataset.act==="donex"){ $("#done").classList.remove("show"); return; }
   if(t.dataset.act==="unhide"){ st.hiddenEx=[]; save(); render(); toast("Ausgeblendete Übungen wiederhergestellt"); return; }
   if(t.dataset.act==="trialstart"){ const m=new Date(); m.setHours(0,0,0,0); m.setDate(m.getDate()-((m.getDay()+6)%7)); st.trial={realStart:st.set.start}; st.set.start=iso(m); flush(); ui.w=currentWeek(); ui.d=0; ui.tab="train"; render(); toast("Probelauf gestartet – viel Spaß beim Testen"); return; }
@@ -1204,6 +1292,17 @@ document.addEventListener("click",e=>{
     clearTraining(); st.set.start=st.trial.realStart; delete st.trial; flush(); ui.w=currentWeek(); ui.d=0; render(); toast("Probelauf beendet – bereit für den echten Start"); return; }
   if(t.dataset.act==="close"){ closeSheet(); render(); return; }
   if(t.dataset.act==="addex"){ openAdd(); return; }
+  if(t.dataset.studiopick){ if(started(ui.w,ui.d)) return; applyStudio(t.dataset.studiopick); return; }
+  if(t.dataset.act==="studionew"||t.dataset.act==="studioadd"){ const inp=$(t.dataset.act==="studionew"?"#newStudio":"#newStudio2"); const n=inp.value.trim(); if(!n) return;
+    const id="s"+Date.now().toString(36); st.studios.push({id,name:n}); save(); if(t.dataset.act==="studionew") applyStudio(id); else render(); return; }
+  if(t.dataset.studiodel){ if(!confirm("Studio entfernen? Bisherige Einträge bleiben im Verlauf.")) return; st.studios=st.studios.filter(s=>s.id!==t.dataset.studiodel); save(); render(); return; }
+  if(t.dataset.hintreset){ delete st.hints[t.dataset.hintreset]; save(); closeSheet(); render(); return; }
+  if(t.dataset.pause){ const sid=t.dataset.pause, sl=slotFor(ui.d,sid), cur=slotPause(sl), c=(st.cfg[sid]||{});
+    $("#sheet").innerHTML=`<div class="grab"></div><h3>Pause</h3><p>${esc(exName(sl,ui.w))} · gilt für alle Wochen</p>
+     <div class="pausepick">${[60,90,120,150,180,210,240,300].map(s=>`<button class="fp ${s===cur?"on":""}" data-psec="${sid}|${s}"><b>${mmss(s)}</b><span>min</span></button>`).join("")}</div>
+     ${c.ps!=null?`<button class="btn" data-psec="${sid}|plan">Wie im Plan (${esc(sl.p)})</button>`:""}<button class="btn" data-act="close">Fertig</button>`;
+    $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); return; }
+  if(t.dataset.psec){ const [sid,v]=t.dataset.psec.split("|"); const c=st.cfg[sid]||{}; if(v==="plan") delete c.ps; else c.ps=+v; st.cfg[sid]=c; save(); closeSheet(); render(); return; }
   if(t.dataset.boadd){ st.boAdd=st.boAdd||{}; const l=t.dataset.boadd; if(st.boAdd[l]) delete st.boAdd[l]; else st.boAdd[l]=1; save(); buildDays(); render(); toast(st.boAdd[l]?"+1 Backoff-Satz ab sofort":"Backoff-Sätze wieder wie geplant"); return; }
   if(t.dataset.tech){ const [ty,sid]=t.dataset.tech.split("|"), k=ui.w+"|"+ui.d+"|"+sid; st.tech=st.tech||{};
     if(ty==="off") delete st.tech[k]; else { const slot=slotFor(ui.d,sid), r=rx(slot,ui.w), L=ensureLog(ui.w,ui.d,sid,r.sets); const nm=exName(slot,ui.w), stp=Math.max(stepFor(nm),1.25);
@@ -1227,10 +1326,12 @@ document.addEventListener("click",e=>{
   if(t.dataset.skip){ st.skip[ui.w+"|"+ui.d+"|"+t.dataset.skip]=true; save(); closeSheet(); render(); return; }
   if(t.dataset.unskip){ delete st.skip[ui.w+"|"+ui.d+"|"+t.dataset.unskip]; save(); render(); return; }
   if(t.dataset.place){ const k=ui.w+"|"+ui.d; if(started(ui.w,ui.d)){ toast("Erst möglich, wenn noch kein Satz abgehakt ist"); return; }
-    if(t.dataset.place==="studio") st.studio[k]=true; else delete st.studio[k]; save(); buildDays(); render(); toast(st.studio[k]?"Studio-Variante für "+DAYS[ui.d].tag:"Homegym-Variante"); return; }
+    if(t.dataset.place==="studio"){ openStudioPick(); return; } delete st.studio[k]; delete st.studioId[k]; save(); buildDays(); render(); toast("Homegym-Variante"); return; }
   if(t.dataset.mnote){ const sl=slotFor(ui.d,t.dataset.mnote), nm=exName(sl,ui.w);
-    $("#sheet").innerHTML=`<div class="grab"></div><h3>Notiz</h3><p>${esc(nm)} – gilt für Topset und Backoffs in allen Wochen.</p>
-     <textarea class="exnotein" data-exnote="${esc(nm)}" placeholder="z. B. Griffbreite, Fußstellung, Pin-Höhe, Technik-Fokus …">${esc(st.exnotes[nm]||"")}</textarea>
+    const hk=noteKey(nm,ui.w,ui.d);
+    $("#sheet").innerHTML=`<div class="grab"></div><h3>Hinweise</h3><p>${esc(nm)}${hk!==nm?" · "+esc(studioName(locOf(ui.w,ui.d))):""} – Technik und eigene Notizen, jede Zeile erscheint mit ↳ unter der Übung.</p>
+     <textarea class="exnotein" rows="5" data-hintedit="${esc(hk)}" placeholder="z. B. Sitz Stufe 8 · Griffbreite · Technik-Fokus …">${esc(hintText(nm,ui.w,ui.d))}</textarea>
+     ${st.hints[hk]!=null?`<button class="btn" data-hintreset="${esc(hk)}">Standard-Hinweis wiederherstellen</button>`:""}
      <button class="btn" data-skip="${t.dataset.mnote}">Heute überspringen</button>
      <button class="btn" data-act="close">Fertig</button>`; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); return; }
   if(t.dataset.ptab){ ui.ptab=t.dataset.ptab; render(); return; }
@@ -1264,18 +1365,19 @@ document.addEventListener("click",e=>{
   if(t.dataset.opt){ ui.opt[ui.w+"|"+ui.d]=t.dataset.opt==="1"; render(); return; }
   if(t.dataset.addg){ openAdd(t.dataset.addg); return; }
   if(t.dataset.addpick){ addExercise(t.dataset.addpick,ui.addg); return; }
-  if(t.dataset.addcustom2){ const n=$("#customName2").value.trim(); if(!n) return; st.hiddenEx=st.hiddenEx.filter(x=>x!==n); if(!st.custom.find(c=>c.n===n)&&!libEntry(n)) st.custom.push({n,g:ui.addg,o:DAYS[ui.d].studio?"Studio":"Homegym"}); addExercise(n,ui.addg); return; }
+  if(t.dataset.addcustom2){ const n=$("#customName2").value.trim(); if(!n) return; { const hl=hidList(), ix=hl.indexOf(n); if(ix>=0) hl.splice(ix,1); } if(!st.custom.find(c=>c.n===n)&&!libEntry(n)) st.custom.push({n,g:ui.addg,o:DAYS[ui.d].studio?"Studio":"Homegym"}); addExercise(n,ui.addg); return; }
   if(t.dataset.restore){ const sid=t.dataset.restore; st.swaps[sid]=(st.swaps[sid]||[]).filter(x=>!(x.name==null&&x.from<=ui.w)); save(); render(); return; }
+  if(t.dataset.subset){ const sid=t.dataset.subset, slot=slotFor(ui.d,sid), r=rx(slot,ui.w); if(r.sets>1){ const L=getLog(ui.w,ui.d,sid); if(L&&L.sets[r.sets-1]&&L.sets[r.sets-1].ok){ toast("Letzter Satz ist schon abgehakt"); return; } st.setov[ui.w+"|"+sid]=r.sets-1; if(L) L.sets.length=Math.min(L.sets.length,r.sets-1); save(); render(); } return; }
   if(t.dataset.addset){ const sid=t.dataset.addset, slot=slotFor(ui.d,sid), r=rx(slot,ui.w); st.setov[ui.w+"|"+sid]=r.sets+1; save(); render(); return; }
   if(t.dataset.del&&t.dataset.del.startsWith("lib|")){ const n=t.dataset.del.slice(4); const ci=st.custom.findIndex(c=>c.n===n);
-    if(ci>=0) st.custom.splice(ci,1); else if(!st.hiddenEx.includes(n)) st.hiddenEx.push(n); save(); const c=ui.sheetCtx||[];
+    if(ci>=0) st.custom.splice(ci,1); else if(!hidList().includes(n)) hidList().push(n); save(); const c=ui.sheetCtx||[];
     if(c[0]==="swap") openSwap(c[1]); else openAdd(c[1]); return; }
   if(t.dataset.del){ const [kind,sid,i]=t.dataset.del.split("|"); const slot=slotFor(ui.d,sid);
     if(kind==="ex"){ const w=ui.w; const arr=(st.swaps[sid]||[]).filter(s=>s.from<w); arr.push({from:w,name:null}); st.swaps[sid]=arr; save(); closeSheet(); render(); return; }
     const r=rx(slot,ui.w); const L=ensureLog(ui.w,ui.d,sid,r.sets); L.sets.splice(+i,1); st.setov[ui.w+"|"+sid]=Math.max(0,r.sets-1); save(); render(); toast("Satz gelöscht"); return; }
   if(t.dataset.act==="cfgreset"){ if(confirm("Satzzahlen und Supersätze auf den Ausgangsplan zurücksetzen?")){ st.cfg={}; save(); render(); toast("Plan zurückgesetzt"); } return; }
   if(t.dataset.pick){ applySwap($("#sheet").dataset.sid,t.dataset.pick); return; }
-  if(t.dataset.addcustom){ const n=$("#customName").value.trim(); if(!n) return; const sid=$("#sheet").dataset.sid; const g=slotFor(ui.d,sid).g; st.hiddenEx=st.hiddenEx.filter(x=>x!==n); if(!st.custom.find(c=>c.n===n)&&!libEntry(n)) st.custom.push({n,g,o:DAYS[ui.d].studio?"Studio":"Homegym"}); applySwap(sid,n); return; }
+  if(t.dataset.addcustom){ const n=$("#customName").value.trim(); if(!n) return; const sid=$("#sheet").dataset.sid; const g=slotFor(ui.d,sid).g; { const hl=hidList(), ix=hl.indexOf(n); if(ix>=0) hl.splice(ix,1); } if(!st.custom.find(c=>c.n===n)&&!libEntry(n)) st.custom.push({n,g,o:DAYS[ui.d].studio?"Studio":"Homegym"}); applySwap(sid,n); return; }
   if(t.dataset.chk!==undefined){ const sid=t.closest("[data-slot]").dataset.slot; const row=t.closest(".set");
     const ph=num(row.querySelector('[data-f=kg]').placeholder); toggleSet(sid,+t.dataset.chk,ph); return; }
   if(t.dataset.toggle){ st.set[t.dataset.toggle]=!st.set[t.dataset.toggle]; save(); if(t.dataset.toggle==="wake"){ if(st.set.wake) wake(); else if(wl){ wl.release(); wl=null; } } render(); return; }
@@ -1296,6 +1398,7 @@ document.addEventListener("input",e=>{
   if(t.dataset.note){ st.notes[t.dataset.note]=t.value; save(); return; }
   if(t.dataset.tk){ const [sid,j,f]=t.dataset.tk.split("|"); const k=ui.w+"|"+ui.d+"|"+sid; if(st.tech&&st.tech[k]){ st.tech[k].e[+j][f]=t.value; save(); } return; }
   if(t.dataset.ff){ const box=t.closest(".finputs"); const sid=box.dataset.slot, i=+box.dataset.i; const L=ensureLog(ui.w,ui.d,sid,rx(slotFor(ui.d,sid),ui.w).sets); L.sets[i][t.dataset.ff]=t.value; save(); return; }
+  if(t.dataset.hintedit!==undefined){ st.hints[t.dataset.hintedit]=t.value; save(); return; }
   if(t.dataset.exnote!==undefined){ const n=t.dataset.exnote; if(t.value.trim()) st.exnotes[n]=t.value; else delete st.exnotes[n]; save(); return; }
   if(t.dataset.bodym!==undefined){ st.bodyM[t.dataset.bodym]=t.value; save(); return; }
   if(t.dataset.set){ const k=t.dataset.set; if(k==="start") st.set.start=t.value; else if(k==="goaldate") st.set.goaldate=t.value; else if(k==="name") st.set.name=t.value.trim(); else { const v=num(t.value); st.set[k]= (k.endsWith("2")||k.endsWith("3"))&&t.value.trim()===""?null:(v??st.set[k]); } save(); return; }
