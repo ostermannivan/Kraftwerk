@@ -380,6 +380,7 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .exmeta.mono{ font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:12px; letter-spacing:.01em; margin-top:6px; }
 .exmeta.mono b{ font-weight:600; }
 .cue{ font-size:12.5px; color:var(--muted); margin-top:6px; line-height:1.4; }
+.exhead>.exl{ flex:1 1 auto; min-width:0; }
 .acts{ display:flex; gap:16px; margin-top:9px; padding-top:8px; border-top:1px solid var(--line); }
 .acts button{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--silver); padding:2px 0; }
 .acts button:active{ color:var(--gold); }
@@ -388,6 +389,12 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .newrow{ display:flex; gap:8px; margin:8px 0; } .newrow input{ flex:1; height:40px; border-radius:10px; border:1px solid var(--line); background:var(--s2); color:var(--text); padding:0 12px; font-size:15px; }
 .exnotein{ width:100%; }
 .cue[data-cuetog]{ cursor:pointer; } .cuefold{ display:block; font-size:12px; color:#5E6168; margin-top:6px; padding:2px 0; }
+.prevtog,.set .prev{ cursor:pointer; } .prevtog{ color:var(--gold) !important; }
+.lastbox{ background:var(--s2); border-radius:10px; padding:8px 10px; margin:8px 0 2px; }
+.lastbox .lh{ display:block; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.lr{ display:grid; grid-template-columns:22px 1fr 1fr 1fr; gap:6px; font-size:13px; padding:2px 0; font-variant-numeric:tabular-nums; }
+.lr i{ font-style:normal; color:var(--muted); } .lr b{ color:var(--gold2); font-weight:600; } .lr span{ color:var(--text); } .lr em{ font-style:normal; color:var(--silver); }
+.flast{ font-size:13px; color:var(--muted); margin-top:4px; } .flast b{ color:var(--silver); }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -524,7 +531,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.7";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.8";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -644,6 +651,12 @@ function history(name,w){ const out=[]; for(let x=w-1;x>=1&&out.length<3;x--){ i
     if(hit) out.push(hit); } return out; }
 function stalled(name,w){ if(W(w).deload||stepFor(name)===0) return false; const h=history(name,w); if(h.length<3) return false;
   return h[0].kg>0&&h[0].kg===h[1].kg&&h[1].kg===h[2].kg&&h[0].last<=h[2].last&&!h.some(x=>x.setback); }
+function lastInfo(slot,w,d){ const name=exName(slot,w);
+  if(slot.t){ for(let x=w-1;x>=1;x--){ const L=getLog(x,d,slot.id); if(L&&L.sets.some(z=>num(z.kg)!=null)) return {sets:L.sets,x,di:d}; } return null; }
+  const e=exposures(name,w,d,slot.id)[0]; return e?{sets:e.L.sets,x:e.x,di:e.di}:null; }
+function lastBox(slot,w,d){ const li=lastInfo(slot,w,d); if(!li) return `<div class="lastbox"><span class="lh">Noch kein Eintrag vorher</span></div>`;
+  const dt=sessDate(li.x,li.di); const lab=`W${li.x} ${esc((daysFor(li.x)[li.di]||{}).tag||"")}${dt?" · "+dt.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}):""}`;
+  return `<div class="lastbox"><span class="lh">Letztes Mal · ${lab}</span>${li.sets.filter(z=>num(z.kg)!=null||z.reps).map((z,j)=>`<div class="lr"><i>${j+1}</i><b>${z.kg?esc(z.kg)+" kg":"–"}</b><span>× ${esc(z.reps||"–")}</span><em>${z.rir!==""&&z.rir!=null?"RIR "+esc(z.rir):""}</em></div>`).join("")}</div>`; }
 function prevSets(slot,w,d){ const name=exName(slot,w);
   if(slot.t){ for(let x=w-1;x>=1;x--){ const L=getLog(x,d,slot.id); if(L&&L.sets.some(z=>num(z.kg)!=null)) return L.sets; } return null; }
   const e=exposures(name,w,d,slot.id)[0]; return e?e.L.sets:null; }
@@ -779,13 +792,14 @@ function vSlot(slot,w,d){
   const ak=ui.adj[w+"|"+d+"|"+slot.id]; if(ak&&!L.sets.slice(1).every(z=>z.ok)) h+=`<div class="adjbox"><span>${esc(ak.why)} – restliche Sätze mit <b>${fk(ak.kg)} kg</b>?</span><div><button class="chip on" data-adjok="${slot.id}">Übernehmen</button><button class="chip" data-adjno="${slot.id}">Nein</button></div></div>`;
   if(isCalib(slot,w)) h+=`<div class="calib">Kalibrierung: letzter Backoff-Satz so viele saubere Wiederholungen wie möglich (RIR 0). So prüft die App, wie genau deine RIR-Schätzungen sind.</div>`;
   const pv=prevSets(slot,w,d); const showRir=slot.t!=="BO";
-  h+=`<div class="sets"><div class="sethead ${showRir?"hasrir":""}"><span>#</span><span>Vorher</span><span>kg</span><span>Wdh.</span>${showRir?"<span>RIR</span>":""}<span></span></div>`;
+  if(ui.prevOpen&&ui.prevOpen[slot.id]) h+=lastBox(slot,w,d);
+  h+=`<div class="sets"><div class="sethead ${showRir?"hasrir":""}"><span>#</span><span class="prevtog" data-prevtog="${slot.id}">Vorher ${ui.prevOpen&&ui.prevOpen[slot.id]?"▴":"▾"}</span><span>kg</span><span>Wdh.</span>${showRir?"<span>RIR</span>":""}<span></span></div>`;
   for(let i=0;i<r.sets;i++){ const s=L.sets[i];
     const kph = main? f1(r.kg).replace(",0","") : (sug?fk(sug.kg):"–");
     const rt = slot.t==="TOP"||slot.t==="VAR" ? r.rir : (main?null:accRir(i,r.sets,P));
     const p=pv&&pv[i]&&num(pv[i].kg)!=null?`${fk(num(pv[i].kg))}×${esc(pv[i].reps||"–")}${pv[i].rir!==""&&pv[i].rir!=null?`<i> @${esc(pv[i].rir)}</i>`:""}`:"–";
     h+=`<div class="swrap" data-sw="set|${slot.id}|${i}"><div class="swin"><div class="set ${showRir?"hasrir":""} ${s.ok?"ok":""} ${ui.pop===slot.id+"|"+i?"pop":""}" data-i="${i}">
-      <div class="no">${i+1}</div><div class="prev">${p}</div>
+      <div class="no">${i+1}</div><div class="prev" data-prevtog="${slot.id}">${p}</div>
       <input class="cell" inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}" aria-label="Gewicht Satz ${i+1}">
       <input class="cell" inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${isCalib(slot,w)&&i===r.sets-1?"max":esc(String(r.reps))}" aria-label="Wiederholungen Satz ${i+1}">
       ${showRir?`<input class="cell" inputmode="decimal" data-f="rir" value="${esc(s.rir)}" placeholder="${rt!=null?rirTxt(rt):""}" aria-label="RIR Satz ${i+1}">`:""}
@@ -989,6 +1003,7 @@ function prefillRow(inp){ const row=inp.closest(".set"), box=inp.closest(".finpu
   ["kg","reps","rir"].forEach(f=>{ const el=host.querySelector(`[${attr}=${f}]`); if(!el||el.value!==""||vals[f]==null||!isFinite(vals[f])) return; const v=String(vals[f]).replace(".",","); el.value=v; s[f]=v; });
   save(); }
 document.addEventListener("click",e=>{ const c=e.target.closest("[data-cuetog]"); if(!c) return; st.hintHide=st.hintHide||{}; const k=c.dataset.cuetog; if(st.hintHide[k]) delete st.hintHide[k]; else st.hintHide[k]=true; save(); render(); if(ui.focus) renderFocus(); });
+document.addEventListener("click",e=>{ const c=e.target.closest("[data-prevtog]"); if(!c) return; ui.prevOpen=ui.prevOpen||{}; const k=c.dataset.prevtog; ui.prevOpen[k]=!ui.prevOpen[k]; render(); });
 document.addEventListener("focusin",e=>{ const el=e.target; if(el.matches&&el.matches("input[data-f],input[data-ff]")){ document.body.classList.add("typing"); prefillRow(el); setTimeout(()=>{ try{ el.select(); }catch(_){} },30); } });
 document.addEventListener("focusout",e=>{ setTimeout(()=>{ if(!document.activeElement||!document.activeElement.matches("input,textarea")) document.body.classList.remove("typing"); },150); });
 /* ============ Trainingszeit ============ */
@@ -1037,6 +1052,7 @@ function renderFocus(){ const el=$("#focus"); if(!el) return; const w=ui.w, d=ui
   h+=`<div class="fbody"><div class="kind">Übung ${exIdx}/${exN} · ${ss?"Supersatz "+ss.pos+"/2":esc(slot.art)} · ${esc(slot.g)}</div>
     <div class="fname">${esc(name)}</div>
     <div class="fset">Satz ${i+1} von ${r.sets}${s.ok?' · <span class="gain">erledigt</span>':""}</div>
+    ${(()=>{ const li=lastInfo(slot,w,d); const z=li&&li.sets[i]; return z&&num(z.kg)!=null?`<div class="flast">Letztes Mal (W${li.x}): <b>${esc(z.kg)} kg × ${esc(z.reps||"–")}</b>${z.rir!==""&&z.rir!=null?" @ RIR "+esc(z.rir):""}</div>`:""; })()}
     <div class="fbig">${kg!=null?fk(kg)+'<small> kg</small>':"–"}</div>
     <div class="frx">× ${esc(String(r.reps))}${slot.t==="BO"?"":" @ RIR "+(main?fk(r.rir):rirTxt(accRir(i,r.sets,W(w))))}${sug?` · <span class="muted">${esc(sug.d)} zur Vorwoche</span>`:""}</div>
     ${(slot.t==="TOP"||slot.t==="VAR")&&i===0?`<div class="warm">Aufwärmen: ${warmups(r.kg).map(([k,n])=>(typeof k==="number"?fk(k):k)+"×"+n).join(" · ")}</div>`:""}
