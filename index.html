@@ -395,6 +395,11 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 .lr{ display:grid; grid-template-columns:22px 1fr 1fr 1fr; gap:6px; font-size:13px; padding:2px 0; font-variant-numeric:tabular-nums; }
 .lr i{ font-style:normal; color:var(--muted); } .lr b{ color:var(--gold2); font-weight:600; } .lr span{ color:var(--text); } .lr em{ font-style:normal; color:var(--silver); }
 .flast{ font-size:13px; color:var(--muted); margin-top:4px; } .flast b{ color:var(--silver); }
+#pop{ position:fixed; z-index:65; display:none; flex-direction:column; gap:2px; background:#1E2128; border:1px solid var(--gold); border-radius:10px; padding:7px 11px; box-shadow:0 8px 24px rgba(0,0,0,.5); pointer-events:none; max-width:80vw; }
+#pop.show{ display:flex; animation:fadeIn .15s ease; } #pop span{ font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+#pop b{ font-size:16px; color:var(--gold2); font-variant-numeric:tabular-nums; } #pop em{ font-style:normal; color:var(--silver); font-weight:500; }
+#pop::after{ content:""; position:absolute; left:18px; bottom:-6px; width:10px; height:10px; background:#1E2128; border-right:1px solid var(--gold); border-bottom:1px solid var(--gold); transform:rotate(45deg); }
+.set .no{ cursor:pointer; }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -459,6 +464,7 @@ header.top{ padding:12px 2px 4px; }
 <div class="wrap" id="app"></div>
 <div id="focus" role="dialog" aria-label="Fokus-Modus"></div>
 <div id="done" role="dialog" aria-label="Einheit geschafft"></div>
+<div id="pop" role="status"></div>
 <div id="flash"></div>
 <div class="timer" id="timer"><div class="in" style="position:relative"><div class="bar" id="tbar"></div>
   <div class="t" id="tval">0:00</div><div class="lbl" id="tlbl">Pause</div>
@@ -531,7 +537,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.8";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.9";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -792,14 +798,13 @@ function vSlot(slot,w,d){
   const ak=ui.adj[w+"|"+d+"|"+slot.id]; if(ak&&!L.sets.slice(1).every(z=>z.ok)) h+=`<div class="adjbox"><span>${esc(ak.why)} – restliche Sätze mit <b>${fk(ak.kg)} kg</b>?</span><div><button class="chip on" data-adjok="${slot.id}">Übernehmen</button><button class="chip" data-adjno="${slot.id}">Nein</button></div></div>`;
   if(isCalib(slot,w)) h+=`<div class="calib">Kalibrierung: letzter Backoff-Satz so viele saubere Wiederholungen wie möglich (RIR 0). So prüft die App, wie genau deine RIR-Schätzungen sind.</div>`;
   const pv=prevSets(slot,w,d); const showRir=slot.t!=="BO";
-  if(ui.prevOpen&&ui.prevOpen[slot.id]) h+=lastBox(slot,w,d);
-  h+=`<div class="sets"><div class="sethead ${showRir?"hasrir":""}"><span>#</span><span class="prevtog" data-prevtog="${slot.id}">Vorher ${ui.prevOpen&&ui.prevOpen[slot.id]?"▴":"▾"}</span><span>kg</span><span>Wdh.</span>${showRir?"<span>RIR</span>":""}<span></span></div>`;
+  h+=`<div class="sets"><div class="sethead ${showRir?"hasrir":""}"><span>#</span><span>Vorher</span><span>kg</span><span>Wdh.</span>${showRir?"<span>RIR</span>":""}<span></span></div>`;
   for(let i=0;i<r.sets;i++){ const s=L.sets[i];
     const kph = main? f1(r.kg).replace(",0","") : (sug?fk(sug.kg):"–");
     const rt = slot.t==="TOP"||slot.t==="VAR" ? r.rir : (main?null:accRir(i,r.sets,P));
     const p=pv&&pv[i]&&num(pv[i].kg)!=null?`${fk(num(pv[i].kg))}×${esc(pv[i].reps||"–")}${pv[i].rir!==""&&pv[i].rir!=null?`<i> @${esc(pv[i].rir)}</i>`:""}`:"–";
     h+=`<div class="swrap" data-sw="set|${slot.id}|${i}"><div class="swin"><div class="set ${showRir?"hasrir":""} ${s.ok?"ok":""} ${ui.pop===slot.id+"|"+i?"pop":""}" data-i="${i}">
-      <div class="no">${i+1}</div><div class="prev" data-prevtog="${slot.id}">${p}</div>
+      <div class="no" data-prevpop="${slot.id}|${i}">${i+1}</div><div class="prev" data-prevpop="${slot.id}|${i}">${p}</div>
       <input class="cell" inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}" aria-label="Gewicht Satz ${i+1}">
       <input class="cell" inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${isCalib(slot,w)&&i===r.sets-1?"max":esc(String(r.reps))}" aria-label="Wiederholungen Satz ${i+1}">
       ${showRir?`<input class="cell" inputmode="decimal" data-f="rir" value="${esc(s.rir)}" placeholder="${rt!=null?rirTxt(rt):""}" aria-label="RIR Satz ${i+1}">`:""}
@@ -1003,7 +1008,15 @@ function prefillRow(inp){ const row=inp.closest(".set"), box=inp.closest(".finpu
   ["kg","reps","rir"].forEach(f=>{ const el=host.querySelector(`[${attr}=${f}]`); if(!el||el.value!==""||vals[f]==null||!isFinite(vals[f])) return; const v=String(vals[f]).replace(".",","); el.value=v; s[f]=v; });
   save(); }
 document.addEventListener("click",e=>{ const c=e.target.closest("[data-cuetog]"); if(!c) return; st.hintHide=st.hintHide||{}; const k=c.dataset.cuetog; if(st.hintHide[k]) delete st.hintHide[k]; else st.hintHide[k]=true; save(); render(); if(ui.focus) renderFocus(); });
-document.addEventListener("click",e=>{ const c=e.target.closest("[data-prevtog]"); if(!c) return; ui.prevOpen=ui.prevOpen||{}; const k=c.dataset.prevtog; ui.prevOpen[k]=!ui.prevOpen[k]; render(); });
+let popT=null;
+document.addEventListener("click",e=>{ const pop=$("#pop"); const c=e.target.closest("[data-prevpop]"); if(!c){ pop.classList.remove("show"); return; }
+  const [sid,i]=c.dataset.prevpop.split("|"); const slot=slotFor(ui.d,sid); if(!slot) return; const li=lastInfo(slot,ui.w,ui.d); const z=li&&li.sets[+i];
+  const dt=li?sessDate(li.x,li.di):null; const lab=li?`W${li.x} ${esc((daysFor(li.x)[li.di]||{}).tag||"")}${dt?" · "+dt.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}):""}`:"";
+  pop.innerHTML=z&&(num(z.kg)!=null||z.reps)?`<span>Satz ${+i+1} · ${lab}</span><b>${z.kg?esc(z.kg)+" kg":"–"} × ${esc(z.reps||"–")}${z.rir!==""&&z.rir!=null?` <em>@ RIR ${esc(z.rir)}</em>`:""}</b>`:`<span>Satz ${+i+1}</span><b>noch kein Wert vorher</b>`;
+  const row=c.closest(".set").getBoundingClientRect(); pop.classList.add("show"); const ph=pop.offsetHeight;
+  pop.style.top=Math.max(8,row.top-ph-6)+"px"; pop.style.left=Math.max(10,row.left)+"px";
+  window._popAt=Date.now(); clearTimeout(popT); popT=setTimeout(()=>pop.classList.remove("show"),4000); });
+window.addEventListener("scroll",()=>{ if(Date.now()-(window._popAt||0)<500) return; const p_=document.getElementById("pop"); if(p_) p_.classList.remove("show"); },{passive:true});
 document.addEventListener("focusin",e=>{ const el=e.target; if(el.matches&&el.matches("input[data-f],input[data-ff]")){ document.body.classList.add("typing"); prefillRow(el); setTimeout(()=>{ try{ el.select(); }catch(_){} },30); } });
 document.addEventListener("focusout",e=>{ setTimeout(()=>{ if(!document.activeElement||!document.activeElement.matches("input,textarea")) document.body.classList.remove("typing"); },150); });
 /* ============ Trainingszeit ============ */
