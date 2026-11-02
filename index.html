@@ -404,6 +404,8 @@ body.typing .timer, body.sheet-open .timer{ display:none !important; }
 #jumpset.show{ display:block; animation:fadeIn .2s ease; } body.typing #jumpset{ display:none; }
 .timer.show ~ #jumpset, #timer.show + * #jumpset{ }
 .set.flash{ animation:rowflash 1.6s ease; } @keyframes rowflash{ 0%,60%{ box-shadow:0 0 0 2px var(--gold); border-radius:10px; } 100%{ box-shadow:none; } }
+.frow.sel{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin:8px 0; } .frow.sel select{ margin-left:auto;  appearance:none; -webkit-appearance:none; background:var(--s2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23C9A45C' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border:1px solid var(--line); border-radius:10px; color:var(--text); font-size:15px; height:40px; padding:0 32px 0 12px; max-width:58%; }
 /* ===== Professional-Layer ===== */
 .wrap{ padding:0 14px 150px; }
 header.top{ padding:12px 2px 4px; }
@@ -542,7 +544,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.10";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.11";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -949,10 +951,10 @@ function openSwap(sid){
   $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung anpassen</h3><p>${esc(slot.g)} · Änderungen gelten ab Woche ${w}.</p>
    <div class="frow2"><span>Sätze (normale Woche)</span></div><div class="setsel">${[1,2,3,4,5,6].map(v=>`<button class="chip ${v===n?"on":""}" data-setn="${v}">${v}</button>`).join("")}</div>
    ${next?`<div class="frow2"><span>Supersatz mit „${esc(exName(next,w))}“<br><small class="muted">keine Pause dazwischen</small></span><button class="toggle ${c.ss?"on":""}" data-ss="1" aria-label="Supersatz"></button></div>`:""}
-   <div class="frow2"><span>Muskelgruppe</span><div class="chips">${GROUPS.map(g=>`<button class="chip ${exPrimary(cur,slot)===g?"on":""}" data-grp="${esc(cur)}|${esc(g)}">${esc(g)}</button>`).join("")}</div></div>
-   <div class="frow2"><span>Höchstens Wdh.</span><div class="chips">${[0,6,8,10,12].map(n=>{ const c=st.repMax[cur]; const on=n===0?!c:c&&c.max===n; return `<button class="chip ${on?"on":""}" data-repmax="${esc(cur)}|${n}">${n||"frei"}</button>`; }).join("")}${st.repMax[cur]&&st.repMax[cur].from>(st.cycle||1)?`<small class="muted"> ab Zyklus ${st.repMax[cur].from}</small>`:""}</div></div>
+   <div class="frow sel"><span>Muskelgruppe</span><select data-grpsel="${esc(cur)}">${GROUPS.map(g=>`<option value="${esc(g)}" ${exPrimary(cur,slot)===g?"selected":""}>${esc(g)}</option>`).join("")}</select></div>
+   <div class="frow sel"><span>Höchstens Wdh. pro Satz${st.repMax[cur]&&st.repMax[cur].from>(st.cycle||1)?`<small>ab Zyklus ${st.repMax[cur].from}</small>`:""}</span><select data-repsel="${esc(cur)}">${[0,5,6,8,10,12,15].map(n=>{ const c=st.repMax[cur]; const on=n===0?!c:c&&c.max===n; return `<option value="${n}" ${on?"selected":""}>${n||"frei"}</option>`; }).join("")}</select></div>
    <div class="frow2"><span>Reihenfolge</span><div class="chips"><button class="chip" data-move="-1">↑ nach oben</button><button class="chip" data-move="1">↓ nach unten</button></div></div>
-   <p style="margin-top:14px">Deine Notiz zu „${esc(cur)}“ (z. B. Sitzhöhe, Griff, Pin):</p>
+   <p style="margin-top:14px">Hinweise zu „${esc(cur)}“ – Technik und eigene Notizen:</p>
    <textarea class="exnotein" rows="4" data-hintedit="${esc(noteKey(cur,ui.w,ui.d))}" placeholder="Hinweise – Technik und eigene Notizen">${esc(hintText(cur,ui.w,ui.d))}</textarea>
    <p style="margin-top:18px">Übung tauschen (${esc(slot.g)}):</p>
    ${list.map(e=>`<div class="swrap" data-sw="lib|${esc(e.n)}"><div class="swin"><button class="opt ${e.n===cur?"cur":""}" data-pick="${esc(e.n)}"><span class="n">${esc(e.n)}${e.n===slot.ex?' <span class="muted">· Plan</span>':''}</span><span class="o">${esc(e.o)}</span></button></div><button class="swdel" data-del="lib|${esc(e.n)}">Löschen</button></div>`).join("")}
@@ -1026,6 +1028,8 @@ document.addEventListener("click",e=>{ const pop=$("#pop"); const c=e.target.clo
   pop.style.top=Math.max(8,row.top-ph-6)+"px"; pop.style.left=Math.max(10,row.left)+"px";
   window._popAt=Date.now(); clearTimeout(popT); popT=setTimeout(()=>pop.classList.remove("show"),4000); });
 window.addEventListener("scroll",()=>{ if(Date.now()-(window._popAt||0)<500) return; const p_=document.getElementById("pop"); if(p_) p_.classList.remove("show"); },{passive:true});
+document.addEventListener("change",e=>{ const t=e.target; if(t.dataset.grpsel!==undefined){ const n=t.dataset.grpsel, g=t.value, le=libEntry(n); if(le&&le.g===g) delete st.groupOv[n]; else st.groupOv[n]=g; save(); render(); toast("Muskelgruppe: "+g); }
+  if(t.dataset.repsel!==undefined){ const n=t.dataset.repsel, v=+t.value; if(!v) delete st.repMax[n]; else st.repMax[n]={max:v,from:(st.repMax[n]||{}).from&&st.repMax[n].from>(st.cycle||1)?st.repMax[n].from:0}; save(); buildDays(); render(); toast(v?"Höchstens "+v+" Wdh. pro Satz":"Wiederholungen wieder frei"); } });
 document.addEventListener("focusin",e=>{ const el=e.target; if(el.matches&&el.matches("input[data-f],input[data-ff]")){ document.body.classList.add("typing"); prefillRow(el); setTimeout(()=>{ try{ el.select(); }catch(_){} },30); } });
 document.addEventListener("focusout",e=>{ setTimeout(()=>{ if(!document.activeElement||!document.activeElement.matches("input,textarea")) document.body.classList.remove("typing"); },150); });
 /* ============ Trainingszeit ============ */
