@@ -462,6 +462,93 @@ header.top{ padding:12px 2px 4px; }
 @media (prefers-reduced-motion: reduce){ .sheet,.toggle::after{ transition:none; } #app.enter,.set.pop .chk,.set.pop .fld input,.timer.end .in{ animation:none; }
   #splash .word span{ transform:none; animation:fadeIn .6s ease forwards; } #splash .rule{ width:150px; opacity:0; animation:fadeIn .6s ease .2s forwards; }
   #pr .card,#pr .t2{ animation:none; } }
+
+/* ===== Design 10.26.12: Eisen & Champagner ===== */
+:root{ --bg:#0B0C0E; --s1:#131519; --s2:#1A1D22; --s3:#23272E; --line:#2A2E35; --hair:rgba(255,255,255,.055);
+  --text:#EDE8DC; --muted:#8D9097; --gold:#C9A45C; --gold2:#E6CD92; --sage:#92BD99;
+  --sans: -apple-system, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif; }
+body{ font-family:var(--sans); letter-spacing:-.003em; }
+/* Kopf */
+header.top{ position:relative; padding:14px 2px 2px; }
+.brand h1{ font-family:var(--serif); font-size:15px; font-weight:400; letter-spacing:.02em; text-transform:none; color:var(--gold); }
+.brand .today{ font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.weekhead{ margin-top:10px; padding-right:84px; }
+.weekhead h2{ font-family:var(--serif); font-weight:400; font-size:40px; line-height:1.02; letter-spacing:-.015em; }
+.wkpick i{ font-size:13px; color:var(--gold); margin-left:2px; vertical-align:6px; }
+.weekhead .sub{ font-size:13.5px; color:var(--silver); margin-top:6px; }
+.plate{ position:absolute; right:2px; top:44px; width:68px; height:68px; }
+.plate svg{ width:68px; height:68px; display:block; }
+.plate b{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-weight:400; font-size:19px; color:var(--text); }
+.plate b i{ font-style:normal; font-size:12px; color:var(--muted); margin-left:1px; }
+/* Navigation: Wochenleiste + Tage als Segment */
+.navsticky{ background:rgba(11,12,14,.86); border-bottom:1px solid var(--hair); padding-bottom:10px; }
+.weeks{ gap:6px; padding:10px 0 10px; }
+.wk{ flex:0 0 34px; height:34px; border-radius:17px; background:transparent; border:1px solid var(--line); font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.wk i{ display:none; }
+.wk.sel{ background:var(--text); border-color:var(--text); color:#121316; font-weight:600; }
+.wk.done{ border-color:rgba(146,189,153,.45); color:var(--sage); }
+.wk.done.sel{ background:var(--sage); border-color:var(--sage); color:#0F1A12; }
+.wk.now:not(.sel){ border-color:var(--gold); color:var(--gold2); }
+.wk.now::before{ display:none; }
+.days{ background:var(--s1); border-radius:14px; padding:4px; gap:2px; box-shadow:inset 0 0 0 1px var(--hair); }
+.day{ background:transparent; border:0; border-radius:11px; padding:8px 2px 7px; }
+.day b{ font-size:14px; font-weight:600; letter-spacing:.01em; color:var(--silver); }
+.day span{ font-size:10.5px; color:var(--muted); }
+.day.sel{ background:var(--s3); box-shadow:0 1px 0 var(--hair) inset, 0 6px 14px rgba(0,0,0,.35); }
+.day.sel b{ color:var(--text); }
+.day.done{ background:transparent; border:0; } .day.done b,.day.done span{ color:var(--sage); }
+.day.done.sel{ background:#15211A; }
+.day.optx{ border:0; opacity:.7; }
+.stickclock span{ text-transform:none; letter-spacing:0; font-size:12.5px; color:var(--silver); }
+/* Untere Leiste */
+nav.tabs{ background:rgba(11,12,14,.82); border-top:1px solid var(--hair); }
+nav.tabs button{ font-size:10.5px; letter-spacing:.01em; position:relative; }
+nav.tabs button.sel{ color:var(--text); }
+nav.tabs button.sel svg{ stroke:var(--gold); }
+nav.tabs button.sel::after{ content:""; position:absolute; top:6px; width:4px; height:4px; border-radius:2px; background:var(--gold); }
+/* Statuskarte, Start */
+.status{ background:transparent; border:0; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); border-radius:0; padding:12px 2px; }
+.status span{ text-transform:none; letter-spacing:0; font-size:12px; }
+.startbtn{ border-radius:16px; height:54px; font-size:16px; letter-spacing:.01em; box-shadow:0 10px 24px rgba(201,164,92,.18); }
+.sessrow{ background:var(--s1); border:0; box-shadow:inset 0 0 0 1px rgba(201,164,92,.35); border-radius:16px; }
+/* Übungskarten */
+.ex{ background:var(--s1); border:0; border-radius:18px; box-shadow:inset 0 1px 0 var(--hair); padding:16px 16px 12px; margin-bottom:14px; }
+.ex.main{ border:0; background:linear-gradient(180deg,#17150F,var(--s1) 140px); box-shadow:inset 0 1px 0 rgba(201,164,92,.25), inset 2px 0 0 var(--gold); }
+.ex.ss{ border-left:0; box-shadow:inset 0 1px 0 var(--hair), inset 2px 0 0 var(--steel); }
+.ex .swin{ background:var(--s1); }
+.wk.now::after,.wk.now::before{ display:none !important; }
+.kind{ text-transform:none; letter-spacing:0; font-size:12px; color:var(--muted); }
+.ex.main .kind{ color:var(--gold2); }
+.exno{ font-family:var(--serif); font-size:13px; letter-spacing:0; color:var(--gold); margin-right:8px; }
+.exno i{ font-size:11px; color:#5F636B; }
+.exname{ font-family:var(--serif); font-weight:400; font-size:21px; line-height:1.18; letter-spacing:-.005em; margin-top:4px; }
+.exmeta.mono{ font-family:var(--sans); font-size:12.5px; gap:0; margin-top:8px; color:var(--silver); font-variant-numeric:tabular-nums; }
+.exmeta.mono b{ color:var(--text); font-weight:600; }
+.exmeta span::before{ content:""; display:inline-block; width:1px; height:11px; background:var(--line); margin:0 10px; vertical-align:-1px; }
+.cue{ font-size:12.5px; line-height:1.45; color:#9A9DA3; margin-top:8px; }
+.acts{ gap:18px; margin-top:12px; padding-top:10px; border-top:1px solid var(--hair); }
+.acts button{ text-transform:none; letter-spacing:.01em; font-size:12.5px; color:var(--muted); }
+.acts button:active{ color:var(--gold2); }
+.big{ font-family:var(--serif); font-weight:400; font-size:52px; letter-spacing:-.02em; }
+.big small{ font-size:17px; color:var(--gold); margin-left:2px; }
+.warm{ font-size:12.5px; color:var(--muted); }
+.sugline b{ font-family:var(--serif); }
+/* Satz-Tabelle */
+.sets{ margin-top:10px; }
+.sethead{ text-transform:none; letter-spacing:0; font-size:11px; color:#6E7178; padding-bottom:4px; border-bottom:1px solid var(--hair); margin-bottom:4px; }
+.set .no{ display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:12px; border:1px solid var(--line); font-size:11.5px; color:var(--silver); }
+.set .prev{ font-size:12px; color:#7C8087; }
+.cell{ height:40px; border-radius:10px; background:#1B1E23; border:1px solid transparent; font-size:16px; }
+.cell::placeholder{ color:#5F636B; }
+.cell:focus{ background:#1D1A13; border-color:rgba(201,164,92,.7); }
+.chk{ width:40px; height:40px; border-radius:20px; border:1.5px solid #3A3F47; justify-self:end; }
+.set.ok .chk{ background:var(--sage); border-color:var(--sage); }
+.set.ok .no{ border-color:var(--sage); background:var(--sage); color:#0F1A12; }
+.set.ok .cell{ background:#142019; color:#D3EAD7; }
+.setbtns{ gap:18px; margin-top:4px; } .addset{ font-size:12.5px; color:var(--gold2); }
+.e1{ font-size:12.5px; color:var(--muted); }
+.addex{ border-radius:16px; border:1px dashed #33373F; color:var(--muted); }
+.quote{ font-family:var(--serif); font-style:italic; font-size:15px; color:#8D9097; }
 </style>
 </head>
 <body>
@@ -544,7 +631,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.11";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.12";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -726,9 +813,10 @@ function vTrain(){
   if(!st.onboarded) return vWelcome();
   const w=ui.w, P=W(w), d=ui.d, day=DAYS[d];
   const from=weekDate(w), to=weekDate(w,6), fv=st.form[w+"|"+d];
-  let h=`<header class="top"><div class="brand"><h1>KRAFTWERK</h1><span class="today">${dshort(from)} – ${dshort(to)}</span></div>
+  const coreDone=[0,1,2].filter(x=>dayDone(w,x).done).length;
+  let h=`<header class="top"><div class="brand"><h1>Kraftwerk</h1><span class="today">${dshort(from)} – ${dshort(to)}</span></div>${plateRing(coreDone)}
    <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button>${P.deload?' <span class="dl">Deload</span>':''}</h2>
-   <div class="sub">${(st.cycle||1)>1?"Zyklus "+st.cycle+" · ":""}Block ${P.block} · ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}${(st.studio||{})[w+"|"+d]&&!DAYS[d].split&&!DAYS[d].pull?` <span class="trialpill studio">${esc(studioName(locOf(w,d)))}</span>`:""}</div></div>
+   <div class="sub">${(st.cycle||1)>1?"Zyklus "+st.cycle+" · ":""}Block ${P.block} – ${P.deload?"Erholung":P.phase}${st.trial?' <span class="trialpill">Probelauf</span>':""}${(st.studio||{})[w+"|"+d]&&!DAYS[d].split&&!DAYS[d].pull?` <span class="trialpill studio">${esc(studioName(locOf(w,d)))}</span>`:""}</div></div>
 </header>`;
   const ss0=sessOf(w,d);
   h+=`<div class="navsticky">${ss0&&!ss0.e?`<div class="stickclock"><span>${(dd_=>`${dd_.ok} / ${dd_.all} Sätze · ${dd_.all?Math.round(100*dd_.ok/dd_.all):0} %`)(dayDone(w,d))}</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now()-new Date(ss0.s))}</b><button class="chip" data-sess="focus">Fokus</button><i class="stickbar" style="width:${(dd_=>dd_.all?100*dd_.ok/dd_.all:0)(dayDone(w,d))}%"></i></div>`:runBanner(w,d)}<div class="weeks ${ss0&&!ss0.e?"locked":""}">`+WK.map((r,i)=>{ const x=i+1; const c=r[1]==="Deload"?"var(--steel)":BLOCKC[r[0]];
@@ -1101,7 +1189,7 @@ function relDay(dt){ if(!dt) return "–"; const a=new Date(); a.setHours(0,0,0,
   return n===0?"heute":n===1?"gestern":n<7?"vor "+n+" Tagen":b.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}); }
 function vStatus(place){ const all=sessionsAll(); const cw=currentWeek(); const done=[0,1,2].filter(d=>dayDone(cw,d).done).length; const last=all[0];
   return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last?relDay(last.date)+" · "+esc(last.tag):"noch nie – los geht’s"}</b></div>
-   <div class="r2"><span>Woche ${cw}</span><b>${done} / 3</b></div>${place?`<div class="placewrap">${place}</div>`:""}</div>`; }
+   ${place?`<div class="placewrap">${place}</div>`:""}</div>`; }
 function weekStreak(){ const cw=currentWeek(); let n=0; for(let w=cw;w>=1;w--){ if(weekDone(w)) n++; else if(w===cw) continue; else break; } return n; }
 function exStats(){ const m={}; for(const k in st.log){ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) continue; const L0=st.log[k]; let name=L0.name||exName(slot,+w); if(!name) continue;
     const lo=L0.loc||locOf(+w,+d); if(isMachine(name)&&lo!=="home") name+=" · "+studioName(lo);
@@ -1303,6 +1391,10 @@ function updJump(){ const b=document.getElementById("jumpset"); if(!b) return; c
 setInterval(updJump,600); window.addEventListener("scroll",()=>requestAnimationFrame(updJump),{passive:true});
 document.getElementById("jumpset").addEventListener("click",()=>{ const tg=curTarget(); if(!tg) return; if(tg.w!==ui.w||tg.d!==ui.d){ ui.w=tg.w; ui.d=tg.d; ui.tab="train"; render(); }
   setTimeout(()=>{ const el=curRowEl(); if(el){ el.scrollIntoView({behavior:"smooth",block:"center"}); el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"),1600); } updJump(); },60); });
+function plateRing(n){ const R=25, C=2*Math.PI*R, seg=C/3, gap=5; let arcs="";
+  for(let k=0;k<3;k++){ const on=k<n; arcs+=`<circle cx="32" cy="32" r="${R}" fill="none" stroke="${on?(n===3?"var(--sage)":"var(--gold)"):"var(--s3)"}" stroke-width="6" stroke-linecap="butt"
+      stroke-dasharray="${seg-gap} ${C-seg+gap}" stroke-dashoffset="${-k*seg}" transform="rotate(-90 32 32)"/>`; }
+  return `<div class="plate" aria-label="${n} von 3 Einheiten diese Woche"><svg viewBox="0 0 64 64">${arcs}<circle cx="32" cy="32" r="16" fill="none" stroke="var(--line)" stroke-width="1"/></svg><b>${n}<i>/3</i></b></div>`; }
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
