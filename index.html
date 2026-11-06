@@ -649,6 +649,8 @@ section.ex.lifted{ transform:scale(1.02); transition:transform .2s ease; positio
 .iospage .sec{ background:var(--s1); border-radius:14px; padding:12px 14px; margin:12px 0; } .iospage .sec h3{ font-size:13px; font-family:var(--sans); font-weight:500; color:var(--muted); margin:0 0 6px; }
 .iospage .frow{ border-bottom:1px solid var(--hair); padding:10px 0; } .iospage .frow:last-child{ border-bottom:0; }
 .stickclock{ gap:8px; } .stickclock .chip{ height:30px; padding:0 11px; font-size:12.5px; } .stickclock .clock{ font-size:20px; }
+.bknote{ background:var(--s1); border-radius:16px; box-shadow:inset 0 0 0 1px rgba(201,164,92,.35); padding:12px 14px; margin:8px 0 12px; display:flex; flex-direction:column; gap:10px; }
+.bknote b{ display:block; font-size:15px; font-weight:600; } .bknote span{ display:block; font-size:12.5px; color:var(--muted); margin-top:2px; } .bkbtns{ display:flex; gap:8px; }
 </style>
 </head>
 <body>
@@ -736,7 +738,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.16";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.17";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -936,6 +938,7 @@ function vTrain(){
   if(day.pull) h+=`<p class="lead small">Zusätzliche Pull-Einheit dieser Woche.</p>`;
   const canPlace=!day.pull&&!day.split&&BASE_DAYS[d].studio; const onS=!!st.studio[w+"|"+d];
   if(weekDone(NW)) h+=`<div class="cyclecard"><b>Zyklus ${st.cycle||1} geschafft.</b><span>Bereit für die nächste Runde mit neuen Startwerten?</span><button class="chip on" data-act="cycle">Nächsten Zyklus starten</button></div>`;
+  h+=vBackupNote();
   h+=vStatus("");
   h+=vSession(w,d);
   const ok_=ui.opt[w+"|"+d]; let optShown=false;
@@ -1584,6 +1587,12 @@ document.getElementById("ctx").addEventListener("click",e=>{ const b=e.target.cl
     if(Math.abs(dx)<80||Math.abs(dx)<Math.abs(dy)*2||Date.now()-t0>700) return;
     const sp_=st.wsplit[ui.w]; const disp=DAYS.length===5?(sp_===0?[0,4,1,2,3]:[0,1,2,4,3]):[0,1,2,3]; const k=disp.indexOf(ui.d); const nk=k+(dx<0?1:-1);
     if(nk<0||nk>=disp.length) return; ui.d=disp[nk]; ui.slideDir=dx<0?"l":"r"; render(); window.scrollTo(0,0); },{passive:true}); })();
+function vBackupNote(){ const now=new Date(), today=iso(now); if(st.backupSnooze===today) return "";
+  const last=st.lastBackup?new Date(st.lastBackup):null; const days=last?Math.floor((now-last)/864e5):null;
+  const due=(now.getDay()===0&&(!last||iso(last)!==today)&&(days==null||days>=1))||(days!=null&&days>8)||(days==null&&Object.keys(st.log||{}).length>0&&now.getDay()===0);
+  if(!due) return "";
+  return `<div class="bknote"><div><b>${now.getDay()===0?"Sonntag – Zeit für die Sicherung":"Deine Sicherung ist überfällig"}</b><span>${last?"Letzte Sicherung vor "+days+(days===1?" Tag":" Tagen"):"Noch keine Sicherung"} · am besten in iCloud Drive speichern</span></div>
+    <div class="bkbtns"><button class="chip on" data-act="export">Jetzt sichern</button><button class="chip" data-act="bksnooze">Später</button></div></div>`; }
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
@@ -1625,6 +1634,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.fbuse){ const f=st.fb[t.dataset.fbuse]; if(f){ f.use=f.use===false; save(); render(); } return; }
   if(t.dataset.act==="onboard"){ st.onboarded=true; save(); ui.w=currentWeek(); ui.d=0; render(); toast("Los geht’s – viel Erfolg!"); return; }
   if(t.dataset.act==="csv") return doCsv();
+  if(t.dataset.act==="bksnooze"){ st.backupSnooze=iso(new Date()); save(); render(); return; }
   if(t.dataset.act==="cycle"){ openCycle(); return; }
   if(t.dataset.act==="cyclego"){ if(confirm("Neuen Zyklus starten? Die Trainingsdaten des aktuellen Zyklus werden archiviert.")) startCycle(); return; }
   if(t.dataset.act==="donex"){ $("#done").classList.remove("show"); return; }
@@ -1766,7 +1776,7 @@ function doCsv(){
   const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
   shareFile("kraftwerk-training-"+iso(new Date())+".csv",csv,"text/csv");
 }
-async function doExport(){
+async function doExport(){ st.lastBackup=new Date().toISOString(); save();
   const name="kraftwerk-sicherung-"+iso(new Date())+".json"; const blob=new Blob([JSON.stringify(st)],{type:"application/json"});
   try{ const file=new File([blob],name,{type:"application/json"}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:"Kraftwerk-Sicherung"}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
