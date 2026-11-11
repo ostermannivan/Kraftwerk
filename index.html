@@ -651,6 +651,7 @@ section.ex.lifted{ transform:scale(1.02); transition:transform .2s ease; positio
 .stickclock{ gap:8px; } .stickclock .chip{ height:30px; padding:0 11px; font-size:12.5px; } .stickclock .clock{ font-size:20px; }
 .bknote{ background:var(--s1); border-radius:16px; box-shadow:inset 0 0 0 1px rgba(201,164,92,.35); padding:12px 14px; margin:8px 0 12px; display:flex; flex-direction:column; gap:10px; }
 .bknote b{ display:block; font-size:15px; font-weight:600; } .bknote span{ display:block; font-size:12.5px; color:var(--muted); margin-top:2px; } .bkbtns{ display:flex; gap:8px; }
+section.ex .exl{ cursor:pointer; } .exdloc{ margin:10px 0 2px; }
 </style>
 </head>
 <body>
@@ -738,7 +739,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.17";
+const KEY = "kraftwerk.v1"; const APPVER = "10.26.18";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -803,7 +804,10 @@ function pauseSec(p){ if(!p||/direkt/.test(p)) return 0; const m=String(p).repla
 function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),1800); }
 
 function lastName(slot,w){ const list=(st.swaps[slot.id]||[]).filter(s=>s.from<=w&&s.name).sort((a,b)=>a.from-b.from); return list.length?list[list.length-1].name:slot.ex; }
-function exName(slot,w){ if(slot.from&&w<slot.from) return null; const list=(st.swaps[slot.id]||[]).filter(s=>s.from<=w).sort((a,b)=>a.from-b.from); return list.length?list[list.length-1].name:slot.ex; }
+const isFree=n=>/[(;,]\s*(LH|KH|SZ|KG)(\s*·\s*Studio)?\)$/.test(n||"");
+function baseOf(n){ const m=String(n||"").match(/^(.*) · Studio\)$/); return m?m[1]+")":n; }
+function canon(n){ if(!n) return n; const b=baseOf(n); if(b!==n&&isFree(b)&&!((st.locMode||{})[b]==="split")) return b; return n; }
+function exName(slot,w){ if(slot.from&&w<slot.from) return null; const list=(st.swaps[slot.id]||[]).filter(s=>s.from<=w).sort((a,b)=>a.from-b.from); return canon(list.length?list[list.length-1].name:slot.ex); }
 function slotFor(d,sid){ const cur=(DAYS[d]||{slots:[]}).slots.find(s=>s.id===sid); if(cur) return cur; const b=BASE_DAYS[d]; if(!b) return null;
   return [...b.main,...b.mix,...(b.push||[]),...(b.studio||[]),...((st.extra||{})[d]||[])].find(s=>s.id===sid); }
 function posOf(d,slot){ const b=BASE_DAYS[d]; const acc=(b.push&&b.push.includes(slot))?b.push:(b.studio&&b.studio.includes(slot))?b.studio:b.mix; return [...b.main,...acc,...((st.extra||{})[d]||[])].indexOf(slot)+1; }
@@ -844,7 +848,7 @@ function rx(slot,w){
 function exposures(name,w,d,sid){ const out=[]; const curS=sessDate(w,d); const cutoff=curS?curS.getTime():Infinity;
   const legDay=(d===1||d===3);
   for(let x=w;x>=1;x--){ const DX=daysFor(x); for(let di=0;di<DX.length;di++){ if(x===w&&di===d) continue; if(legDay&&di!==d) continue;
-      for(const s of DX[di].slots){ if(s.t) continue; const L=getLog(x,di,s.id); if(!L||((L.name||exName(s,x))!==name)||!L.sets.some(z=>num(z.kg)!=null)) continue;
+      for(const s of DX[di].slots){ if(s.t) continue; const L=getLog(x,di,s.id); if(!L||((canon(L.name)||exName(s,x))!==name)||!L.sets.some(z=>num(z.kg)!=null)) continue;
         if(isMachine(name)&&(L.loc||locOf(x,di))!==locOf(w,d)) continue;
         const dt=sessDate(x,di); const tm=dt?dt.getTime():null; if(x===w&&(tm==null||tm>=cutoff)) continue;
         out.push({x,di,L,tm:tm??(x*10+di)}); } } if(out.length>=2&&out.some(o=>o.x<w)) break; }
@@ -1148,11 +1152,12 @@ function vSet(){
 function openSwap(sid){
   const d=ui.d, slot=slotFor(d,sid), w=ui.w, cur=exName(slot,w), c=st.cfg[sid]||{}, n=c.n??slot.n;
   const sl=visSlots(d), i=sl.indexOf(slot), next=sl[i+1]&&!sl[i+1].t?sl[i+1]:null;
-  const loc=DAYS[d].studio?"Studio":"Homegym"; const list=[...(LIB[slot.g]||[]).filter(e=>e.o===loc), ...st.custom.filter(x=>x.g===slot.g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!hidList().includes(e.n)||e.n===cur); ui.sheetCtx=["swap",sid];
+  const loc=DAYS[d].studio?"Studio":"Homegym"; const list=[...dedupeN((LIB[slot.g]||[]).filter(e=>e.o===loc).map(e=>({...e,n:canon(e.n)}))), ...st.custom.filter(x=>x.g===slot.g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!hidList().includes(e.n)||e.n===cur); ui.sheetCtx=["swap",sid];
   $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung anpassen</h3><p>${esc(slot.g)} · Änderungen gelten ab Woche ${w}.</p>
    <div class="frow2"><span>Sätze (normale Woche)</span></div><div class="setsel">${[1,2,3,4,5,6].map(v=>`<button class="chip ${v===n?"on":""}" data-setn="${v}">${v}</button>`).join("")}</div>
    ${next?`<div class="frow2"><span>Supersatz mit „${esc(exName(next,w))}“<br><small class="muted">keine Pause dazwischen</small></span><button class="toggle ${c.ss?"on":""}" data-ss="1" aria-label="Supersatz"></button></div>`:""}
    <div class="frow sel"><span>Muskelgruppe</span><select data-grpsel="${esc(cur)}">${GROUPS.map(g=>`<option value="${esc(g)}" ${exPrimary(cur,slot)===g?"selected":""}>${esc(g)}</option>`).join("")}</select></div>
+   ${locModeRow(cur)}
    <div class="frow sel"><span>Höchstens Wdh. pro Satz${st.repMax[cur]&&st.repMax[cur].from>(st.cycle||1)?`<small>ab Zyklus ${st.repMax[cur].from}</small>`:""}</span><select data-repsel="${esc(cur)}">${[0,5,6,8,10,12,15].map(n=>{ const c=st.repMax[cur]; const on=n===0?!c:c&&c.max===n; return `<option value="${n}" ${on?"selected":""}>${n||"frei"}</option>`; }).join("")}</select></div>
    <div class="frow2"><span>Reihenfolge</span><div class="chips"><button class="chip" data-move="-1">↑ nach oben</button><button class="chip" data-move="1">↓ nach unten</button></div></div>
    <p style="margin-top:14px">Hinweise zu „${esc(cur)}“ – Technik und eigene Notizen:</p>
@@ -1167,7 +1172,7 @@ function openSwap(sid){
 }
 function openAdd(g){
   g=g||ui.addg||"Brust"; ui.addg=g;
-  const loc=DAYS[ui.d].studio?"Studio":"Homegym"; const list=[...(LIB[g]||[]).filter(e=>e.o===loc), ...st.custom.filter(x=>x.g===g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!hidList().includes(e.n)); ui.sheetCtx=["add",g];
+  const loc=DAYS[ui.d].studio?"Studio":"Homegym"; const list=[...dedupeN((LIB[g]||[]).filter(e=>e.o===loc).map(e=>({...e,n:canon(e.n)}))), ...st.custom.filter(x=>x.g===g&&(x.o||"Homegym")===loc).map(x=>({n:x.n,o:"eigene"}))].filter(e=>!hidList().includes(e.n)); ui.sheetCtx=["add",g];
   $("#sheet").innerHTML=`<div class="grab"></div><h3>Übung hinzufügen</h3><p>Zu „${esc(DAYS[ui.d].name)}“ ab Woche ${ui.w}.</p>
    <div class="chips cwrap">${GROUPS.map(x=>`<button class="chip ${x===g?"on":""}" data-addg="${esc(x)}">${esc(x)}</button>`).join("")}</div>
    <div style="margin-top:10px">${list.map(e=>`<div class="swrap" data-sw="lib|${esc(e.n)}"><div class="swin"><button class="opt" data-addpick="${esc(e.n)}"><span class="n">${esc(e.n)}</span><span class="o">${esc(e.o)}</span></button></div><button class="swdel" data-del="lib|${esc(e.n)}">Löschen</button></div>`).join("")}</div>
@@ -1179,7 +1184,7 @@ function addExercise(name,g){ const G=["Brust","Latissimus","Oberer Rücken","Sc
   const rt=(G.includes(g)&&/(LH|KH)\)/.test(name))?"G":"I";
   const s={id:"x"+Date.now().toString(36),art:"Assistenz",g,ex:name,wu:rt==="G"?"1":"0",n:2,rt,p:rt==="G"?"2 min":"1–1,5 min",from:ui.w};
   st.extra[ui.d]=(st.extra[ui.d]||[]).concat([s]); save(); buildDays(); closeSheet(); render(); toast(name+" hinzugefügt"); }
-function closeSheet(){ $("#sheet").classList.remove("show"); $("#sheetbg").classList.remove("show"); document.body.classList.remove("sheet-open"); }
+function closeSheet(){ ui.exdOpen=false; $("#sheet").classList.remove("show"); $("#sheetbg").classList.remove("show"); document.body.classList.remove("sheet-open"); }
 new MutationObserver(()=>{ document.body.classList.toggle("sheet-open",$("#sheet").classList.contains("show")); }).observe(document.getElementById("sheet"),{attributes:true,attributeFilter:["class"]});
 function applySwap(sid,name){ const w=ui.w; const arr=(st.swaps[sid]||[]).filter(s=>s.from<w); arr.push({from:w,name}); st.swaps[sid]=arr; save(); closeSheet(); render(); toast("Ab Woche "+w+": "+name); }
 
@@ -1230,7 +1235,8 @@ document.addEventListener("click",e=>{ const pop=$("#pop"); const c=e.target.clo
   pop.style.top=Math.max(8,row.top-ph-6)+"px"; pop.style.left=Math.max(10,row.left)+"px";
   window._popAt=Date.now(); clearTimeout(popT); popT=setTimeout(()=>pop.classList.remove("show"),4000); });
 window.addEventListener("scroll",()=>{ if(Date.now()-(window._popAt||0)<500) return; const p_=document.getElementById("pop"); if(p_) p_.classList.remove("show"); },{passive:true});
-document.addEventListener("change",e=>{ const t=e.target; if(t.dataset.grpsel!==undefined){ const n=t.dataset.grpsel, g=t.value, le=libEntry(n); if(le&&le.g===g) delete st.groupOv[n]; else st.groupOv[n]=g; save(); render(); toast("Muskelgruppe: "+g); }
+document.addEventListener("change",e=>{ const t=e.target;
+  if(t.dataset.locmode!==undefined){ st.locMode=st.locMode||{}; if(t.value==="split") st.locMode[t.dataset.locmode]="split"; else delete st.locMode[t.dataset.locmode]; save(); buildDays(); render(); toast(t.value==="split"?"Studio wird getrennt geführt":"Homegym & Studio teilen sich die Gewichte"); const sid=$("#sheet").dataset.sid; if(ui.sheetCtx&&ui.sheetCtx[0]==="swap"&&$("#sheet").classList.contains("show")&&!ui.exdOpen) openSwap(sid); else if(ui.exdOpen) openExDetail(canon(ui.exd)); return; } if(t.dataset.grpsel!==undefined){ const n=t.dataset.grpsel, g=t.value, le=libEntry(n); if(le&&le.g===g) delete st.groupOv[n]; else st.groupOv[n]=g; save(); render(); toast("Muskelgruppe: "+g); }
   if(t.dataset.repsel!==undefined){ const n=t.dataset.repsel, v=+t.value; if(!v) delete st.repMax[n]; else st.repMax[n]={max:v,from:(st.repMax[n]||{}).from&&st.repMax[n].from>(st.cycle||1)?st.repMax[n].from:0}; save(); buildDays(); render(); toast(v?"Höchstens "+v+" Wdh. pro Satz":"Wiederholungen wieder frei"); } });
 document.addEventListener("focusin",e=>{ const el=e.target; if(el.matches&&el.matches("input[data-f],input[data-ff]")){ document.body.classList.add("typing"); prefillRow(el); setTimeout(()=>{ try{ el.select(); }catch(_){} },30); } });
 document.addEventListener("focusout",e=>{ setTimeout(()=>{ if(!document.activeElement||!document.activeElement.matches("input,textarea")) document.body.classList.remove("typing"); },150); });
@@ -1304,7 +1310,7 @@ function vStatus(place){ const all=sessionsAll(); const cw=currentWeek(); const 
   return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last?relDay(last.date)+" · "+esc(last.tag):"noch nie – los geht’s"}</b></div>
    ${place?`<div class="placewrap">${place}</div>`:""}</div>`; }
 function weekStreak(){ const cw=currentWeek(); let n=0; for(let w=cw;w>=1;w--){ if(weekDone(w)) n++; else if(w===cw) continue; else break; } return n; }
-function exStats(){ const m={}; for(const k in st.log){ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) continue; const L0=st.log[k]; let name=L0.name||exName(slot,+w); if(!name) continue;
+function exStats(){ const m={}; for(const k in st.log){ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) continue; const L0=st.log[k]; let name=canon(L0.name)||exName(slot,+w); if(!name) continue;
     const lo=L0.loc||locOf(+w,+d); if(isMachine(name)&&lo!=="home") name+=" · "+studioName(lo);
     st.log[k].sets.forEach(z=>{ const kg=num(z.kg); if(!z.ok||kg==null) return; const e=m[name]||(m[name]={name,g:slot.g,weeks:{},best:0,n:0}); e.n++;
       const cur=e.weeks[w]; if(!cur||kg>cur.kg) e.weeks[w]={kg,reps:z.reps}; if(kg>e.best) e.best=kg; }); }
@@ -1339,7 +1345,7 @@ function openExDetail(name){ const e=exStats().find(x=>x.name===name); if(!e) re
   g+=`<text x="${px}" y="${Hd-1}" fill="#8A8D94" font-size="10">W1</text><text x="${Wd-8}" y="${Hd-1}" fill="#8A8D94" font-size="10" text-anchor="end">W${NW}</text></svg>`;
   $("#sheet").innerHTML=`<div class="grab"></div><h3>${esc(name)}</h3><p>${esc(e.g)} · Bestwert ${fk(e.best)} kg · ${e.n} Sätze</p>${g}
    <div style="margin-top:8px">${ws.slice().reverse().map(w=>`<div class="row"><div class="l">Woche ${w}${W(w).deload?" · Deload":""}</div><div class="r"><b style="font-size:18px">${fk(e.weeks[w].kg)} kg</b><small>× ${esc(e.weeks[w].reps||"–")}</small></div></div>`).join("")}</div>
-   <button class="btn" data-act="close">Schließen</button>`;
+   ${locModeRow(name)?`<div class="exdloc">${locModeRow(name)}</div>`:""}<button class="btn" data-act="close">Schließen</button>`; ui.exd=name; ui.exdOpen=true;
   $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
 function vHistory(){ const all=sessionsAll(); if(!all.length) return `<p class="lead" style="margin-top:16px">Abgeschlossene Einheiten erscheinen hier – antippen zum Ansehen.</p>`;
   let m0="", h=""; all.forEach(s=>{ const m=s.date?s.date.toLocaleDateString("de-DE",{month:"long",year:"numeric"}):"Ohne Datum"; if(m!==m0){ h+=`<div class="grp">${esc(m)}</div>`; m0=m; }
@@ -1593,6 +1599,12 @@ function vBackupNote(){ const now=new Date(), today=iso(now); if(st.backupSnooze
   if(!due) return "";
   return `<div class="bknote"><div><b>${now.getDay()===0?"Sonntag – Zeit für die Sicherung":"Deine Sicherung ist überfällig"}</b><span>${last?"Letzte Sicherung vor "+days+(days===1?" Tag":" Tagen"):"Noch keine Sicherung"} · am besten in iCloud Drive speichern</span></div>
     <div class="bkbtns"><button class="chip on" data-act="export">Jetzt sichern</button><button class="chip" data-act="bksnooze">Später</button></div></div>`; }
+function dedupeN(a){ const s=new Set(); return a.filter(e=>s.has(e.n)?false:(s.add(e.n),true)); }
+function locModeRow(name){ const b=baseOf(name); if(!isFree(b)) return ""; const split=(st.locMode||{})[b]==="split";
+  return `<div class="frow sel"><span>Homegym & Studio<small>freie Gewichte</small></span><select data-locmode="${esc(b)}"><option value="shared" ${split?"":"selected"}>gemeinsame Gewichte</option><option value="split" ${split?"selected":""}>getrennt führen</option></select></div>`; }
+document.addEventListener("click",e=>{ const card=e.target.closest("section.ex[data-slot]"); if(!card||ui.tab!=="train") return;
+  if(e.target.closest("button,input,select,textarea,[data-cuetog],.sets,.setbtns,.techbox,.techrow,.adjbox,.sugline,.calib,.e1,.target,.warm,.skiprow")) return;
+  if(!e.target.closest(".exl")) return; openCtx(card.dataset.slot,card); });
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
