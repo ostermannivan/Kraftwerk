@@ -18,4 +18,4 @@ Wichtig
 · Regelmäßig unter Einstellungen → „Sicherung exportieren“ eine Sicherung anlegen
   (z. B. in „Dateien“ oder iCloud Drive), am besten nach jedem Block.
 · Updates: neue index.html hochladen und in sw.js die Versionsnummer erhöhen
-  (kraftwerk-v1 → kraftwerk-v2). Beim nächsten Start mit Internet wird aktualisiert.
+  (Schema Monat.Jahr.Nummer, z. B. kraftwerk-10.26.1 → kraftwerk-10.26.2). Beim nächsten Start mit Internet wird aktualisiert.
