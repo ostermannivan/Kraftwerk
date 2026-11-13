@@ -155,7 +155,7 @@ header.top{ padding:14px 0 6px; }
 /* Tabs */
 nav.tabs{ position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(10,11,13,.94); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
   border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px); }
-nav.tabs .in{ max-width:560px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); height:64px; }
+nav.tabs .in{ max-width:560px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); height:64px; }
 nav.tabs button{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:11px; color:var(--muted); }
 nav.tabs button svg{ width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.6; }
 nav.tabs button.sel{ color:var(--gold); }
@@ -652,6 +652,26 @@ section.ex.lifted{ transform:scale(1.02); transition:transform .2s ease; positio
 .bknote{ background:var(--s1); border-radius:16px; box-shadow:inset 0 0 0 1px rgba(201,164,92,.35); padding:12px 14px; margin:8px 0 12px; display:flex; flex-direction:column; gap:10px; }
 .bknote b{ display:block; font-size:15px; font-weight:600; } .bknote span{ display:block; font-size:12.5px; color:var(--muted); margin-top:2px; } .bkbtns{ display:flex; gap:8px; }
 section.ex .exl{ cursor:pointer; } .exdloc{ margin:10px 0 2px; }
+
+/* ===== Wochenplaner ===== */
+.pcount{ display:flex; align-items:baseline; gap:8px; margin:12px 2px 8px; } .pcount b{ font-family:var(--serif); font-weight:400; font-size:26px; color:var(--gold2); } .pcount span{ font-size:12.5px; color:var(--muted); }
+.pbox{ background:var(--s1); border-radius:16px; box-shadow:inset 0 1px 0 var(--hair); overflow:hidden; }
+.prow{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--hair); min-height:56px; } .prow:last-child{ border-bottom:0; }
+.prow.today{ background:#17150F; box-shadow:inset 2px 0 0 var(--gold); }
+.pd{ width:44px; flex:0 0 auto; } .pd b{ display:block; font-size:15px; font-weight:600; } .pd span{ font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.ps{ flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; } .ps em{ font-style:normal; font-size:13px; color:#5F636B; }
+.pplus{ font-style:normal; font-size:11px; color:var(--muted); }
+.pchip{ display:inline-flex; align-items:center; height:32px; padding:0 12px; border-radius:16px; font-size:13.5px; font-weight:600; border:1px solid var(--line); color:var(--text); background:var(--s2); white-space:nowrap; }
+.pchip.str{ border-color:rgba(201,164,92,.55); color:var(--gold2); } .pchip.run{ border-color:rgba(127,161,195,.6); color:#A9C4DE; } .pchip.swim{ border-color:rgba(110,190,190,.55); color:#9FD6D2; }
+.pchip.done{ background:#142019; border-color:var(--sage); color:var(--sage); }
+.pedit{ width:32px; height:32px; border-radius:9px; color:var(--muted); font-size:18px; flex:0 0 auto; }
+.piss{ margin:10px 0 0; padding:10px 12px; border-radius:12px; background:#1D1612; box-shadow:inset 0 0 0 1px rgba(168,113,79,.5); } .piss b{ display:block; font-size:13px; color:#E0A58C; margin-bottom:4px; } .piss span{ display:block; font-size:12.5px; color:var(--silver); padding:1px 0; }
+.pprev{ margin-top:14px; } .pnav{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; } .pnav span{ font-size:13px; color:var(--silver); } .pnav button{ width:40px; height:36px; border-radius:10px; background:var(--s2); font-size:20px; color:var(--gold2); }
+.pprev .btn{ margin-top:10px; }
+.ptoday{ font-family:var(--sans) !important; font-size:14px !important; color:var(--gold2) !important; font-weight:600 !important; }
+.status .r2{ text-align:right; }
+.calg .cd.en{ background:#131B24; color:#A9C4DE; } .calg .cd.en i{ background:#7FA1C3; } .calg .cd i.e2{ margin-left:4px; background:#7FA1C3; }
+.about .linkbtn{ margin:8px auto 0; }
 </style>
 </head>
 <body>
@@ -668,6 +688,7 @@ section.ex .exl{ cursor:pointer; } .exdloc{ margin:10px 0 2px; }
   <button id="tminus">−15 s</button><button id="tplus">+15 s</button><button id="tstop">Fertig</button></div></div>
 <nav class="tabs"><div class="in">
   <button data-tab="train"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>Training</button>
+  <button data-tab="week"><svg viewBox="0 0 24 24"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg>Woche</button>
   <button data-tab="rec"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Fortschritt</button>
   <button data-tab="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Einstellungen</button>
 </div></nav>
@@ -739,7 +760,7 @@ const FBQ=[["Ermüdung am Blockende",[["kaum",1],["fordernd, aber gut",0],["am L
 const MAIN_NAMES = Object.values(D.MAIN);
 
 /* ============ Speicher ============ */
-const KEY = "kraftwerk.v1"; const APPVER = "10.26.18";
+const KEY = "kraftwerk.v1"; const APPVER = "11.26.1";
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const DEF = ()=>({ v:1, set:{ start:"2026-10-26", kb:140, bd:105, kh:170, kb2:null, bd2:null, kh2:null, kb3:null, bd3:null, kh3:null,
   round:2.5, fpkb:0.88, fpbd:0.92, wake:false, sound:true, tracked:D.TRACKED.slice(), split:"mix", name:"", wustart:70, goalkb:200, goalbd:"", goalkh:250, goaldate:"",
@@ -905,7 +926,8 @@ function dayDone(w,d){ const day=daysFor(w)[d]; if(!day) return {all:0,ok:0,done
 
 /* ============ UI-Zustand ============ */
 var ui = { tab:"train", w:currentWeek(), d:0, hint:{}, opt:{}, adj:{} };
-(function pickDay(){ for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; return; } } ui.d=started(ui.w,3)?3:0; })();
+(function pickDay(){ try{ const pl=(st.wplan||{})[ui.w], ti=todayIdx(ui.w); if(pl&&ti>=0){ const id=pl[ti].find(x=>x in STRD); if(id&&!dayDone(ui.w,STRD[id]).done){ ui.d=STRD[id]; return; } } }catch(e){}
+  for(let d=0;d<3;d++){ if(!dayDone(ui.w,d).done){ ui.d=d; return; } } ui.d=started(ui.w,3)?3:0; })();
 
 /* ============ Render ============ */
 let lastView="";
@@ -914,6 +936,7 @@ function render(){ buildDays();
   document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("sel",b.dataset.tab===ui.tab));
   const app=$("#app");
   if(ui.tab==="train") app.innerHTML=vTrain();
+  if(ui.tab==="week") app.innerHTML=vWeek();
   if(ui.tab==="rec") app.innerHTML=vProg();
   if(ui.tab==="body"){ ui.tab="set"; app.innerHTML=vSet(); }
   if(ui.tab==="set"){ app.innerHTML=vSet(); groupSettings(); }
@@ -936,7 +959,7 @@ function vTrain(){
   const sp_=st.wsplit[w]; const disp=DAYS.length===5?(sp_===0?[0,4,1,2,3]:[0,1,2,4,3]):[0,1,2,3];
   h+=`<div class="days" style="grid-template-columns:repeat(${DAYS.length},1fr)">`+disp.map(i=>[DAYS[i],i]).map(([dd,i])=>{ const s=dayDone(w,i); const opt=dd.optional&&!started(w,i)&&i!==d;
     const lab=dd.pull?"Pull":dd.split?"Push":dd.tag; const sub=dd.pull||dd.split?(DAYS[sp_]||{}).tag||"":"";
-    return `<button class="day ${i===d?"sel":""} ${s.done?"done":""} ${opt?"optx":""}" data-day="${i}"><b>${lab}</b><span>${s.done?"✓ "+((d_=>d_?d_.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}):"")(sessDate(w,i))):s.ok?s.ok+"/"+s.all:(dd.optional?"optional":sub||"offen")}</span></button>`; }).join("")+`</div></div>`;
+    return `<button class="day ${i===d?"sel":""} ${s.done?"done":""} ${opt?"optx":""}" data-day="${i}"><b>${lab}</b><span>${s.done?"✓ "+((d_=>d_?d_.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}):"")(sessDate(w,i))):s.ok?s.ok+"/"+s.all:(planDayLabel(w,i)||(dd.optional?"optional":sub||"offen"))}</span></button>`; }).join("")+`</div></div>`;
   if(P.deload && (w===5||w===10)) h+=vFeedback(P.block+1);
   if(day.optional && !started(w,d)) h+=`<p class="lead small">Optionaler Tag – zählt erst, sobald du den ersten Satz abhakst.</p>`;
   if(day.pull) h+=`<p class="lead small">Zusätzliche Pull-Einheit dieser Woche.</p>`;
@@ -1145,7 +1168,7 @@ function vSet(){
    <button class="btn" data-act="csv">Trainingsdaten als CSV (für Excel)</button>
    <button class="btn" data-act="cfgreset">Sätze & Supersätze zurücksetzen</button>
    <button class="btn danger" data-act="reset">Alle Trainingsdaten löschen</button>
-   <div class="about"><span>Über Kraftwerk</span><small>15-Wochen-Powerbuilding · Version ${APPVER} · Daten nur auf diesem Gerät</small></div></div>`;
+   <div class="about"><span>Über Kraftwerk</span><small>15-Wochen-Powerbuilding · Version ${APPVER} · Daten nur auf diesem Gerät</small><button class="linkbtn" data-act="selftest">Selbsttest</button></div></div>`;
 }
 
 /* ============ Tauschen ============ */
@@ -1215,7 +1238,7 @@ function toggleSet(sid,i,kgDefault,force){
   if(s.ok&&isMain){ const e=topE1(slot.lift,ui.w); const anyPrev=[...Array(NW)].some((_,k)=>k+1!==ui.w&&topE1(slot.lift,k+1)!=null);
     if(e!=null&&anyPrev&&(prevBest==null||e>prevBest)){ showPR(exName(slot,ui.w),e); setTimeout(()=>{ const el=document.querySelector(`[data-slot="${sid}"] .e1`); if(el) el.classList.add("glow"); },60); } }
 }
-function clearTraining(){ st.tech={}; st.skip={}; st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
+function clearTraining(){ st.wplan={}; st.endu={}; st.wcfg={}; st.tech={}; st.skip={}; st.log={}; st.dates={}; st.ends={}; st.notes={}; st.sess={}; st.form={}; st.setov={}; st.fb={}; st.wsplit={}; }
 function prefillRow(inp){ const row=inp.closest(".set"), box=inp.closest(".finputs"); const host=row||box; if(!host) return;
   const sid=row?inp.closest("[data-slot]").dataset.slot:box.dataset.slot; const i=row?+row.dataset.i:+box.dataset.i; const attr=row?"data-f":"data-ff";
   const slot=slotFor(ui.d,sid); if(!slot) return; const r=rx(slot,ui.w); const L=ensureLog(ui.w,ui.d,sid,r.sets); const s=L.sets[i]; if(s.ok) return; const calibLast=isCalib(slot,ui.w)&&i===r.sets-1;
@@ -1308,7 +1331,7 @@ function relDay(dt){ if(!dt) return "–"; const a=new Date(); a.setHours(0,0,0,
   return n===0?"heute":n===1?"gestern":n<7?"vor "+n+" Tagen":b.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}); }
 function vStatus(place){ const all=sessionsAll(); const cw=currentWeek(); const done=[0,1,2].filter(d=>dayDone(cw,d).done).length; const last=all[0];
   return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last?relDay(last.date)+" · "+esc(last.tag):"noch nie – los geht’s"}</b></div>
-   ${place?`<div class="placewrap">${place}</div>`:""}</div>`; }
+   ${planTodayText()?`<div class="r2"><span>Heute geplant</span><b class="ptoday">${esc(planTodayText())}</b></div>`:""}${place?`<div class="placewrap">${place}</div>`:""}</div>`; }
 function weekStreak(){ const cw=currentWeek(); let n=0; for(let w=cw;w>=1;w--){ if(weekDone(w)) n++; else if(w===cw) continue; else break; } return n; }
 function exStats(){ const m={}; for(const k in st.log){ const [w,d,sid]=k.split("|"); const slot=slotFor(+d,sid); if(!slot) continue; const L0=st.log[k]; let name=canon(L0.name)||exName(slot,+w); if(!name) continue;
     const lo=L0.loc||locOf(+w,+d); if(isMachine(name)&&lo!=="home") name+=" · "+studioName(lo);
@@ -1524,14 +1547,15 @@ function setRing(n,done,cur){ const R=88, C=2*Math.PI*R, seg=C/Math.max(1,n), ga
   f.addEventListener("touchend",e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; sx=null; if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.5) return;
     const q=focusQueue(); ui.fi=Math.max(0,Math.min(q.length,ui.fi+(dx<0?1:-1))); renderFocus(); },{passive:true}); })();
 function vCalendar(){ const byDay={}; sessionsAll().forEach(s=>{ if(!s.date) return; const k=iso(s.date); (byDay[k]=byDay[k]||[]).push(s); });
+  const enDay={}; Object.values(st.endu||{}).forEach(e=>{ if(e&&e.done&&e.date) enDay[iso(new Date(e.date))]=1; });
   const s0=startDate(), now=new Date(); const m=new Date(s0.getFullYear(),s0.getMonth(),1);
-  let h=`<div class="sec"><h3>Kalender</h3><p class="lead small">Gold: Trainingstag · ✓ grün: Woche komplett geschafft</p>`;
+  let h=`<div class="sec"><h3>Kalender</h3><p class="lead small">Gold: Kraft · Blau: Laufen/Schwimmen · ✓ grün: Kraftwoche komplett</p>`;
   while(m<=now){ const y=m.getFullYear(), mo=m.getMonth(), days=new Date(y,mo+1,0).getDate(), off=(new Date(y,mo,1).getDay()+6)%7;
     h+=`<div class="cal"><b>${m.toLocaleDateString("de-DE",{month:"long",year:"numeric"})}</b><div class="calg">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<span class="cw">${x}</span>`).join("")}<span class="cw"></span>`;
     let col=0; const endRow=(monday)=>{ const wk=Math.floor((monday-s0)/6048e5)+1; const inPlan=wk>=1&&wk<=NW; h+=`<span class="wkst ${inPlan&&weekDone(wk)?"full":""}">${inPlan?(weekDone(wk)?"✓":"W"+wk):""}</span>`; };
     for(let k=0;k<off;k++){ h+="<span></span>"; col++; }
-    for(let dd=1;dd<=days;dd++){ const dt=new Date(y,mo,dd), k=iso(dt), ss=byDay[k];
-      h+=`<span class="cd ${ss?"on":""} ${k===iso(now)?"today":""}">${dd}${ss?"<i></i>":""}</span>`; col++;
+    for(let dd=1;dd<=days;dd++){ const dt=new Date(y,mo,dd), k=iso(dt), ss=byDay[k], en=enDay[k];
+      h+=`<span class="cd ${ss?"on":en?"en":""} ${k===iso(now)?"today":""}">${dd}${ss||en?`<i></i>`:""}${ss&&en?`<i class="e2"></i>`:""}</span>`; col++;
       if(col===7){ const mon=new Date(y,mo,dd-6); endRow(mon); col=0; } }
     if(col>0){ const mon=new Date(y,mo,days-col+1); for(let k=col;k<7;k++) h+="<span></span>"; endRow(mon); }
     h+=`</div></div>`; m.setMonth(m.getMonth()+1); }
@@ -1605,6 +1629,106 @@ function locModeRow(name){ const b=baseOf(name); if(!isFree(b)) return ""; const
 document.addEventListener("click",e=>{ const card=e.target.closest("section.ex[data-slot]"); if(!card||ui.tab!=="train") return;
   if(e.target.closest("button,input,select,textarea,[data-cuetog],.sets,.setbtns,.techbox,.techrow,.adjbox,.sugline,.calib,.e1,.target,.warm,.skiprow")) return;
   if(!e.target.closest(".exl")) return; openCtx(card.dataset.slot,card); });
+/* ============ Wochenplaner ============ */
+const WD=["Mo","Di","Mi","Do","Fr","Sa","So"];
+const SESS={ok1:"OK1",ok2:"OK2",uk1:"UK1",uk2:"UK2",l1:"Lauf",l2:"Lauf",s:"Schwimmen"};
+const SIDS=["ok1","uk1","ok2","uk2","l1","l2","s"], STRD={ok1:0,uk1:1,ok2:2,uk2:3};
+const pIsRun=x=>x==="l1"||x==="l2", pIsStr=x=>x in STRD;
+function planCfg(w){ st.wcfg=st.wcfg||{}; if(!st.wcfg[w]){ const p=st.wcfg[w-1]; st.wcfg[w]=p?{dbl:p.dbl.slice(),rest:p.rest}:{dbl:[0,0,0,0,0,1,1],rest:0}; } return st.wcfg[w]; }
+function planDayOf(days,id){ return days.findIndex(a=>a.includes(id)); }
+const cgap=(a,b)=>((b-a-1)%7+7)%7;            // Tage zwischen a und b (vorwärts, über das Wochenende hinaus)
+const cdist=(a,b)=>Math.min(Math.abs(a-b),7-Math.abs(a-b));
+function planNormalize(days){ const u1=planDayOf(days,"uk1"), u2=planDayOf(days,"uk2"), a=planDayOf(days,"ok1"), b=planDayOf(days,"ok2");
+  if(u1<0||u2<0||a<0||b<0) return days; const sc=d=>cdist(d,u1)-cdist(d,u2);
+  if(sc(a)>sc(b)){ days[a]=days[a].map(x=>x==="ok1"?"ok2":x); days[b]=days[b].map(x=>x==="ok2"?"ok1":x); } return days; }
+function planIssues(days,cfg){ const out=[]; const at=id=>planDayOf(days,id);
+  SIDS.forEach(id=>{ if(at(id)<0) out.push(SESS[id]+" ist noch keinem Tag zugeordnet"); });
+  days.forEach((a,i)=>{ if(a.length>2) out.push(WD[i]+": mehr als zwei Einheiten");
+    if(a.filter(pIsStr).length>1) out.push(WD[i]+": zwei Krafteinheiten an einem Tag");
+    if(a.length===2&&!a.some(pIsStr)) out.push(WD[i]+": Lauf und Schwimmen am selben Tag");
+    if(a.length>=2&&cfg&&!cfg.dbl[i]) out.push(WD[i]+": Doppeltraining ist für diesen Tag nicht freigegeben"); });
+  const u1=at("uk1"), u2=at("uk2"), o1=at("ok1"), o2=at("ok2"), runs=["l1","l2"].map(at).filter(x=>x>=0), sw=at("s");
+  if(sw===1) out.push("Schwimmen am Dienstag ist nicht möglich");
+  if(u2>=0&&runs.length&&!runs.includes((u2+1)%7)) out.push("Am Tag nach UK2 fehlt der Lauf");
+  if(u1>=0) runs.forEach(r=>{ if(r===u1||r===(u1+1)%7||r===(u1+6)%7) out.push("Lauf direkt vor, nach oder an UK1 ("+WD[r]+")"); });
+  if(u2>=0&&runs.includes(u2)) out.push("Lauf am UK2-Tag – der Lauf gehört auf den Tag danach");
+  if(u1>=0&&u2>=0){ if(cgap(u1,u2)<2||cgap(u2,u1)<2) out.push("Zwischen UK1 und UK2 liegen weniger als 2 Tage");
+    const lo=Math.min(u1,u2), hi=Math.max(u1,u2); if(![o1,o2].some(o=>o>lo&&o<hi)) out.push("Zwischen UK1 und UK2 fehlt ein OK-Tag"); }
+  if(o1>=0&&o2>=0&&(cgap(o1,o2)<2||cgap(o2,o1)<2)) out.push("Zwischen den OK-Tagen liegen weniger als 2 Tage");
+  return [...new Set(out)]; }
+function genPlans(w){ const cfg=planCfg(w), res=[], seen=new Set(); const prev=(st.wplan||{})[w-1]; const prevSw=prev?planDayOf(prev,"s"):-1;
+  for(let u1=0;u1<7;u1++) for(let u2=0;u2<7;u2++){ if(u2===u1||cgap(u1,u2)<2||cgap(u2,u1)<2) continue;
+    for(let a=0;a<7;a++) for(let b=a+1;b<7;b++){ if([u1,u2].includes(a)||[u1,u2].includes(b)) continue; if(cgap(a,b)<2||cgap(b,a)<2) continue;
+      for(let r1=0;r1<7;r1++) for(let r2=r1+1;r2<7;r2++) for(let s=0;s<7;s++){ if(s===1) continue;
+        const days=[[],[],[],[],[],[],[]]; days[u1].push("uk1"); days[u2].push("uk2"); days[a].push("ok1"); days[b].push("ok2"); days[r1].push("l1"); days[r2].push("l2"); days[s].push("s");
+        if(days.filter(x=>x.length>=2).length!==cfg.rest) continue; planNormalize(days); if(planIssues(days,cfg).length) continue;
+        const key=days.map(x=>x.map(y=>SESS[y]).join("+")).join("|"); if(seen.has(key)) continue; seen.add(key);
+        let sc=(s===prevSw?6:0)+(Math.abs(r1-r2)===1?1:0); days.forEach((x,i)=>{ if(x.length>=2&&i<5) sc+=1; if(!x.length&&i>=5) sc+=1; });
+        res.push({days,sc}); } } }
+  res.sort((x,y)=>x.sc-y.sc); return res.slice(0,60).map(x=>x.days); }
+function todayIdx(w){ const t=new Date(); t.setHours(0,0,0,0); const n=Math.round((t-weekDate(w))/864e5); return n>=0&&n<7?n:-1; }
+function sessDone(w,id){ return pIsStr(id)?dayDone(w,STRD[id]).done:!!((st.endu||{})[w+"|"+id]||{}).done; }
+function planDayLabel(w,d){ const pl=(st.wplan||{})[w]; if(!pl) return ""; const id=Object.keys(STRD).find(k=>STRD[k]===d); const i=planDayOf(pl,id); return i>=0?WD[i]:""; }
+function planTodayText(){ const w=currentWeek(), pl=(st.wplan||{})[w], i=todayIdx(w); if(!pl||i<0) return ""; return pl[i].length?pl[i].map(x=>SESS[x]).join(" + "):"Ruhetag"; }
+function pChip(w,id,di,live){ const dn=live&&sessDone(w,id); const e=((st.endu||{})[w+"|"+id])||{}; const extra=!pIsStr(id)&&dn&&(e.km||e.min)?` · ${e.km?esc(e.km)+" km":esc(e.min)+" min"}`:"";
+  return `<${live?"button":"span"} class="pchip ${pIsStr(id)?"str":pIsRun(id)?"run":"swim"} ${dn?"done":""}" ${live?`data-psess="${id}|${di}"`:""}>${dn?"✓ ":""}${SESS[id]}${extra}</${live?"button":"span"}>`; }
+function planRows(w,days,live){ const ti=todayIdx(w); return days.map((a,i)=>`<div class="prow ${i===ti&&live?"today":""}"><div class="pd"><b>${WD[i]}</b><span>${dshort(weekDate(w,i))}</span></div>
+   <div class="ps">${a.length?a.map(id=>pChip(w,id,i,live)).join(a.length>1?'<i class="pplus">dann</i>':""):'<em>Ruhetag</em>'}</div>${live?`<button class="pedit" data-pday="${i}" aria-label="${WD[i]} bearbeiten">⋯</button>`:""}</div>`).join(""); }
+function vWeek(){ const w=ui.w, P=W(w), cfg=planCfg(w), pl=(st.wplan||{})[w];
+  let h=`<header class="top"><div class="brand"><h1>Kraftwerk</h1><span class="today">${dshort(weekDate(w))} – ${dshort(weekDate(w,6))}</span></div>
+   <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button></h2><div class="sub">Wochenplan – Kraft, Laufen, Schwimmen</div></div></header>`;
+  if(pl){ const iss=planIssues(pl,cfg), n=SIDS.filter(id=>sessDone(w,id)).length;
+    h+=`<div class="pcount"><b>${n} / 7</b><span>Einheiten erledigt</span></div><div class="pbox">${planRows(w,pl,true)}</div>`;
+    if(iss.length) h+=`<div class="piss"><b>Passt noch nicht zu deinen Regeln</b>${iss.map(x=>`<span>${esc(x)}</span>`).join("")}</div>`; }
+  else h+=`<p class="lead" style="margin:14px 2px">Für diese Woche gibt es noch keinen Plan. Lass dir gültige Wochen vorschlagen – deine Regeln sind eingebaut.</p>`;
+  const g=ui.pgen&&ui.pgen.w===w?ui.pgen:null;
+  if(!pl||g||ui.pset){ h+=`<div class="sec"><h3>${pl?"Neu planen":"Woche planen"}</h3>
+    <div class="frow2"><span>Ruhetage<small>= Tage mit Doppeltraining</small></span><div class="chips">${[0,1,2,3].map(n=>`<button class="chip ${cfg.rest===n?"on":""}" data-prest="${n}">${n}</button>`).join("")}</div></div>
+    <div class="frow2"><span>Doppeltraining möglich</span><div class="chips">${WD.map((d,i)=>`<button class="chip ${cfg.dbl[i]?"on":""}" data-pdbl="${i}">${d}</button>`).join("")}<button class="chip" data-pdbl="all">Ferien: alle</button></div></div>
+    <button class="btn gold" data-act="pgen">Wochen vorschlagen</button>`;
+    if(g){ h+= g.list.length?`<div class="pprev"><div class="pnav"><button data-act="pprev" aria-label="Vorheriger Vorschlag">‹</button><span>Vorschlag ${g.i+1} von ${g.list.length}</span><button data-act="pnext" aria-label="Nächster Vorschlag">›</button></div>
+        <div class="pbox">${planRows(w,g.list[g.i],false)}</div><button class="btn gold" data-act="ptake">Diesen Plan übernehmen</button></div>`
+      :`<p class="lead small" style="margin-top:10px">Mit diesen Vorgaben gibt es keine Woche, die alle Regeln erfüllt. ${cfg.rest?"Gib mehr Tage für Doppeltraining frei oder senke die Ruhetage.":"Erlaube ein Doppeltraining oder passe den Plan von Hand an."}</p>`; }
+    h+=`</div>`; }
+  else h+=`<button class="linkbtn" data-act="pset">Woche neu planen</button>`;
+  h+=`<p class="lead small" style="margin:18px 2px 0">Regeln: nach UK2 ein Lauf · kein Lauf direkt vor oder nach UK1 · UK1 und UK2 mit mindestens 2 Tagen Abstand und einem OK-Tag dazwischen · OK-Tage mit mindestens 2 Tagen Abstand · Schwimmen nie dienstags.</p>`;
+  return h; }
+function openEndu(id){ const w=ui.w, k=w+"|"+id; st.endu=st.endu||{}; const e=st.endu[k]||{}; const run=pIsRun(id);
+  $("#sheet").innerHTML=`<div class="grab"></div><h3>${SESS[id]}</h3><p>Ein Tipp genügt – Strecke und Zeit sind freiwillig.</p>
+   <div class="form"><div class="frow"><span>${run?"Kilometer":"Meter"}</span><input inputmode="decimal" data-endu="${k}|km" value="${esc(e.km||"")}" placeholder="optional"></div>
+   <div class="frow"><span>Minuten</span><input inputmode="numeric" data-endu="${k}|min" value="${esc(e.min||"")}" placeholder="optional"></div></div>
+   <button class="btn gold" data-endone="${k}">${e.done?"✓ Erledigt – zurücknehmen":"Erledigt"}</button><button class="btn" data-act="close">Schließen</button>`;
+  $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
+function openPlanDay(di){ const w=ui.w, pl=st.wplan[w];
+  $("#sheet").innerHTML=`<div class="grab"></div><h3>${WD[di]} · ${dshort(weekDate(w,di))}</h3><p>Antippen legt die Einheit auf diesen Tag (oder nimmt sie wieder weg).</p>
+   ${SIDS.map(id=>{ const at=planDayOf(pl,id); return `<button class="opt ${at===di?"cur":""}" data-pmove="${id}|${di}"><span class="n">${SESS[id]}${id==="l2"?" (2.)":""}</span><span class="o">${at===di?"hier":at>=0?WD[at]:"offen"}</span></button>`; }).join("")}
+   <button class="btn" data-act="close">Fertig</button>`;
+  $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
+document.addEventListener("click",e=>{ const t=e.target.closest("button"); if(!t) return; const w=ui.w, d=t.dataset;
+  if(d.prest!==undefined){ planCfg(w).rest=+d.prest; ui.pgen=null; save(); render(); return; }
+  if(d.pdbl!==undefined){ const c=planCfg(w); if(d.pdbl==="all") c.dbl=c.dbl.every(x=>x)?[0,0,0,0,0,1,1]:[1,1,1,1,1,1,1]; else c.dbl[+d.pdbl]=c.dbl[+d.pdbl]?0:1; ui.pgen=null; save(); render(); return; }
+  if(d.act==="pgen"){ ui.pgen={w,list:genPlans(w),i:0}; render(); return; }
+  if(d.act==="pnext"||d.act==="pprev"){ const g=ui.pgen; if(g&&g.list.length){ g.i=(g.i+(d.act==="pnext"?1:g.list.length-1))%g.list.length; render(); } return; }
+  if(d.act==="ptake"){ const g=ui.pgen; if(g&&g.list.length){ st.wplan=st.wplan||{}; st.wplan[w]=JSON.parse(JSON.stringify(g.list[g.i])); ui.pgen=null; ui.pset=false; save(); render(); window.scrollTo(0,0); toast("Wochenplan übernommen"); } return; }
+  if(d.act==="pset"){ ui.pset=true; render(); return; }
+  if(d.psess){ const [id,di]=d.psess.split("|"); if(pIsStr(id)){ ui.tab="train"; ui.d=STRD[id]; render(); window.scrollTo(0,0); } else openEndu(id); return; }
+  if(d.pday!==undefined){ openPlanDay(+d.pday); return; }
+  if(d.pmove){ const [id,di]=d.pmove.split("|"); const pl=st.wplan[w]; const at=planDayOf(pl,id); if(at>=0) pl[at]=pl[at].filter(x=>x!==id); if(at!==+di) pl[+di].push(id);
+    pl.forEach(a=>a.sort((x,y)=>(pIsStr(y)?1:0)-(pIsStr(x)?1:0))); planNormalize(pl); save(); render(); openPlanDay(+di); return; }
+  if(d.endone){ st.endu=st.endu||{}; const e=st.endu[d.endone]=st.endu[d.endone]||{}; e.done=!e.done; e.date=e.done?new Date().toISOString():null; save(); closeSheet(); render(); if(e.done) haptic(); return; } });
+document.addEventListener("input",e=>{ const t=e.target; if(t.dataset&&t.dataset.endu){ const p=t.dataset.endu.split("|"), f=p.pop(), k=p.join("|"); st.endu=st.endu||{}; (st.endu[k]=st.endu[k]||{})[f]=t.value; save(); } });
+/* ============ Selbsttest ============ */
+function selfTest(){ const errs=[]; let n=0; const ok=(c,msg)=>{ n++; if(!c) errs.push(msg); };
+  try{ ok(typeof st==="object"&&st.set&&st.log,"Zustand unvollständig"); ok(JSON.stringify(JSON.parse(JSON.stringify(st)))===JSON.stringify(st),"Zustand nicht speicherbar");
+    for(let w=1;w<=NW;w++){ const DX=daysFor(w); ok(DX.length>=4,"Woche "+w+": Tage fehlen");
+      DX.forEach((day,d)=>day.slots.forEach(s=>{ try{ const nm=exName(s,w); if(nm==null) return; const r=rx(s,w); ok(r.sets>=1&&r.sets<=12,`W${w} ${day.tag} ${nm}: Satzzahl ${r.sets}`); if(s.t) ok(isFinite(r.kg)&&r.kg>0,`W${w} ${day.tag} ${nm}: Gewicht fehlt`); ok(!!String(r.reps),`W${w} ${nm}: Wdh. fehlen`); }catch(e){ errs.push(`W${w} ${day.tag}: ${e.message}`); } })); }
+    [70,95,120,150,155,185].forEach(k=>{ const wu=warmups(k); ok(wu.length>=1&&wu.every((x,i)=>i===0||typeof x[0]!=="number"||x[0]>(typeof wu[i-1][0]==="number"?wu[i-1][0]:0)),"Aufwärmen bei "+k+" kg nicht aufsteigend"); });
+    const keep=JSON.stringify(st.wcfg||{}); [[0,[0,0,0,0,0,1,1]],[1,[0,0,0,0,0,1,1]],[2,[0,0,0,0,0,1,1]]].forEach(([rest,dbl])=>{ st.wcfg=st.wcfg||{}; st.wcfg[99]={rest,dbl}; const g=genPlans(99); ok(g.length>0,"Wochenplaner: keine Lösung bei "+rest+" Ruhetagen"); g.slice(0,5).forEach(p=>ok(planIssues(p,st.wcfg[99]).length===0,"Wochenplaner: Vorschlag verletzt Regeln")); });
+    st.wcfg=JSON.parse(keep);
+    ok(currentWeek()>=1&&currentWeek()<=NW,"Aktuelle Woche außerhalb des Plans"); ok(typeof vTrain()==="string"&&vTrain().length>500,"Trainingsansicht leer"); ok(vProg().length>300,"Fortschritt leer"); ok(vWeek().length>300,"Wochenplan leer");
+  }catch(e){ errs.push("Abbruch: "+e.message); }
+  return {n,errs}; }
+
 /* ============ Timer ============ */
 let tEnd=0,tTot=0,tInt=null,actx=null;
 function setAudioType(ty){ try{ if(navigator.audioSession) navigator.audioSession.type=ty; }catch(e){} }
@@ -1646,6 +1770,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.fbuse){ const f=st.fb[t.dataset.fbuse]; if(f){ f.use=f.use===false; save(); render(); } return; }
   if(t.dataset.act==="onboard"){ st.onboarded=true; save(); ui.w=currentWeek(); ui.d=0; render(); toast("Los geht’s – viel Erfolg!"); return; }
   if(t.dataset.act==="csv") return doCsv();
+  if(t.dataset.act==="selftest"){ const r=selfTest(); $("#sheet").innerHTML=`<div class="grab"></div><h3>Selbsttest</h3><p>${r.n} Prüfungen · ${r.errs.length?r.errs.length+" Auffälligkeiten":"alles in Ordnung"}</p>${r.errs.slice(0,20).map(x=>`<div class="row"><div class="l">${esc(x)}</div></div>`).join("")}<button class="btn" data-act="close">Schließen</button>`; $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); return; }
   if(t.dataset.act==="bksnooze"){ st.backupSnooze=iso(new Date()); save(); render(); return; }
   if(t.dataset.act==="cycle"){ openCycle(); return; }
   if(t.dataset.act==="cyclego"){ if(confirm("Neuen Zyklus starten? Die Trainingsdaten des aktuellen Zyklus werden archiviert.")) startCycle(); return; }
