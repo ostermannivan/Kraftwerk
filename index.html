@@ -50,12 +50,14 @@
 
 /* ---------- Grundlagen ---------- */
 html{ scroll-padding-top:env(safe-area-inset-top,0px); -webkit-text-size-adjust:100%; }
+/* iOS 26 (WebKit-Fehler 301108): Eine Home-Bildschirm-App bekommt eine um die Statusleiste zu kurze Anzeige,
+   solange die Seite kürzer als der Bildschirm ist – die Leiste unten schwebt dann über einem schwarzen Streifen. */
+@media (display-mode: standalone){ html{ min-height:min(100lvh, calc(100% + env(safe-area-inset-top,0px))); } }
 *, *::before, *::after{ box-sizing:inherit; -webkit-tap-highlight-color:transparent; }
 body{ margin:0; background:var(--bg); color:var(--text); font-size:var(--fs-xl); line-height:1.4; overscroll-behavior-y:none; font-family:var(--sans); letter-spacing:-.003em; }
 button{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
 input, textarea, select{ font:inherit; color:var(--gold2); }
 :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
-#vh{ position:fixed; inset:0; visibility:hidden; pointer-events:none; }
 #hapt{ position:fixed; left:-99px; top:-99px; opacity:0; pointer-events:none; }
 .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 var(--rand) 150px; }
 #app.enter{ animation:enter .32s cubic-bezier(.2,.7,.2,1); }
@@ -133,7 +135,8 @@ input, textarea, select{ font:inherit; color:var(--gold2); }
 .fp.on b{ color:var(--gold2); }
 .pausepick{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:6px 0 10px; }
 .newrow{ display:flex; gap:8px; margin:8px 0; }
-.newrow input{ flex:1; height:40px; border-radius:var(--r1); border:1px solid var(--line); background:var(--s2); color:var(--text); padding:0 12px; font-size:var(--fs-l); }
+.newrow button{ flex:0 0 auto; }
+.newrow input{ flex:1; min-width:0; height:40px; border-radius:var(--r1); border:1px solid var(--line); background:var(--s2); color:var(--text); padding:0 12px; font-size:var(--fs-l); }
 .exnotein{ min-height:64px; border-radius:var(--r1); border:1px solid var(--inline); background:var(--inbg); padding:8px 10px; font-size:var(--fs-l); width:100%; }
 .frow.sel{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin:8px 0; }
 .frow.sel select{ margin-left:auto; appearance:none; -webkit-appearance:none; background:var(--s2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23C9A45C' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--line); border-radius:var(--r1); color:var(--text); font-size:var(--fs-l); height:40px; padding:0 32px 0 12px; max-width:58%; }
@@ -372,7 +375,6 @@ section.ex .exl{ cursor:pointer; }
 .pchip.run{ border-color:rgba(127,161,195,.6); color:var(--run); }
 .pchip.swim{ border-color:rgba(110,190,190,.55); color:#9FD6D2; }
 .pchip.done{ background:var(--sage-bg); border-color:var(--sage); color:var(--sage); }
-.pedit{ width:32px; height:32px; border-radius:9px; color:var(--muted); font-size:18px; flex:0 0 auto; }
 .piss{ margin:10px 0 0; padding:10px 12px; border-radius:var(--r2); background:#1D1612; box-shadow:inset 0 0 0 1px rgba(168,113,79,.5); }
 .piss b{ display:block; font-size:var(--fs-m); color:var(--warn); margin-bottom:4px; }
 .piss span{ display:block; font-size:var(--fs-sm); color:var(--silver); padding:1px 0; }
@@ -381,8 +383,17 @@ section.ex .exl{ cursor:pointer; }
 .pnav{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
 .pnav span{ font-size:var(--fs-m); color:var(--silver); }
 .pnote{ margin:14px 2px 12px; }
-.plinks{ display:flex; justify-content:center; gap:20px; margin-top:6px; }
-.plinks .linkbtn{ display:inline-block; margin:0; }
+.hbtn{ position:absolute; right:2px; bottom:26px; height:34px; padding:0 16px; border-radius:17px; border:1px solid rgba(var(--gold-rgb),.55); color:var(--gold2); font-size:var(--fs-ml); font-weight:600; }
+.hbtn.on{ background:var(--gold); border-color:var(--gold); color:var(--ink); }
+.ppool{ display:flex; align-items:center; gap:10px; min-height:56px; padding:10px 12px; margin-bottom:10px; border-radius:var(--r4); border:1px dashed var(--line); }
+.ppool>span{ width:44px; flex:0 0 auto; font-size:var(--fs-s); color:var(--muted); line-height:1.2; }
+.ziel .prow{ cursor:pointer; }
+.pbox.ziel{ box-shadow:inset 0 0 0 1px rgba(var(--gold-rgb),.35); }
+.ppool.ziel{ cursor:pointer; border-color:rgba(var(--gold-rgb),.55); }
+.pchip.pick{ background:var(--gold); border-color:var(--gold); color:var(--ink); box-shadow:0 0 0 3px rgba(var(--gold-rgb),.25); }
+.pok{ margin:10px 0 0; padding:10px 12px; border-radius:var(--r2); background:var(--sage-bg); color:var(--sage); font-size:var(--fs-m); font-weight:600; }
+.pdays.p8{ grid-template-columns:1.6fr repeat(7,1fr); }
+.chip:disabled{ opacity:.3; }
 .pcfg{ background:var(--s1); border-radius:var(--r4); box-shadow:inset 0 1px 0 var(--hair); padding:2px 14px 14px; margin-top:4px; }
 .pcfg-blk{ padding:12px 0; border-bottom:1px solid var(--hair); }
 .pcfg-blk>span{ display:block; font-size:var(--fs-l); margin-bottom:10px; }
@@ -477,7 +488,9 @@ section.ex .exl{ cursor:pointer; }
 .iosrow b{ display:block; font-size:var(--fs-xl); font-weight:500; color:var(--text); }
 .iosrow small{ display:block; font-size:var(--fs-sm); color:var(--muted); margin-top:1px; }
 .iosrow em{ font-style:normal; font-size:22px; color:var(--dim); }
-.iosback{ display:block; color:var(--gold2); font-size:var(--fs-xl); padding:14px 2px 0; }
+.iosback{ position:sticky; top:env(safe-area-inset-top,0px); z-index:12; display:block; width:calc(100% + 2 * var(--rand)); margin:0 calc(-1 * var(--rand)); padding:12px calc(var(--rand) + 2px) 10px; text-align:left; color:var(--gold2); font-size:var(--fs-xl); background:rgba(var(--bg-rgb),.86); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+.iosback::before{ content:""; position:absolute; left:0; right:0; bottom:100%; height:env(safe-area-inset-top,0px); background:var(--bg); }
+body.scrolled .iosback{ border-bottom:1px solid var(--hair); }
 .iospage .sec{ background:var(--s1); border-radius:var(--r3); padding:12px 14px; margin:12px 0; }
 .iospage .sec h3{ font-size:var(--fs-m); font-family:var(--sans); font-weight:500; color:var(--muted); margin:0 0 6px; }
 .iospage .frow{ border-bottom:1px solid var(--hair); padding:10px 0; }
@@ -627,7 +640,6 @@ body.typing #jumpset{ display:none; }
 <div class="sheetbg" id="sheetbg"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
-<div id="vh" aria-hidden="true"></div>
 <label id="hapt" aria-hidden="true"><input type="checkbox" switch tabindex="-1"></label>
 <div id="undo" role="status"><span></span><button data-undo>Rückgängig</button></div>
 <div id="acts" class="actsheet" role="dialog"></div>
@@ -1483,7 +1495,7 @@ const SIDS = ["ok1", "uk1", "ok2", "uk2", "l1", "l2", "s"],
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.3";
+const APPVER = "11.26.4";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -2075,10 +2087,11 @@ function hidListEdit() {
   return st.hiddenBy[l] || (st.hiddenBy[l] = st.hiddenEx.slice());
 }
 
-/** Planer-Vorgaben der Woche (lesen): eigene, sonst die der Vorwoche, sonst Standard (Doppeltraining Sa/So, 0 Ruhetage). */
+/** Planer-Vorgaben der Woche (lesen): eigene, sonst die der Vorwoche, sonst Standard (Doppeltraining Sa/So, 0 Ruhetage, Schwimmtag offen). */
 function planCfg(w) {
   const c = st.wcfg[w] || st.wcfg[w - 1];
-  return c ? { dbl: c.dbl.slice(), rest: c.rest } : { dbl: [0, 0, 0, 0, 0, 1, 1], rest: 0 };
+  const swim = (st.wcfg[w] || {}).swim ?? -1; // Schwimmtag gilt nur für die eigene Woche
+  return c ? { dbl: c.dbl.slice(), rest: c.rest, swim } : { dbl: [0, 0, 0, 0, 0, 1, 1], rest: 0, swim };
 }
 /** … zum Ändern: legt die Vorgaben der Woche an. */
 function planCfgEdit(w) {
@@ -2884,6 +2897,7 @@ function planIssues(days, cfg) {
     runs = ["l1", "l2"].map(at).filter((x) => x >= 0),
     sw = at("s");
   if (sw === 1) out.push("Schwimmen am Dienstag ist nicht möglich");
+  if (runs.length === 2 && !runs.some((r) => r >= 5)) out.push("Am Wochenende fehlt ein Lauf");
   if (u2 >= 0 && runs.length && !runs.includes((u2 + 1) % 7)) out.push("Am Tag nach UK2 fehlt der Lauf");
   if (u1 >= 0)
     runs.forEach((r) => {
@@ -2914,7 +2928,7 @@ function genPlans(w, cfg = planCfg(w)) {
           for (let r1 = 0; r1 < 7; r1++)
             for (let r2 = r1 + 1; r2 < 7; r2++)
               for (let s = 0; s < 7; s++) {
-                if (s === 1) continue;
+                if (s === 1 || (cfg.swim >= 0 && s !== cfg.swim)) continue;
                 const days = [[], [], [], [], [], [], []];
                 days[u1].push("uk1");
                 days[u2].push("uk2");
@@ -3386,47 +3400,69 @@ function showPR(name, e) {
 }
 
 /* ---------- Woche ---------- */
-function pChip(w, id, di, live) {
-  const dn = live && sessDone(w, id);
+function pChip(w, id, di, modus) {
+  const dn = modus !== "vorschau" && sessDone(w, id);
   const e = st.endu[w + "|" + id] || {};
   const extra = !pIsStr(id) && dn && (e.km || e.min) ? ` · ${e.km ? esc(e.km) + " km" : esc(e.min) + " min"}` : "";
-  return `<${live ? "button" : "span"} class="pchip ${pIsStr(id) ? "str" : pIsRun(id) ? "run" : "swim"} ${dn ? "done" : ""}" ${live ? `data-psess="${id}|${di}"` : ""}>${dn ? "✓ " : ""}${SESS[id]}${extra}</${live ? "button" : "span"}>`;
+  const art = `pchip ${pIsStr(id) ? "str" : pIsRun(id) ? "run" : "swim"} ${dn ? "done" : ""}`;
+  const text = `${dn ? "✓ " : ""}${SESS[id]}${extra}`;
+  if (modus === "edit") return `<button class="${art} ${ui.ppick === id ? "pick" : ""}" data-ppick="${id}">${text}</button>`;
+  if (modus === "live") return `<button class="${art}" data-psess="${id}">${text}</button>`;
+  return `<span class="${art}">${text}</span>`;
 }
-/** Wochenplan: zuerst der Plan der Woche, die Vorgaben für Vorschläge liegen zugeklappt darunter. */
+const LEERPLAN = () => [[], [], [], [], [], [], []];
+/** Wochenplan. Planen (Vorschläge, Vorgaben, selbst einteilen) liegt hinter dem Knopf oben rechts. */
 function vWeek() {
   const w = ui.w,
     cfg = planCfg(w),
-    pl = st.wplan[w],
+    edit = ui.pedit === w,
+    pl = st.wplan[w] || (edit ? LEERPLAN() : null),
     g = ui.pgen && ui.pgen.w === w ? ui.pgen : null;
   let h = `<header class="top"><div class="brand"><h1>Kraftwerk</h1><span class="today">${dshort(weekDate(w))} – ${dshort(weekDate(w, 6))}</span></div>
-   <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button></h2><div class="sub">Wochenplan – Kraft, Laufen, Schwimmen</div></div></header>`;
+   <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button></h2><div class="sub">Wochenplan – Kraft, Laufen, Schwimmen</div></div>
+   ${g ? "" : edit ? `<button class="hbtn on" data-act="pedit">Fertig</button>` : `<button class="hbtn" data-act="pplan">Planen</button>`}</header>`;
   if (g) {
     h += g.list.length
       ? `<div class="pprev"><div class="pnav"><button data-act="pprev" aria-label="Vorheriger Vorschlag">‹</button><span>Vorschlag ${g.i + 1} von ${g.list.length}</span><button data-act="pnext" aria-label="Nächster Vorschlag">›</button></div>
-        <div class="pbox">${planRows(w, g.list[g.i], false)}</div><button class="btn gold" data-act="ptake">Diesen Plan übernehmen</button><button class="btn" data-act="pcancel">Abbrechen</button></div>`
-      : `<p class="lead pnote">Mit diesen Vorgaben gibt es keine Woche, die alle Regeln erfüllt. ${cfg.rest ? "Gib mehr Tage für Doppeltraining frei oder nimm weniger Ruhetage." : "Plane einen Ruhetag mit Doppeltraining ein."}</p>`;
-  } else if (pl) {
-    const iss = planIssues(pl, cfg),
-      n = SIDS.filter((id) => sessDone(w, id)).length;
-    h += `<div class="pcount"><b>${n} / 7</b><span>Einheiten erledigt</span></div><div class="pbox">${planRows(w, pl, true)}</div>`;
-    if (iss.length) h += `<div class="piss"><b>Passt noch nicht zu deinen Regeln</b>${iss.map((x) => `<span>${esc(x)}</span>`).join("")}</div>`;
-  } else {
-    h += `<p class="lead pnote">Für diese Woche gibt es noch keinen Plan.</p><button class="btn gold" data-act="pgen">Woche vorschlagen</button>`;
+        <div class="pbox">${planRows(w, g.list[g.i], "vorschau")}</div><button class="btn gold" data-act="ptake">Diesen Plan übernehmen</button><button class="btn" data-act="pcancel">Abbrechen</button></div>`
+      : `<p class="lead pnote">Mit diesen Vorgaben gibt es keine Woche, die alle Regeln erfüllt. ${cfg.rest ? "Gib mehr Tage für Doppeltraining frei oder nimm weniger Ruhetage." : "Plane einen Ruhetag mit Doppeltraining ein."}</p>
+        <button class="btn gold" data-act="pplan">Vorgaben ändern</button><button class="btn" data-act="pcancel">Abbrechen</button>`;
+    return h;
   }
-  h += `<div class="plinks">${pl && !g ? `<button class="linkbtn" data-act="pgen">Neu vorschlagen</button>` : ""}<button class="linkbtn" data-act="pset">${ui.pset ? "Vorgaben ausblenden" : "Vorgaben und Regeln"}</button></div>`;
-  if (ui.pset) h += vPlanCfg(cfg);
+  if (!pl) return h + `<p class="lead pnote">Für diese Woche gibt es noch keinen Plan. Oben rechts auf „Planen“ tippen – für Vorschläge oder um selbst einzuteilen.</p>`;
+  const iss = planIssues(pl, cfg);
+  if (edit) {
+    const offen = SIDS.filter((id) => planDayOf(pl, id) < 0);
+    h += `<p class="lead pnote">${ui.ppick ? `<b>${SESS[ui.ppick]}</b> gewählt – tippe auf den Tag, auf den die Einheit soll.` : "Tippe auf eine Einheit und dann auf den Tag, auf den sie soll."}</p>
+      <div class="ppool ${ui.ppick ? "ziel" : ""}" data-pdrop="-1"><span>Ohne Tag</span><div class="ps">${offen.length ? offen.map((id) => pChip(w, id, -1, "edit")).join("") : "<em>alle Einheiten verteilt</em>"}</div></div>
+      <div class="pbox ${ui.ppick ? "ziel" : ""}">${planRows(w, pl, "edit")}</div>`;
+  } else {
+    const n = SIDS.filter((id) => sessDone(w, id)).length;
+    h += `<div class="pcount"><b>${n} / 7</b><span>Einheiten erledigt</span></div><div class="pbox">${planRows(w, pl, "live")}</div>`;
+  }
+  h += iss.length
+    ? `<div class="piss"><b>Verstößt gegen deine Regeln</b>${iss.map((x) => `<span>${esc(x)}</span>`).join("")}</div>`
+    : edit ? `<div class="pok">✓ Passt zu allen Regeln</div>` : "";
   return h;
 }
-/** Vorgaben für die Vorschläge: Ruhetage, Tage mit Doppeltraining, Regeln. */
-function vPlanCfg(cfg) {
-  const alle = cfg.dbl.every((x) => x);
-  return `<div class="pcfg">
+/** Blatt „Woche planen“: Vorschläge, selbst einteilen, Vorgaben und Regeln. */
+function planSheetHtml() {
+  const w = ui.w, cfg = planCfg(w), alle = cfg.dbl.every((x) => x);
+  return `<div class="grab"></div><h3>Woche ${w} planen</h3><p>Lass dir gültige Wochen vorschlagen oder teile die Einheiten selbst ein – die App prüft dabei deine Regeln.</p>
+   <button class="btn gold" data-act="pgen">Wochen vorschlagen</button><button class="btn" data-act="pedit">${st.wplan[w] ? "Plan selbst ändern" : "Selbst einteilen"}</button>
+   <div class="pcfg">
+   <div class="pcfg-blk"><span>Schwimmen<small>Wenn du den Tag schon kennst, trag ihn ein – die Vorschläge richten sich danach.</small></span>
+    <div class="pdays p8"><button class="chip ${cfg.swim < 0 ? "on" : ""}" data-pswim="-1">offen</button>${WD.map((d, i) => `<button class="chip ${cfg.swim === i ? "on" : ""}" data-pswim="${i}" ${i === 1 ? 'disabled aria-label="Dienstag: kein Schwimmen"' : ""}>${d}</button>`).join("")}</div></div>
    <div class="pcfg-blk"><span>Ruhetage<small>Sieben Einheiten auf sieben Tage – für jeden Ruhetag wird an einem anderen Tag doppelt trainiert.</small></span>
     <div class="chips">${[0, 1, 2, 3].map((n) => `<button class="chip ${cfg.rest === n ? "on" : ""}" data-prest="${n}">${n}</button>`).join("")}</div></div>
    ${cfg.rest ? `<div class="pcfg-blk"><span>Doppeltraining möglich an</span>
     <div class="pdays">${WD.map((d, i) => `<button class="chip ${cfg.dbl[i] ? "on" : ""}" data-pdbl="${i}">${d}</button>`).join("")}</div>
     <button class="linkbtn" data-pdbl="all">${alle ? "Nur Samstag und Sonntag" : "Alle Tage (Ferien)"}</button></div>` : ""}
-   <p class="prules">Regeln: nach UK2 ein Lauf · kein Lauf direkt vor oder nach UK1 · UK1 und UK2 mit mindestens 2 Tagen Abstand und einem OK-Tag dazwischen · OK-Tage mit mindestens 2 Tagen Abstand · Schwimmen nie dienstags.</p></div>`;
+   <p class="prules">Regeln: mindestens ein Lauf am Wochenende · nach UK2 ein Lauf · kein Lauf direkt vor oder nach UK1 · UK1 und UK2 mit mindestens 2 Tagen Abstand und einem OK-Tag dazwischen · OK-Tage mit mindestens 2 Tagen Abstand · Schwimmen nie dienstags.</p></div>
+   <button class="btn" data-act="close">Schließen</button>`;
+}
+function openPlanSheet() {
+  openSheet(planSheetHtml());
 }
 
 /* ---------- Fortschritt ---------- */
@@ -3810,16 +3846,18 @@ function locModeRow(name) {
   const split = st.locMode[b] === "split";
   return `<div class="frow sel"><span>Homegym & Studio<small>freie Gewichte</small></span><select data-locmode="${esc(b)}"><option value="shared" ${split ? "" : "selected"}>gemeinsame Gewichte</option><option value="split" ${split ? "selected" : ""}>getrennt führen</option></select></div>`;
 }
-/** Zeilen des Wochenplans in zeitlicher Reihenfolge der Plan-Woche, beschriftet mit dem echten Wochentag. */
-function planRows(w, days, live) {
+/** Zeilen des Wochenplans in zeitlicher Reihenfolge der Plan-Woche, beschriftet mit dem echten Wochentag.
+ *  modus: "live" = Einheiten antippbar, "edit" = Einheit wählen und Tag als Ziel antippen, "vorschau" = nur ansehen. */
+function planRows(w, days, modus) {
   const ti = todayIdx(w),
-    s0 = planStartWd();
+    s0 = planStartWd(),
+    edit = modus === "edit";
   return [0, 1, 2, 3, 4, 5, 6]
     .map((k) => (s0 + k) % 7)
     .map((i) => {
       const a = days[i];
-      return `<div class="prow ${i === ti && live ? "today" : ""}"><div class="pd"><b>${WD[i]}</b><span>${dshort(planDate(w, i))}</span></div>
-   <div class="ps">${a.length ? a.map((id) => pChip(w, id, i, live)).join(a.length > 1 ? '<i class="pplus">dann</i>' : "") : "<em>Ruhetag</em>"}</div>${live ? `<button class="pedit" data-pday="${i}" aria-label="${WD[i]} bearbeiten">⋯</button>` : ""}</div>`;
+      return `<div class="prow ${i === ti && modus === "live" ? "today" : ""}" ${edit ? `data-pdrop="${i}"` : ""}><div class="pd"><b>${WD[i]}</b><span>${dshort(planDate(w, i))}</span></div>
+   <div class="ps">${a.length ? a.map((id) => pChip(w, id, i, modus)).join(a.length > 1 ? '<i class="pplus">dann</i>' : "") : "<em>Ruhetag</em>"}</div></div>`;
     })
     .join("");
 }
@@ -4046,6 +4084,9 @@ const ui = {
   volPick: {}, // gewählte Option je Volumen-Vorschlag
   asked: {}, // „Alle Sätze geschafft“ wurde für diese Einheit schon gefragt
   ctxCard: null, // Übungskarte, zu der das Kontextmenü offen ist
+  pgen: null, // Wochenvorschläge { w, list, i }
+  pedit: null, // Woche, deren Plan gerade selbst eingeteilt wird
+  ppick: null, // gewählte Einheit beim Einteilen
 };
 
 /* ---------- Blätter ---------- */
@@ -4213,18 +4254,6 @@ function openEndu(id) {
    <div class="form"><div class="frow"><span>${run ? "Kilometer" : "Meter"}</span><input inputmode="decimal" data-endu="${k}|km" value="${esc(e.km || "")}" placeholder="optional"></div>
    <div class="frow"><span>Minuten</span><input inputmode="numeric" data-endu="${k}|min" value="${esc(e.min || "")}" placeholder="optional"></div></div>
    <button class="btn gold" data-endone="${k}">${e.done ? "✓ Erledigt – zurücknehmen" : "Erledigt"}</button><button class="btn" data-act="close">Schließen</button>`;
-  showSheet();
-}
-function openPlanDay(di) {
-  const w = ui.w,
-    pl = st.wplan[w];
-  $("#sheet").innerHTML =
-    `<div class="grab"></div><h3>${WD[di]} · ${dshort(planDate(w, di))}</h3><p>Antippen legt die Einheit auf diesen Tag (oder nimmt sie wieder weg).</p>
-   ${SIDS.map((id) => {
-     const at = planDayOf(pl, id);
-     return `<button class="opt ${at === di ? "cur" : ""}" data-pmove="${id}|${di}"><span class="n">${SESS[id]}${id === "l2" ? " (2.)" : ""}</span><span class="o">${at === di ? "hier" : at >= 0 ? WD[at] : "offen"}</span></button>`;
-   }).join("")}
-   <button class="btn" data-act="close">Fertig</button>`;
   showSheet();
 }
 function openCtx(sid, card) {
@@ -4843,9 +4872,15 @@ const AKTION = {
     toast("Ausgeblendete Übungen wiederhergestellt");
   },
   // Wochenplaner
+  pplan() {
+    openPlanSheet();
+  },
   pgen() {
-    schlageVor();
+    closeSheet();
+    ui.pedit = null;
+    ui.pgen = { w: ui.w, list: genPlans(ui.w), i: 0 };
     render();
+    window.scrollTo(0, 0);
   },
   pcancel() {
     ui.pgen = null;
@@ -4862,21 +4897,37 @@ const AKTION = {
     if (!g || !g.list.length) return;
     st.wplan[ui.w] = JSON.parse(JSON.stringify(g.list[g.i]));
     ui.pgen = null;
-    ui.pset = false;
     save();
     render();
     window.scrollTo(0, 0);
     toast("Wochenplan übernommen");
   },
-  pset() {
-    ui.pset = !ui.pset;
+  pedit() {
+    const w = ui.w;
+    closeSheet();
+    ui.ppick = null;
+    if (ui.pedit === w) {
+      // Fertig: ein Plan ohne jede Einheit wird nicht gespeichert
+      ui.pedit = null;
+      if (st.wplan[w] && st.wplan[w].every((a) => !a.length)) delete st.wplan[w];
+    } else {
+      ui.pedit = w;
+      if (!st.wplan[w]) {
+        st.wplan[w] = LEERPLAN();
+        const sw = planCfg(w).swim;
+        if (sw >= 0) st.wplan[w][sw].push("s");
+      }
+    }
+    save();
     render();
   },
 };
-/** Erzeugt Wochenvorschläge mit den aktuellen Vorgaben; gibt es keinen, werden die Vorgaben aufgeklappt. */
-function schlageVor() {
-  ui.pgen = { w: ui.w, list: genPlans(ui.w), i: 0 };
-  if (!ui.pgen.list.length) ui.pset = true;
+/** Ändert eine Vorgabe im Blatt „Woche planen“ und zeichnet das Blatt neu. */
+function aendereVorgabe(fn) {
+  fn(planCfgEdit(ui.w));
+  save();
+  render();
+  openPlanSheet();
 }
 function addStudio(inp, anwenden) {
   const n = inp.value.trim();
@@ -5381,21 +5432,18 @@ const KLICK = {
 
   /* --- Wochenplaner --- */
   prest(t, v) {
-    planCfgEdit(ui.w).rest = +v;
-    if (ui.pgen) schlageVor();
-    save();
-    render();
+    aendereVorgabe((c) => (c.rest = +v));
   },
   pdbl(t, v) {
-    const c = planCfgEdit(ui.w);
-    if (v === "all") c.dbl = c.dbl.every((x) => x) ? [0, 0, 0, 0, 0, 1, 1] : [1, 1, 1, 1, 1, 1, 1];
-    else c.dbl[+v] = c.dbl[+v] ? 0 : 1;
-    if (ui.pgen) schlageVor();
-    save();
-    render();
+    aendereVorgabe((c) => {
+      if (v === "all") c.dbl = c.dbl.every((x) => x) ? [0, 0, 0, 0, 0, 1, 1] : [1, 1, 1, 1, 1, 1, 1];
+      else c.dbl[+v] = c.dbl[+v] ? 0 : 1;
+    });
   },
-  psess(t, v) {
-    const id = v.split("|")[0];
+  pswim(t, v) {
+    aendereVorgabe((c) => (c.swim = +v));
+  },
+  psess(t, id) {
     if (pIsStr(id)) {
       ui.tab = "train";
       ui.d = STRD[id];
@@ -5403,20 +5451,24 @@ const KLICK = {
       window.scrollTo(0, 0);
     } else openEndu(id);
   },
-  pday(t, v) {
-    openPlanDay(+v);
+  ppick(t, id) {
+    ui.ppick = ui.ppick === id ? null : id;
+    render();
   },
-  pmove(t, v) {
-    const [id, di] = v.split("|"),
-      pl = st.wplan[ui.w],
-      at = planDayOf(pl, id);
-    if (at >= 0) pl[at] = pl[at].filter((x) => x !== id);
-    if (at !== +di) pl[+di].push(id);
-    pl.forEach((a) => a.sort((x, y) => (pIsStr(y) ? 1 : 0) - (pIsStr(x) ? 1 : 0)));
-    planNormalize(pl);
+  pdrop(t, v) {
+    const id = ui.ppick,
+      pl = st.wplan[ui.w];
+    if (!id || !pl) return;
+    const von = planDayOf(pl, id),
+      nach = +v;
+    if (von >= 0) pl[von] = pl[von].filter((x) => x !== id);
+    if (nach >= 0) {
+      pl[nach].push(id);
+      pl[nach].sort((x, y) => (pIsStr(y) ? 1 : 0) - (pIsStr(x) ? 1 : 0)); // Kraft zuerst
+    }
+    ui.ppick = null;
     save();
     render();
-    openPlanDay(+di);
   },
   endone(t, key) {
     const e = (st.endu[key] = st.endu[key] || {});
@@ -5598,7 +5650,7 @@ document.addEventListener("click", (e) => {
     toggleHint(hinweis.dataset.cuetog);
     return;
   }
-  const knopf = ziel.closest("button,[data-pick]");
+  const knopf = ziel.closest("button,[data-pick],[data-pdrop]");
   if (knopf) {
     waehle(KLICK, knopf);
     return;
@@ -5642,7 +5694,6 @@ document.addEventListener("visibilitychange", () => {
   else {
     wake();
     tick();
-    neuMessen();
   }
 });
 
@@ -5730,24 +5781,8 @@ document.addEventListener("focusout", (e) => {
   setTimeout(() => {
     if (!document.activeElement || !document.activeElement.matches("input,textarea")) document.body.classList.remove("typing");
   }, 150);
-  if (e.target.matches && e.target.matches("input,textarea,select")) [180, 600].forEach((ms) => setTimeout(neuMessen, ms));
 });
 
-/* iOS-Fehler bei Apps auf dem Home-Bildschirm: Nach Tastatur oder Datumsauswahl bleibt die Anzeige verkleinert –
-   die Leiste unten schwebt zu hoch, darunter bleibt ein schwarzer Streifen. Ein Element in voller Bildschirmhöhe
-   kurz aus- und wieder einzublenden zwingt iOS, die Höhe neu zu messen. */
-let vollHoehe = innerHeight;
-addEventListener("resize", () => {
-  vollHoehe = Math.max(vollHoehe, innerHeight);
-});
-function neuMessen() {
-  if (vollHoehe - innerHeight <= 4 || document.activeElement?.matches?.("input,textarea,select")) return;
-  const v = $("#vh");
-  v.style.display = "none";
-  void v.offsetHeight;
-  v.style.display = "";
-  void v.offsetHeight;
-}
 
 /* ---------- Gesten ---------- */
 // Fokus-Modus: wischen = vorheriger / nächster Satz
@@ -5954,7 +5989,7 @@ function selfTest() {
     }
   };
   const vorher = JSON.stringify(st);
-  const uiVorher = { tab: ui.tab, w: ui.w, d: ui.d, ptab: ui.ptab, sgPage: ui.sgPage, pgen: ui.pgen };
+  const uiVorher = { tab: ui.tab, w: ui.w, d: ui.d, ptab: ui.ptab, sgPage: ui.sgPage, pgen: ui.pgen, pedit: ui.pedit, ppick: ui.ppick };
   let html = "";
 
   versuch("Zustand", () => {
@@ -6069,11 +6104,18 @@ function selfTest() {
       "Wochenplaner: Tag außerhalb der Plan-Woche",
     );
     [0, 1, 2].forEach((rest) => {
-      const cfg = { rest, dbl: [0, 0, 0, 0, 0, 1, 1] };
+      const cfg = { rest, dbl: [0, 0, 0, 0, 0, 1, 1], swim: -1 };
       const g = genPlans(1, cfg);
       ok(g.length > 0, "Wochenplaner: keine Lösung bei " + rest + " Ruhetagen");
-      g.slice(0, 5).forEach((p) => ok(planIssues(p, cfg).length === 0, "Wochenplaner: Vorschlag verletzt Regeln"));
+      g.forEach((p) => ok(planIssues(p, cfg).length === 0, "Wochenplaner: Vorschlag verletzt Regeln"));
+      g.forEach((p) => ok(["l1", "l2"].some((id) => planDayOf(p, id) >= 5), "Wochenplaner: Vorschlag ohne Lauf am Wochenende"));
     });
+    [0, 2, 3, 4, 5, 6].forEach((sw) => {
+      const cfg = { rest: 0, dbl: [0, 0, 0, 0, 0, 1, 1], swim: sw };
+      ok(genPlans(1, cfg).every((p) => planDayOf(p, "s") === sw), "Wochenplaner: eingetragener Schwimmtag " + WD[sw] + " wird nicht eingehalten");
+    });
+    const nurWerktags = [["uk1"], ["l1"], ["ok1"], ["l2"], ["uk2"], ["s"], ["ok2"]];
+    ok(planIssues(nurWerktags, null).includes("Am Wochenende fehlt ein Lauf"), "Wochenplaner: fehlender Wochenend-Lauf wird nicht erkannt");
     for (const w in st.wplan) ok(Array.isArray(st.wplan[w]) && st.wplan[w].length === 7, "Wochenplan Woche " + w + " beschädigt");
   });
 
@@ -6097,6 +6139,14 @@ function selfTest() {
       ui.d = 0;
       zeichne("Wochenplan W" + w, 300, vWeek);
     }
+    ui.pedit = ui.w = uiVorher.w;
+    ui.ppick = "uk1";
+    zeichne("Wochenplan selbst einteilen", 300, vWeek);
+    ui.pedit = ui.ppick = null;
+    ui.pgen = { w: ui.w, list: genPlans(ui.w), i: 0 };
+    zeichne("Wochenvorschläge", 300, vWeek);
+    ui.pgen = null;
+    zeichne("Blatt Woche planen", 300, planSheetHtml);
     ui.w = uiVorher.w;
     ui.d = uiVorher.d;
     buildDays();
