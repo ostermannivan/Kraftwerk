@@ -1359,18 +1359,33 @@ const S = [100,97.8,95.5,93.9,92.2,90.7,89.2,87.8,86.3,85.0,83.7,82.4,81.1,79.9,
 
 /* ---------- 15 Wochen: 3 Blöcke je Einstieg, Aufbau, Steigerung, Peak, Deload ---------- */
 // Je Block: Wiederholungen Topset (..t), Backoff (..b), Backoff-Sätze (..s) für Kniebeuge kb, Bank bd, Kreuzheben kh, pausierte Bank pb;
-// pkr/pks = pausierte Kniebeuge; rg/ri = Wiederholungsbereich Grund-/Isolationsübungen
+// kbo = optionaler zusätzlicher Backoff-Satz Kniebeuge; bdhr/bdhs = schwerer Satz Bank nach dem Topset (Wiederholungen/Sätze, optional);
+// pkr/pks = pausierte Kniebeuge (Wiederholungen/Sätze); rg/ri = Wiederholungsbereich Grund-/Isolationsübungen
 // prettier-ignore
 const BLK = {
- 1:{kbt:6,kbb:6,kbs:2,bdt:5,bdb:6,bds:2,kht:5,khb:5,khs:1,pbt:3,pbb:5,pbs:1,pkr:5,pks:2,rg:"8–10",ri:"10"},
- 2:{kbt:5,kbb:5,kbs:2,bdt:4,bdb:5,bds:2,kht:4,khb:4,khs:1,pbt:2,pbb:4,pbs:1,pkr:4,pks:2,rg:"6–8",ri:"8–10"},
- 3:{kbt:4,kbb:4,kbs:2,bdt:3,bdb:4,bds:2,kht:3,khb:3,khs:1,pbt:1,pbb:3,pbs:1,pkr:3,pks:2,rg:"5–7",ri:"8"}};
+ 1:{kbt:6,kbb:6,kbs:2,kbo:0,bdt:5,bdb:6,bds:2,bdhr:3,bdhs:1,kht:6,khb:6,khs:1,pbt:3,pbb:5,pbs:1,pkr:5,pks:3,rg:"8–10",ri:"10"},
+ 2:{kbt:5,kbb:5,kbs:2,kbo:1,bdt:4,bdb:5,bds:2,bdhr:2,bdhs:1,kht:4,khb:4,khs:1,pbt:2,pbb:4,pbs:1,pkr:5,pks:3,rg:"6–8",ri:"8–10"},
+ 3:{kbt:4,kbb:4,kbs:2,kbo:1,bdt:3,bdb:4,bds:2,bdhr:2,bdhs:1,kht:3,khb:4,khs:1,pbt:1,pbb:3,pbs:1,pkr:4,pks:3,rg:"5–7",ri:"8"}};
 // Je Woche: Block, Phase, RIR Topset, Backoff-Anteil vom e1RM, RIR Variante, RIR Assistenz
 // prettier-ignore
 const WK = [
- [1,"Einstieg",4,.70,4,3],[1,"Aufbau",3,.72,3,2],[1,"Steigerung",2,.74,2,2],[1,"Peak",1,.76,2,1],[1,"Deload",4,.65,4,4],
- [2,"Einstieg",4,.72,3,3],[2,"Aufbau",3,.74,3,2],[2,"Steigerung",2,.76,2,2],[2,"Peak",1,.78,1.5,1],[2,"Deload",4,.65,4,4],
- [3,"Einstieg",4,.74,3,3],[3,"Aufbau",3,.76,2,2],[3,"Steigerung",2,.78,2,1],[3,"Peak",1,.80,1.5,1],[3,"Deload",4,.65,4,4]];
+ [1,"Einstieg",4,.70,4,3],[1,"Aufbau",3,.72,3,2],[1,"Steigerung",2,.74,2.5,2],[1,"Peak",1,.76,2,1],[1,"Deload",4,.65,4,4],
+ [2,"Einstieg",4,.72,4,3],[2,"Aufbau",3,.74,3,2],[2,"Steigerung",2,.76,2,2],[2,"Peak",1,.78,1,1],[2,"Deload",4,.65,4,4],
+ [3,"Einstieg",4,.74,4,3],[3,"Aufbau",3,.76,3,2],[3,"Steigerung",2,.78,2,1],[3,"Peak",1,.80,1.5,1],[3,"Deload",4,.65,4,4]];
+// Variante (pausierte Kniebeuge) wie in der Vorlage: 3 × 5 · 3 × 5 · 3 × 4, jeder Block startet bei RIR 4 und fällt jede Woche.
+// Übergang im 1. Zyklus (umgestellt nach Woche 6): schon trainierte Wochen behalten ihre damalige Vorgabe
+// (pks = Sätze, pkr = Wiederholungen, vr = RIR) – sonst gälten sie nachträglich als unvollständig.
+// Kreuzheben (kht/khb) lief in Block 1 des 1. Zyklus noch mit 5 Wiederholungen.
+const UEBERGANG = {
+  1: {
+    1: { pks: 2, kht: 5, khb: 5 },
+    2: { pks: 2, kht: 5, khb: 5 },
+    3: { pks: 2, vr: 2, kht: 5, khb: 5 },
+    4: { pks: 2, kht: 5, khb: 5 },
+    5: { pks: 2, kht: 5, khb: 5 },
+    6: { pks: 2, pkr: 4, vr: 3 },
+  },
+};
 const NW = WK.length;
 
 /* ---------- Trainingstage ---------- */
@@ -1380,7 +1395,12 @@ const BASE_DAYS = [
     id: "ok1",
     name: "Bank",
     tag: "OK1",
-    main: [M_("ok1t", "Topset", "Brust", "bd", "TOP", "3–4 min"), M_("ok1b", "Backoff", "Brust", "bd", "BO", "3 min")],
+    main: [
+      M_("ok1t", "Topset", "Brust", "bd", "TOP", "3–4 min"),
+      // optional wie in der Vorlage: ein schwerer Satz (3 bzw. 2 Wdh.) bei Backoff-Anteil + 10 Prozentpunkte
+      { ...M_("ok1h", "Schwerer Satz", "Brust", "bd", "BO", "3 min"), opt: true, rk: "bdh", plus: 0.1 },
+      M_("ok1b", "Backoff", "Brust", "bd", "BO", "3 min"),
+    ],
     mix: D.OK1_MIX,
     push: D.PUSH1,
     studio: D.OK1_ST,
@@ -1495,7 +1515,7 @@ const SIDS = ["ok1", "uk1", "ok2", "uk2", "l1", "l2", "s"],
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.4";
+const APPVER = "11.26.7";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -1918,7 +1938,7 @@ function pct(reps, rir) {
 function W(w) {
   const r = WK[w - 1];
   const b = BLK[r[0]];
-  return { block: r[0], phase: r[1], top: r[2], bo: r[3], vr: r[4], acc: r[5], deload: r[1] === "Deload", ...b };
+  return { block: r[0], phase: r[1], top: r[2], bo: r[3], vr: r[4], acc: r[5], deload: r[1] === "Deload", ...b, ...(UEBERGANG[st.cycle] || {})[w] };
 }
 let DAYS = [];
 const SLOTDAY = {};
@@ -2322,7 +2342,7 @@ function base1RM(lift, w) {
   return B[lift];
 }
 const isCalibW = (w) => WK[w - 1] && WK[w - 1][1] === "Peak";
-const isCalib = (slot, w) => slot && slot.t === "BO" && ["kb", "bd", "kh"].includes(slot.lift) && isCalibW(w);
+const isCalib = (slot, w) => slot && slot.t === "BO" && !slot.opt && ["kb", "bd", "kh"].includes(slot.lift) && isCalibW(w);
 function setE1(set, defReps, defRir) {
   const kg = num(set.kg);
   if (!kg) return null;
@@ -2368,15 +2388,17 @@ function rx(slot, w) {
     return { sets: ov ?? Math.max(1, P.pks - red), reps: P.pkr, rir: P.vr, pct: p, kg: rnd(base1RM("pkb", w) * p) };
   }
   if (slot.t === "BO") {
-    const k = { bd: ["bdb", "bds"], kb: ["kbb", "kbs"], kh: ["khb", "khs"], pbd: ["pbb", "pbs"] }[slot.lift];
+    const k = { bd: ["bdb", "bds"], bdh: ["bdhr", "bdhs"], kb: ["kbb", "kbs", "kbo"], kh: ["khb", "khs"], pbd: ["pbb", "pbs"] }[slot.rk || slot.lift];
     const e = topE1(slot.lift, w);
     const ref = e ?? base1RM(slot.lift, w);
+    const p = P.bo + (slot.plus || 0);
     return {
-      sets: ov ?? Math.max(1, P[k[1]] - red) + (P.deload ? 0 : st.boAdd[slot.lift] || 0),
+      sets: ov ?? Math.max(1, P[k[1]] - red) + (P.deload || slot.opt ? 0 : st.boAdd[slot.lift] || 0),
       reps: P[k[0]],
-      pct: P.bo,
-      kg: rnd(ref * P.bo),
+      pct: p,
+      kg: rnd(ref * p),
       fromDay: e != null,
+      optSatz: !P.deload && ov == null && P[k[2]] ? 1 : 0, // laut Vorlage möglicher zusätzlicher Satz
     };
   }
   const c = st.cfg[slot.id] || {};
@@ -3030,8 +3052,9 @@ function vTrain() {
   day.slots.forEach((slot) => {
     if (slot.opt && exName(slot, w) != null && !ok_ && !slotStarted(w, d, slot)) {
       if (!optShown) {
-        const n = day.slots.filter((s) => s.opt && exName(s, w) != null).length;
-        h += `<button class="optbtn" data-opt="1">+ ${n} optionale Beinübungen</button>`;
+        const opt = day.slots.filter((s) => s.opt && exName(s, w) != null);
+        const was = opt.every((s) => s.t) ? opt.map((s) => s.art).join(", ") : opt.length + " optionale Beinübungen";
+        h += `<button class="optbtn" data-opt="1">+ ${esc(was)}${opt.every((s) => s.t) ? " (optional)" : ""}</button>`;
         optShown = true;
       }
       return;
@@ -3211,7 +3234,7 @@ function vSlot(slot, w, d) {
   }
   h += `</div>`;
   if (slot.t !== "TOP")
-    h += `<div class="setbtns"><button class="addset" data-addset="${slot.id}">+ Satz</button>${r.sets > 1 ? `<button class="addset" data-subset="${slot.id}">− Satz</button>` : ""}</div>`;
+    h += `<div class="setbtns"><button class="addset" data-addset="${slot.id}">${r.optSatz ? `+ ${r.sets + 1}. Satz (optional)` : "+ Satz"}</button>${r.sets > 1 ? `<button class="addset" data-subset="${slot.id}">− Satz</button>` : ""}</div>`;
   if (
     !main &&
     !P.deload &&
@@ -5525,12 +5548,14 @@ const EINGABE = {
     if (e1) e1.innerHTML = e1Text(slot, ui.w, ui.d);
     if (slot.t !== "TOP") return;
     // Das Backoff-Gewicht hängt vom Topset ab – Zahl und Platzhalter sofort nachführen
-    const bo = DAYS[ui.d].slots.find((s) => s.t === "BO");
-    if (!bo) return;
-    const rb = rx(bo, ui.w),
-      big = document.querySelector(`[data-kg="${bo.id}"]`);
-    if (big) big.innerHTML = f1(rb.kg) + "<small> kg</small>";
-    document.querySelectorAll(`[data-slot="${bo.id}"] [data-f=kg]`).forEach((i) => (i.placeholder = f1(rb.kg).replace(",0", "")));
+    DAYS[ui.d].slots
+      .filter((s) => s.t === "BO")
+      .forEach((bo) => {
+        const rb = rx(bo, ui.w),
+          big = document.querySelector(`[data-kg="${bo.id}"]`);
+        if (big) big.innerHTML = f1(rb.kg) + "<small> kg</small>";
+        document.querySelectorAll(`[data-slot="${bo.id}"] [data-f=kg]`).forEach((i) => (i.placeholder = f1(rb.kg).replace(",0", "")));
+      });
   },
   ff(t, feld) {
     // Fokus-Modus
@@ -6063,6 +6088,10 @@ function selfTest() {
 
   versuch("Plan", () => {
     ok(currentWeek() >= 1 && currentWeek() <= NW, "Aktuelle Woche außerhalb des Plans");
+    [0, 5, 10].forEach((a) => {
+      const v = WK.slice(a, a + 4).map((r) => r[4]);
+      ok(v[0] === 4 && v.every((x, i) => !i || x < v[i - 1]), `Variante Block ${a / 5 + 1}: RIR startet nicht bei 4 oder fällt nicht jede Woche`);
+    });
     for (let w = 1; w <= NW; w++) {
       const DX = daysFor(w);
       ok(DX.length >= 4, "Woche " + w + ": Tage fehlen");
