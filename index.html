@@ -33,7 +33,7 @@
   /* Schrift- und Akzentfarben */
   --silver:#B9BDC4; --bronze:#B07A57; --steel:#7F9CB8; --text:#ECE6D8; --muted:#8D9097; --gold:#C9A45C; --gold2:#E6CD92; --sage:#92BD99;
   /* Abgeleitete Töne */
-  --dim:#5F636B; --ink:#16120A; --ink-sage:#0F1A12; --gold-bg:#1A1712; --gold-bg2:#17150F; --sage-bg:#142019; --cell:#1B1E23; --pop:#1E2128; --menu:rgba(34,37,43,.97); --red:#FF6B5E; --warn:#E0A58C; --run:#A9C4DE; --run2:#7FA1C3;
+  --dim:#5F636B; --ink:#16120A; --ink-sage:#0F1A12; --gold-bg:#1A1712; --gold-bg2:#17150F; --sage-bg:#142019; --cell:#1B1E23; --pop:#1E2128; --menu:rgba(34,37,43,.97); --red:#FF6B5E; --warn:#E0A58C;
   /* Farbanteile für durchscheinende Töne: rgba(var(--gold-rgb),.35) */
   --gold-rgb:201,164,92; --sage-rgb:146,189,153; --bg-rgb:10,11,13;
   /* Radien */
@@ -156,7 +156,7 @@ input, textarea, select{ font:inherit; color:var(--gold2); }
 .weekhead .sub{ font-size:13.5px; color:var(--silver); margin-top:6px; }
 .weeks::-webkit-scrollbar, .weeks.locked{ display:none; }
 .weeks{ display:flex; overflow-x:auto; scrollbar-width:none; gap:6px; padding:10px 0 10px; }
-nav.tabs .in{ max-width:var(--maxw); margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); height:var(--tabbar); }
+nav.tabs .in{ max-width:var(--maxw); margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); height:var(--tabbar); }
 nav.tabs button svg{ width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.6; }
 nav.tabs{ position:fixed; left:0; right:0; bottom:0; z-index:30; -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); padding-bottom:env(safe-area-inset-bottom,0px); background:rgba(var(--bg-rgb),.82); border-top:1px solid var(--hair); }
 nav.tabs button{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--muted); font-size:var(--fs-2xs); letter-spacing:.01em; position:relative; }
@@ -207,12 +207,8 @@ body.scrolled .navtitle{ height:28px; opacity:1; padding-top:6px; }
 .status b{ font-size:var(--fs-l); font-weight:600; }
 .status .r{ text-align:right; }
 .status .r b{ font-family:var(--serif); font-weight:400; font-size:20px; color:var(--gold2); }
-.status .r2 span{ display:block; }
-.status .r2 b{ font-family:var(--serif); font-weight:400; font-size:20px; color:var(--gold2); }
 .status{ display:flex; justify-content:space-between; align-items:center; margin:0 0 10px; position:relative; flex-wrap:wrap; background:transparent; border:0; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); border-radius:0; padding:12px 2px; }
 .status span{ display:block; color:var(--muted); text-transform:none; letter-spacing:0; font-size:var(--fs-s); }
-.status .r2 b.ptoday{ font-family:var(--sans); font-size:var(--fs-ml); color:var(--gold2); font-weight:600; }
-.status .r2{ order:2; text-align:right; }
 .trialpill{ display:inline-block; margin-left:8px; padding:1px 8px; border:1px solid var(--bronze); color:var(--bronze); border-radius:var(--r1); font-size:var(--fs-xs); letter-spacing:.04em; vertical-align:1px; }
 .trialpill.studio{ border-color:var(--steel); color:var(--steel); }
 .donefoot{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 14px; margin:16px 0 0; font-size:var(--fs-m); color:var(--sage); }
@@ -294,6 +290,7 @@ section.ex .exl{ cursor:pointer; }
 .cue[data-cuetog]{ cursor:pointer; }
 .cue{ font-size:var(--fs-sm); line-height:1.45; color:#9A9DA3; margin-top:8px; }
 .cuefold{ display:block; font-size:var(--fs-s); color:var(--dim); margin-top:6px; padding:2px 0; }
+.vwinfo{ font-size:var(--fs-s); color:var(--sage); margin-top:2px; }
 .target{ display:flex; align-items:baseline; margin:10px 0 2px; gap:10px; }
 .sugline{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; margin:10px 0 4px; font-size:var(--fs-m); }
 .sugline span{ color:var(--muted); font-size:var(--fs-s); }
@@ -357,52 +354,8 @@ section.ex .exl{ cursor:pointer; }
 .fsetno i{ font-style:normal; color:var(--dim); }
 
 /* ---------- Woche ---------- */
-.pcount{ display:flex; align-items:baseline; gap:8px; margin:12px 2px 8px; }
-.pcount b{ font-family:var(--serif); font-weight:400; font-size:26px; color:var(--gold2); }
-.pcount span{ font-size:var(--fs-sm); color:var(--muted); }
-.pbox{ background:var(--s1); border-radius:var(--r4); box-shadow:inset 0 1px 0 var(--hair); overflow:hidden; }
-.prow{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--hair); min-height:56px; }
-.prow:last-child{ border-bottom:0; }
-.prow.today{ background:var(--gold-bg2); box-shadow:inset 2px 0 0 var(--gold); }
-.pd{ width:44px; flex:0 0 auto; }
-.pd b{ display:block; font-size:var(--fs-l); font-weight:600; }
-.pd span{ font-size:var(--fs-xs); color:var(--muted); font-variant-numeric:tabular-nums; }
 .ps{ flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
 .ps em{ font-style:normal; font-size:var(--fs-m); color:var(--dim); }
-.pplus{ font-style:normal; font-size:var(--fs-xs); color:var(--muted); }
-.pchip{ display:inline-flex; align-items:center; height:32px; padding:0 12px; border-radius:var(--r4); font-size:13.5px; font-weight:600; border:1px solid var(--line); color:var(--text); background:var(--s2); white-space:nowrap; }
-.pchip.str{ border-color:rgba(var(--gold-rgb),.55); color:var(--gold2); }
-.pchip.run{ border-color:rgba(127,161,195,.6); color:var(--run); }
-.pchip.swim{ border-color:rgba(110,190,190,.55); color:#9FD6D2; }
-.pchip.done{ background:var(--sage-bg); border-color:var(--sage); color:var(--sage); }
-.piss{ margin:10px 0 0; padding:10px 12px; border-radius:var(--r2); background:#1D1612; box-shadow:inset 0 0 0 1px rgba(168,113,79,.5); }
-.piss b{ display:block; font-size:var(--fs-m); color:var(--warn); margin-bottom:4px; }
-.piss span{ display:block; font-size:var(--fs-sm); color:var(--silver); padding:1px 0; }
-.pprev{ margin-top:14px; }
-.pprev .btn{ margin-top:10px; }
-.pnav{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.pnav span{ font-size:var(--fs-m); color:var(--silver); }
-.pnote{ margin:14px 2px 12px; }
-.hbtn{ position:absolute; right:2px; bottom:26px; height:34px; padding:0 16px; border-radius:17px; border:1px solid rgba(var(--gold-rgb),.55); color:var(--gold2); font-size:var(--fs-ml); font-weight:600; }
-.hbtn.on{ background:var(--gold); border-color:var(--gold); color:var(--ink); }
-.ppool{ display:flex; align-items:center; gap:10px; min-height:56px; padding:10px 12px; margin-bottom:10px; border-radius:var(--r4); border:1px dashed var(--line); }
-.ppool>span{ width:44px; flex:0 0 auto; font-size:var(--fs-s); color:var(--muted); line-height:1.2; }
-.ziel .prow{ cursor:pointer; }
-.pbox.ziel{ box-shadow:inset 0 0 0 1px rgba(var(--gold-rgb),.35); }
-.ppool.ziel{ cursor:pointer; border-color:rgba(var(--gold-rgb),.55); }
-.pchip.pick{ background:var(--gold); border-color:var(--gold); color:var(--ink); box-shadow:0 0 0 3px rgba(var(--gold-rgb),.25); }
-.pok{ margin:10px 0 0; padding:10px 12px; border-radius:var(--r2); background:var(--sage-bg); color:var(--sage); font-size:var(--fs-m); font-weight:600; }
-.pdays.p8{ grid-template-columns:1.6fr repeat(7,1fr); }
-.chip:disabled{ opacity:.3; }
-.pcfg{ background:var(--s1); border-radius:var(--r4); box-shadow:inset 0 1px 0 var(--hair); padding:2px 14px 14px; margin-top:4px; }
-.pcfg-blk{ padding:12px 0; border-bottom:1px solid var(--hair); }
-.pcfg-blk>span{ display:block; font-size:var(--fs-l); margin-bottom:10px; }
-.pcfg-blk small{ display:block; font-size:var(--fs-s); color:var(--muted); margin-top:2px; line-height:1.4; }
-.pcfg-blk .linkbtn{ margin-top:4px; }
-.pdays{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-.pdays .chip{ min-width:0; padding:0; }
-.prules{ font-size:var(--fs-sm); color:var(--muted); line-height:1.45; margin:12px 0 0; }
-.pnav button{ width:40px; height:36px; border-radius:var(--r1); background:var(--s2); font-size:20px; color:var(--gold2); }
 
 /* ---------- Fortschritt ---------- */
 .chart{ width:100%; height:auto; display:block; margin-top:8px; }
@@ -460,9 +413,6 @@ section.ex .exl{ cursor:pointer; }
 .calg{ display:grid; gap:4px; grid-template-columns:repeat(7,1fr) 30px; }
 .calg .cd.on{ background:#211D12; color:var(--gold2); }
 .calg .cd.on i{ background:var(--gold); }
-.calg .cd.en{ background:#131B24; color:var(--run); }
-.calg .cd.en i{ background:var(--run2); }
-.calg .cd i.e2{ margin-left:4px; background:var(--run2); }
 .plaques{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .plaque{ background:linear-gradient(180deg,var(--gold-bg),var(--s1)); border-radius:var(--r3); padding:12px 10px 10px; box-shadow:inset 0 1px 0 rgba(var(--gold-rgb),.3); display:flex; flex-direction:column; gap:2px; min-width:0; }
 .plaque span{ font-size:11.5px; color:var(--silver); }
@@ -617,6 +567,18 @@ body.typing #jumpset{ display:none; }
   #splash .rule{ width:150px; opacity:0; animation:fadeIn .6s ease .2s forwards; }
   #pr .card, #pr .t2{ animation:none; }
 }
+.prio{ margin:0 0 12px; }
+.prio-q{ font-size:var(--fs-m); color:var(--silver); margin:2px 2px 0; }
+.prio .seg{ grid-template-columns:repeat(3,1fr); margin:8px 0 6px; }
+.prio .seg button{ height:48px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; }
+.prio .seg button b{ font-weight:inherit; font-size:var(--fs-m); }
+.prio .seg button span{ font-size:var(--fs-xs); color:var(--muted); }
+.prio-info{ font-size:var(--fs-s); color:var(--muted); margin:0 2px; line-height:1.4; }
+.pbadge{ height:20px; padding:0 7px; margin-right:10px; border-radius:10px; font-size:var(--fs-xs); font-weight:700; letter-spacing:.03em; border:1px solid var(--line); color:var(--muted); align-self:center; }
+.pbadge.p1{ border-color:rgba(var(--gold-rgb),.6); color:var(--gold2); }
+.pbadge.p2{ border-color:var(--silver); color:var(--silver); }
+.ausinfo{ font-size:var(--fs-s); color:var(--muted); margin:6px 2px 10px; line-height:1.45; }
+.sugline.find span{ color:var(--gold2); font-weight:600; }
 </style>
 </head>
 <body>
@@ -633,7 +595,6 @@ body.typing #jumpset{ display:none; }
   <button data-timer="minus">−15 s</button><button data-timer="plus">+15 s</button><button data-timer="stop">Fertig</button></div></div>
 <nav class="tabs"><div class="in">
   <button data-tab="train"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>Training</button>
-  <button data-tab="week"><svg viewBox="0 0 24 24"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg>Woche</button>
   <button data-tab="rec"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Fortschritt</button>
   <button data-tab="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Einstellungen</button>
 </div></nav>
@@ -1363,9 +1324,9 @@ const S = [100,97.8,95.5,93.9,92.2,90.7,89.2,87.8,86.3,85.0,83.7,82.4,81.1,79.9,
 // pkr/pks = pausierte Kniebeuge (Wiederholungen/Sätze); rg/ri = Wiederholungsbereich Grund-/Isolationsübungen
 // prettier-ignore
 const BLK = {
- 1:{kbt:6,kbb:6,kbs:2,kbo:0,bdt:5,bdb:6,bds:2,bdhr:3,bdhs:1,kht:6,khb:6,khs:1,pbt:3,pbb:5,pbs:1,pkr:5,pks:3,rg:"8–10",ri:"10"},
- 2:{kbt:5,kbb:5,kbs:2,kbo:1,bdt:4,bdb:5,bds:2,bdhr:2,bdhs:1,kht:4,khb:4,khs:1,pbt:2,pbb:4,pbs:1,pkr:5,pks:3,rg:"6–8",ri:"8–10"},
- 3:{kbt:4,kbb:4,kbs:2,kbo:1,bdt:3,bdb:4,bds:2,bdhr:2,bdhs:1,kht:3,khb:4,khs:1,pbt:1,pbb:3,pbs:1,pkr:4,pks:3,rg:"5–7",ri:"8"}};
+ 1:{kbt:6,kbb:6,kbs:2,kbo:0,bdt:5,bdb:6,bds:2,bdhr:3,bdhs:1,kht:6,khb:6,khs:1,pbt:4,pbb:5,pbs:1,pkr:5,pks:3,rg:"8–10",ri:"10"},
+ 2:{kbt:5,kbb:5,kbs:2,kbo:1,bdt:4,bdb:5,bds:2,bdhr:2,bdhs:1,kht:4,khb:4,khs:1,pbt:3,pbb:4,pbs:1,pkr:5,pks:3,rg:"6–8",ri:"8–10"},
+ 3:{kbt:4,kbb:4,kbs:2,kbo:1,bdt:3,bdb:4,bds:2,bdhr:2,bdhs:1,kht:3,khb:4,khs:1,pbt:2,pbb:3,pbs:1,pkr:4,pks:3,rg:"5–7",ri:"8"}};
 // Je Woche: Block, Phase, RIR Topset, Backoff-Anteil vom e1RM, RIR Variante, RIR Assistenz
 // prettier-ignore
 const WK = [
@@ -1375,15 +1336,15 @@ const WK = [
 // Variante (pausierte Kniebeuge) wie in der Vorlage: 3 × 5 · 3 × 5 · 3 × 4, jeder Block startet bei RIR 4 und fällt jede Woche.
 // Übergang im 1. Zyklus (umgestellt nach Woche 6): schon trainierte Wochen behalten ihre damalige Vorgabe
 // (pks = Sätze, pkr = Wiederholungen, vr = RIR) – sonst gälten sie nachträglich als unvollständig.
-// Kreuzheben (kht/khb) lief in Block 1 des 1. Zyklus noch mit 5 Wiederholungen.
+// Kreuzheben (kht/khb) lief in Block 1 des 1. Zyklus noch mit 5 Wiederholungen, das OK2-Topset (pbt) mit einer weniger.
 const UEBERGANG = {
   1: {
-    1: { pks: 2, kht: 5, khb: 5 },
-    2: { pks: 2, kht: 5, khb: 5 },
-    3: { pks: 2, vr: 2, kht: 5, khb: 5 },
-    4: { pks: 2, kht: 5, khb: 5 },
-    5: { pks: 2, kht: 5, khb: 5 },
-    6: { pks: 2, pkr: 4, vr: 3 },
+    1: { pks: 2, kht: 5, khb: 5, pbt: 3 },
+    2: { pks: 2, kht: 5, khb: 5, pbt: 3 },
+    3: { pks: 2, vr: 2, kht: 5, khb: 5, pbt: 3 },
+    4: { pks: 2, kht: 5, khb: 5, pbt: 3 },
+    5: { pks: 2, kht: 5, khb: 5, pbt: 3 },
+    6: { pks: 2, pkr: 4, vr: 3, pbt: 2 },
   },
 };
 const NW = WK.length;
@@ -1503,10 +1464,6 @@ const TECH = {
   drop: ["Drop-Satz", "Direkt nach dem letzten Satz ~25 % leichter, ohne Pause bis kurz vors Versagen."],
   myo: ["Myo-Reps", "Gleiches Gewicht, 3 Mini-Sätze à 3–5 Wdh. mit je 5 tiefen Atemzügen Pause."],
 };
-const WD = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-const SESS = { ok1: "OK1", ok2: "OK2", uk1: "UK1", uk2: "UK2", l1: "Lauf", l2: "Lauf", s: "Schwimmen" };
-const SIDS = ["ok1", "uk1", "ok2", "uk2", "l1", "l2", "s"],
-  STRD = { ok1: 0, uk1: 1, ok2: 2, uk2: 3 };
 /* ==========================================================================
    2 · SPEICHER
    Ein Zustand (st), ein Schlüssel. Laden, Import und Umwandlung alter Stände
@@ -1515,7 +1472,7 @@ const SIDS = ["ok1", "uk1", "ok2", "uk2", "l1", "l2", "s"],
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.7";
+const APPVER = "11.26.9";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -1582,6 +1539,8 @@ function DEF() {
     form: {}, // Tagesform 1–5
     notes: {},
     skip: {},
+    prio: {}, // geänderte Priorität je Plan-Platz (1–3)
+    prioWahl: {}, // „Schaffst du heute alles?“ je Einheit: höchste Priorität, die trainiert wird (3 = alle)
     tech: {}, // Intensitätstechniken
     // Orte
     studios: [],
@@ -1595,6 +1554,7 @@ function DEF() {
     hintHide: {},
     bodyM: {}, // Körpergewicht je Monat
     // Woche
+    // Wochenplaner (bis 11.26.7, derzeit ausgebaut) – Daten bleiben erhalten und gehen mit jeder Sicherung mit
     wplan: {}, // Wochenplan: 7 Listen, Index 0 = Montag
     wcfg: {}, // Planer-Vorgaben je Woche
     endu: {}, // Lauf- und Schwimm-Einträge
@@ -2107,32 +2067,6 @@ function hidListEdit() {
   return st.hiddenBy[l] || (st.hiddenBy[l] = st.hiddenEx.slice());
 }
 
-/** Planer-Vorgaben der Woche (lesen): eigene, sonst die der Vorwoche, sonst Standard (Doppeltraining Sa/So, 0 Ruhetage, Schwimmtag offen). */
-function planCfg(w) {
-  const c = st.wcfg[w] || st.wcfg[w - 1];
-  const swim = (st.wcfg[w] || {}).swim ?? -1; // Schwimmtag gilt nur für die eigene Woche
-  return c ? { dbl: c.dbl.slice(), rest: c.rest, swim } : { dbl: [0, 0, 0, 0, 0, 1, 1], rest: 0, swim };
-}
-/** … zum Ändern: legt die Vorgaben der Woche an. */
-function planCfgEdit(w) {
-  return st.wcfg[w] || (st.wcfg[w] = planCfg(w));
-}
-/** Wochentag (0 = Montag), an dem die Plan-Woche beginnt – ergibt sich aus dem Startdatum. */
-function planStartWd() {
-  return (startDate().getDay() + 6) % 7;
-}
-/** Datum des Wochentags wd (0 = Montag) innerhalb der Plan-Woche w. */
-function planDate(w, wd) {
-  return weekDate(w, (wd - planStartWd() + 7) % 7);
-}
-/** Wochentag von heute (0 = Montag), falls heute in Plan-Woche w liegt – sonst −1. */
-function todayIdx(w) {
-  const t = new Date();
-  t.setHours(0, 0, 0, 0);
-  const n = Math.round((t - weekDate(w)) / 864e5);
-  return n >= 0 && n < 7 ? (t.getDay() + 6) % 7 : -1;
-}
-
 /** Wählt in Woche w den ersten offenen Pflichttag. */
 function gotoWeek(w) {
   ui.w = w;
@@ -2144,17 +2078,8 @@ function gotoWeek(w) {
     }
   }
 }
-/** Tag beim Start: heute geplante Krafteinheit, sonst der erste offene Pflichttag. */
+/** Tag beim Start: der erste offene Pflichttag. */
 function pickDay() {
-  const pl = st.wplan[ui.w],
-    ti = todayIdx(ui.w);
-  if (pl && ti >= 0) {
-    const id = pl[ti].find((x) => x in STRD);
-    if (id && !dayDone(ui.w, STRD[id]).done) {
-      ui.d = STRD[id];
-      return;
-    }
-  }
   for (let d = 0; d < 3; d++) {
     if (!dayDone(ui.w, d).done) {
       ui.d = d;
@@ -2182,11 +2107,31 @@ function posOf(d, slot) {
   const acc = b.push && b.push.includes(slot) ? b.push : b.studio && b.studio.includes(slot) ? b.studio : b.mix;
   return [...b.main, ...acc, ...(st.extra[d] || [])].indexOf(slot) + 1;
 }
+/** Priorität eines Plan-Platzes: Hauptübungen 1, Grundübungen 2, Isolation und Optionales 3 – oder wie selbst festgelegt. */
+function prioOf(s) {
+  return st.prio[s.id] ?? (s.t && !s.opt ? 1 : s.opt || s.rt === "I" ? 3 : 2);
+}
+const prioWahl = (w, d) => st.prioWahl[w + "|" + d] ?? 3;
+/** Gilt die Übung heute? Nicht entfernt, nicht übersprungen, optionale nur eingeblendet, Priorität gewählt – Begonnenes gilt immer. */
+function zaehlt(w, d, s, wahl = prioWahl(w, d)) {
+  if (exName(s, w) == null || isSkipped(w, d, s.id)) return false;
+  if (slotStarted(w, d, s)) return true;
+  return (!s.opt || !!ui.opt[w + "|" + d]) && prioOf(s) <= wahl;
+}
 function visSlots(d, w) {
   w = w ?? ui.w;
   const day = DAYS[d];
-  if (!day) return [];
-  return day.slots.filter((s) => exName(s, w) != null && (!s.opt || ui.opt[w + "|" + d] || slotStarted(w, d, s)));
+  return day ? day.slots.filter((s) => zaehlt(w, d, s)) : [];
+}
+/** Geschätzte Trainingsdauer in Minuten: je Satz 45 s Arbeit, dazwischen die Pause, je Übung 1,5 min Wechsel, Aufwärmen 5 min. */
+function dauer(w, d, wahl) {
+  let sek = 0;
+  (daysFor(w)[d] || { slots: [] }).slots.forEach((s) => {
+    if (!zaehlt(w, d, s, wahl) || (s.opt && !slotStarted(w, d, s))) return;
+    const n = rx(s, w).sets;
+    sek += n * 45 + (n - 1) * slotPause(s) + 90 + (s.t === "TOP" || s.t === "VAR" ? 300 : 0);
+  });
+  return Math.round(sek / 60);
 }
 function ssInfo(slot, d) {
   const sl = visSlots(d),
@@ -2240,9 +2185,7 @@ function dayDone(w, d) {
   let all = 0,
     ok = 0;
   day.slots.forEach((s) => {
-    if (exName(s, w) == null) return;
-    if (isSkipped(w, d, s.id)) return;
-    if (s.opt && !slotStarted(w, d, s)) return;
+    if (!zaehlt(w, d, s) || (s.opt && !slotStarted(w, d, s))) return;
     const r = rx(s, w);
     const L = getLog(w, d, s.id);
     all += r.sets;
@@ -2390,14 +2333,17 @@ function rx(slot, w) {
   if (slot.t === "BO") {
     const k = { bd: ["bdb", "bds"], bdh: ["bdhr", "bdhs"], kb: ["kbb", "kbs", "kbo"], kh: ["khb", "khs"], pbd: ["pbb", "pbs"] }[slot.rk || slot.lift];
     const e = topE1(slot.lift, w);
-    const ref = e ?? base1RM(slot.lift, w);
+    const basis = e ?? base1RM(slot.lift, w);
+    // Dynamische Anpassung: Wer in der Vorwoche mehr geschafft hat als vorgegeben, bekommt mehr – nie weniger als das Topset ergibt.
+    const vw = P.deload ? null : backoffVorwoche(slot, w, k);
+    const ref = vw && vw.ref > basis ? vw.ref : basis;
     const p = P.bo + (slot.plus || 0);
     return {
       sets: ov ?? Math.max(1, P[k[1]] - red) + (P.deload || slot.opt ? 0 : st.boAdd[slot.lift] || 0),
       reps: P[k[0]],
       pct: p,
       kg: rnd(ref * p),
-      fromDay: e != null,
+      vorwoche: ref === basis ? null : vw,
       optSatz: !P.deload && ov == null && P[k[2]] ? 1 : 0, // laut Vorlage möglicher zusätzlicher Satz
     };
   }
@@ -2410,6 +2356,28 @@ function rx(slot, w) {
     reps: capReps(nm && st.set.tracked.includes(nm) ? "6–8" : slot.rt === "I" ? P.ri : P.rg, nm),
     rir: P.acc,
   };
+}
+/**
+ * Backoff-Leistung der letzten trainierten Woche desselben Blocks: Waren alle vorgegebenen Sätze mit den vorgegebenen
+ * Wiederholungen geschafft, ergibt das leichteste geschaffte Gewicht geteilt durch den damaligen Anteil eine Bezugsgröße
+ * für diese Woche. Beispiel: 90 kg statt 87,5 kg bei 72 % → Bezug 125 kg → bei 74 % diese Woche 92,5 kg.
+ */
+function backoffVorwoche(slot, w, k) {
+  const P = W(w),
+    d = LIFTDAY[slot.lift][0];
+  for (let v = w - 1; v >= 1; v--) {
+    const Pv = W(v);
+    if (Pv.block !== P.block) return null;
+    if (Pv.deload) continue;
+    const L = getLog(v, d, slot.id);
+    if (!L || !L.sets.some((z) => z.ok)) continue;
+    const soll = st.setov[v + "|" + slot.id] ?? Pv[k[1]];
+    const saetze = L.sets.slice(0, soll);
+    if (saetze.length < soll || !saetze.every((z) => z.ok && num(z.kg) && (num(z.reps) ?? Pv[k[0]]) >= Pv[k[0]])) return null;
+    const kg = Math.min(...saetze.map((z) => num(z.kg)));
+    return { ref: kg / (Pv.bo + (slot.plus || 0)), w: v, kg, reps: Pv[k[0]] };
+  }
+  return null;
 }
 function accRir(i, n, P) {
   if (P.deload) return P.acc;
@@ -2607,7 +2575,7 @@ function focusQueue() {
     d = ui.d,
     day = DAYS[d];
   const q = [];
-  const shown = day.slots.filter((s) => exName(s, w) != null && !isSkipped(w, d, s.id) && (!s.opt || ui.opt[w + "|" + d] || slotStarted(w, d, s)));
+  const shown = visSlots(d, w);
   for (let k = 0; k < shown.length; k++) {
     const s = shown[k],
       n = rx(s, w).sets;
@@ -2879,122 +2847,6 @@ function cycleProposal() {
   return o;
 }
 
-/* ---------- Wochenplaner: Regeln und Vorschläge ---------- */
-const pIsRun = (x) => x === "l1" || x === "l2",
-  pIsStr = (x) => x in STRD;
-function planDayOf(days, id) {
-  return days.findIndex((a) => a.includes(id));
-}
-const cgap = (a, b) => (((b - a - 1) % 7) + 7) % 7;
-const cdist = (a, b) => Math.min(Math.abs(a - b), 7 - Math.abs(a - b));
-function planNormalize(days) {
-  const u1 = planDayOf(days, "uk1"),
-    u2 = planDayOf(days, "uk2"),
-    a = planDayOf(days, "ok1"),
-    b = planDayOf(days, "ok2");
-  if (u1 < 0 || u2 < 0 || a < 0 || b < 0) return days;
-  const sc = (d) => cdist(d, u1) - cdist(d, u2);
-  if (sc(a) > sc(b)) {
-    days[a] = days[a].map((x) => (x === "ok1" ? "ok2" : x));
-    days[b] = days[b].map((x) => (x === "ok2" ? "ok1" : x));
-  }
-  return days;
-}
-function planIssues(days, cfg) {
-  const out = [];
-  const at = (id) => planDayOf(days, id);
-  SIDS.forEach((id) => {
-    if (at(id) < 0) out.push(SESS[id] + " ist noch keinem Tag zugeordnet");
-  });
-  days.forEach((a, i) => {
-    if (a.length > 2) out.push(WD[i] + ": mehr als zwei Einheiten");
-    if (a.filter(pIsStr).length > 1) out.push(WD[i] + ": zwei Krafteinheiten an einem Tag");
-    if (a.length === 2 && !a.some(pIsStr)) out.push(WD[i] + ": Lauf und Schwimmen am selben Tag");
-    if (a.length >= 2 && cfg && !cfg.dbl[i]) out.push(WD[i] + ": Doppeltraining ist für diesen Tag nicht freigegeben");
-  });
-  const u1 = at("uk1"),
-    u2 = at("uk2"),
-    o1 = at("ok1"),
-    o2 = at("ok2"),
-    runs = ["l1", "l2"].map(at).filter((x) => x >= 0),
-    sw = at("s");
-  if (sw === 1) out.push("Schwimmen am Dienstag ist nicht möglich");
-  if (runs.length === 2 && !runs.some((r) => r >= 5)) out.push("Am Wochenende fehlt ein Lauf");
-  if (u2 >= 0 && runs.length && !runs.includes((u2 + 1) % 7)) out.push("Am Tag nach UK2 fehlt der Lauf");
-  if (u1 >= 0)
-    runs.forEach((r) => {
-      if (r === u1 || r === (u1 + 1) % 7 || r === (u1 + 6) % 7) out.push("Lauf direkt vor, nach oder an UK1 (" + WD[r] + ")");
-    });
-  if (u2 >= 0 && runs.includes(u2)) out.push("Lauf am UK2-Tag – der Lauf gehört auf den Tag danach");
-  if (u1 >= 0 && u2 >= 0) {
-    if (cgap(u1, u2) < 2 || cgap(u2, u1) < 2) out.push("Zwischen UK1 und UK2 liegen weniger als 2 Tage");
-    const lo = Math.min(u1, u2),
-      hi = Math.max(u1, u2);
-    if (![o1, o2].some((o) => o > lo && o < hi)) out.push("Zwischen UK1 und UK2 fehlt ein OK-Tag");
-  }
-  if (o1 >= 0 && o2 >= 0 && (cgap(o1, o2) < 2 || cgap(o2, o1) < 2)) out.push("Zwischen den OK-Tagen liegen weniger als 2 Tage");
-  return [...new Set(out)];
-}
-function genPlans(w, cfg = planCfg(w)) {
-  const res = [],
-    seen = new Set();
-  const prev = st.wplan[w - 1];
-  const prevSw = prev ? planDayOf(prev, "s") : -1;
-  for (let u1 = 0; u1 < 7; u1++)
-    for (let u2 = 0; u2 < 7; u2++) {
-      if (u2 === u1 || cgap(u1, u2) < 2 || cgap(u2, u1) < 2) continue;
-      for (let a = 0; a < 7; a++)
-        for (let b = a + 1; b < 7; b++) {
-          if ([u1, u2].includes(a) || [u1, u2].includes(b)) continue;
-          if (cgap(a, b) < 2 || cgap(b, a) < 2) continue;
-          for (let r1 = 0; r1 < 7; r1++)
-            for (let r2 = r1 + 1; r2 < 7; r2++)
-              for (let s = 0; s < 7; s++) {
-                if (s === 1 || (cfg.swim >= 0 && s !== cfg.swim)) continue;
-                const days = [[], [], [], [], [], [], []];
-                days[u1].push("uk1");
-                days[u2].push("uk2");
-                days[a].push("ok1");
-                days[b].push("ok2");
-                days[r1].push("l1");
-                days[r2].push("l2");
-                days[s].push("s");
-                if (days.filter((x) => x.length >= 2).length !== cfg.rest) continue;
-                planNormalize(days);
-                if (planIssues(days, cfg).length) continue;
-                const key = days.map((x) => x.map((y) => SESS[y]).join("+")).join("|");
-                if (seen.has(key)) continue;
-                seen.add(key);
-                let sc = (s === prevSw ? 6 : 0) + (Math.abs(r1 - r2) === 1 ? 1 : 0);
-                days.forEach((x, i) => {
-                  if (x.length >= 2 && i < 5) sc += 1;
-                  if (!x.length && i >= 5) sc += 1;
-                });
-                res.push({ days, sc });
-              }
-        }
-    }
-  res.sort((x, y) => x.sc - y.sc);
-  return res.slice(0, 60).map((x) => x.days);
-}
-function sessDone(w, id) {
-  return pIsStr(id) ? dayDone(w, STRD[id]).done : !!(st.endu[w + "|" + id] || {}).done;
-}
-function planDayLabel(w, d) {
-  const pl = st.wplan[w];
-  if (!pl) return "";
-  const id = Object.keys(STRD).find((k) => STRD[k] === d);
-  const i = planDayOf(pl, id);
-  return i >= 0 ? WD[i] : "";
-}
-function planTodayText() {
-  const w = currentWeek(),
-    pl = st.wplan[w],
-    i = todayIdx(w);
-  if (!pl || i < 0) return "";
-  return pl[i].length ? pl[i].map((x) => SESS[x]).join(" + ") : "Ruhetag";
-}
-
 /* ==========================================================================
    4 · ANSICHTEN
    Erzeugen HTML aus dem Zustand. Ansichten lesen nur – jede Änderung läuft über die Bedienung (Bereich 6).
@@ -3033,7 +2885,7 @@ function vTrain() {
         const opt = dd.optional && !started(w, i) && i !== d;
         const lab = dd.pull ? "Pull" : dd.split ? "Push" : dd.tag;
         const sub = dd.pull || dd.split ? (DAYS[sp_] || {}).tag || "" : "";
-        return `<button class="day ${i === d ? "sel" : ""} ${s.done ? "done" : ""} ${opt ? "optx" : ""}" data-day="${i}"><b>${lab}</b><span>${s.done ? "✓ " + ((d_) => (d_ ? d_.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : ""))(sessDate(w, i)) : s.ok ? s.ok + "/" + s.all : planDayLabel(w, i) || (dd.optional ? "optional" : sub || "offen")}</span></button>`;
+        return `<button class="day ${i === d ? "sel" : ""} ${s.done ? "done" : ""} ${opt ? "optx" : ""}" data-day="${i}"><b>${lab}</b><span>${s.done ? "✓ " + ((d_) => (d_ ? d_.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : ""))(sessDate(w, i)) : s.ok ? s.ok + "/" + s.all : (dd.optional ? "optional" : sub || "offen")}</span></button>`;
       })
       .join("") +
     `</div></div>`;
@@ -3049,10 +2901,13 @@ function vTrain() {
   h += vSession(w, d);
   const ok_ = ui.opt[w + "|" + d];
   let optShown = false;
+  const weg = (x) => exName(x, w) != null && !isSkipped(w, d, x.id) && !slotStarted(w, d, x) && prioOf(x) > prioWahl(w, d);
+  const aus = day.slots.filter((x) => weg(x) && !x.opt);
   day.slots.forEach((slot) => {
+    if (weg(slot)) return;
     if (slot.opt && exName(slot, w) != null && !ok_ && !slotStarted(w, d, slot)) {
       if (!optShown) {
-        const opt = day.slots.filter((s) => s.opt && exName(s, w) != null);
+        const opt = day.slots.filter((s) => s.opt && exName(s, w) != null && !weg(s));
         const was = opt.every((s) => s.t) ? opt.map((s) => s.art).join(", ") : opt.length + " optionale Beinübungen";
         h += `<button class="optbtn" data-opt="1">+ ${esc(was)}${opt.every((s) => s.t) ? " (optional)" : ""}</button>`;
         optShown = true;
@@ -3065,6 +2920,7 @@ function vTrain() {
     }
     h += vSlot(slot, w, d);
   });
+  if (aus.length) h += `<p class="ausinfo">Heute ausgeblendet: ${aus.map((x) => esc(exName(x, w)) + " · P" + prioOf(x)).join(", ")}</p>`;
   h += `<button class="addex" data-act="addex">+ Übung hinzufügen</button>`;
   const nk = w + "|" + d;
   h += `<div class="sec note"><h3>Notizen</h3><textarea data-note="${nk}" placeholder="Technik, Schlaf, Besonderheiten …">${esc(st.notes[nk] || "")}</textarea></div>`;
@@ -3133,13 +2989,19 @@ function vBackupNote() {
 }
 function vStatus() {
   const last = sessionsAll()[0];
-  return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last ? relDay(last.date) + " · " + esc(last.tag) : "noch nie – los geht’s"}</b></div>
-   ${planTodayText() ? `<div class="r2"><span>Heute geplant</span><b class="ptoday">${esc(planTodayText())}</b></div>` : ""}</div>`;
+  return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last ? relDay(last.date) + " · " + esc(last.tag) : "noch nie – los geht’s"}</b></div></div>`;
 }
 function vSession(w, d) {
   const s = sessOf(w, d);
-  if (!s) return `<button class="btn gold startbtn" data-sess="start">▶  Training starten</button>`;
-  return "";
+  if (s && s.e) return "";
+  const wahl = prioWahl(w, d),
+    opt = [3, 2, 1].map((p) => ({ p, min: dauer(w, d, p), n: DAYS[d].slots.filter((x) => zaehlt(w, d, x, p) && !(x.opt && !slotStarted(w, d, x))).length }));
+  const name = { 3: "Alle", 2: "Prio 1 + 2", 1: "Nur Prio 1" };
+  const cur = opt.find((o) => o.p === wahl);
+  return `<div class="prio"><div class="prio-q">Schaffst du heute alle Übungen?</div>
+   <div class="seg">${opt.map((o) => `<button class="${o.p === wahl ? "on" : ""}" data-pwahl="${o.p}"><b>${name[o.p]}</b><span>${o.min} min</span></button>`).join("")}</div>
+   <div class="prio-info">${cur.n} Übungen · ca. ${cur.min} min · Priorität ändern: auf P1/P2/P3 an der Übung tippen</div></div>
+   ${s ? "" : `<button class="btn gold startbtn" data-sess="start">▶  Training starten</button>`}`;
 }
 function vSessionFoot(w, d) {
   const s = sessOf(w, d);
@@ -3186,7 +3048,7 @@ function vSlot(slot, w, d) {
   const vis = visSlots(d, w),
     idx = vis.indexOf(slot) + 1;
   const head = `<div class="exhead"><div class="exl"><div class="kind"><span class="exno">${String(idx).padStart(2, "0")}<i>/${String(vis.length).padStart(2, "0")}</i></span>${esc(kind)} · ${esc(main ? slot.g : exPrimary(name, slot))}</div><div class="exname">${esc(name)}</div>
-   <div class="exmeta mono"><b>${r.sets}×${esc(String(r.reps))}</b>${rirInfo ? `<span>${rirInfo}</span>` : ""}<span>⏱ ${pause}</span></div>
+   <div class="exmeta mono"><button class="pbadge ${["", "p1", "p2", ""][prioOf(slot)]}" data-prio="${slot.id}" aria-label="Priorität ${prioOf(slot)} – antippen zum Ändern">P${prioOf(slot)}</button><b>${r.sets}×${esc(String(r.reps))}</b>${rirInfo ? `<span>${rirInfo}</span>` : ""}<span>⏱ ${pause}</span></div>
    ${hintHtml(name, w, d)}
    <div class="acts">${main ? "" : `<button data-swap="${slot.id}">Tauschen</button>`}<button data-mnote="${slot.id}">Hinweise</button><button data-pause="${slot.id}">Pause</button></div></div></div>`;
   let h =
@@ -3197,7 +3059,7 @@ function vSlot(slot, w, d) {
   let sug = null;
   const lt = main ? null : lastTime(name, w, d, slot.id);
   if (main) {
-    h += `<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div></div>`;
+    h += `<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div>${r.vorwoche ? `<div class="vwinfo">↑ angepasst – in Woche ${r.vorwoche.w} ${fk(r.vorwoche.kg)} kg × ${r.vorwoche.reps} geschafft</div>` : ""}</div>`;
     if (slot.t === "TOP" || slot.t === "VAR")
       h += `<div class="warm">Aufwärmen  ${warmups(r.kg)
         .map(([k, n]) => (typeof k === "number" ? fk(k) : k) + " × " + n)
@@ -3206,7 +3068,7 @@ function vSlot(slot, w, d) {
     sug = suggest(name, lt, r.reps, w, d);
     h += sug
       ? `<div class="sugline ${sug.setback ? "sb" : ""}"><span>Vorschlag</span><b>${fk(sug.kg)} kg</b><em>${esc(sug.d)}${lt ? ` · zuletzt ${lt.same ? "diese Woche " : "W" + lt.w + " "}${esc(lt.day)}` : ""}</em>${sug.setback ? `<small>Drei Wochen ohne Fortschritt – neuer Anlauf mit weniger Gewicht und einem Satz mehr.</small>` : ""}</div>`
-      : `<div class="sugline"><span>Erster Eintrag</span><em>Gewicht so wählen, dass die Ziel-RIR passt</em></div>`;
+      : `<div class="sugline find"><span>Gewicht finden</span><em>Noch kein Verlauf: mit einem leichten ersten Satz herantasten, dann so steigern, dass die Ziel-RIR passt.</em></div>`;
   }
   const ak = ui.adj[w + "|" + d + "|" + slot.id];
   if (ak && !L.sets.slice(1).every((z) => z.ok))
@@ -3422,72 +3284,6 @@ function showPR(name, e) {
   setTimeout(() => p.classList.remove("show"), 2700);
 }
 
-/* ---------- Woche ---------- */
-function pChip(w, id, di, modus) {
-  const dn = modus !== "vorschau" && sessDone(w, id);
-  const e = st.endu[w + "|" + id] || {};
-  const extra = !pIsStr(id) && dn && (e.km || e.min) ? ` · ${e.km ? esc(e.km) + " km" : esc(e.min) + " min"}` : "";
-  const art = `pchip ${pIsStr(id) ? "str" : pIsRun(id) ? "run" : "swim"} ${dn ? "done" : ""}`;
-  const text = `${dn ? "✓ " : ""}${SESS[id]}${extra}`;
-  if (modus === "edit") return `<button class="${art} ${ui.ppick === id ? "pick" : ""}" data-ppick="${id}">${text}</button>`;
-  if (modus === "live") return `<button class="${art}" data-psess="${id}">${text}</button>`;
-  return `<span class="${art}">${text}</span>`;
-}
-const LEERPLAN = () => [[], [], [], [], [], [], []];
-/** Wochenplan. Planen (Vorschläge, Vorgaben, selbst einteilen) liegt hinter dem Knopf oben rechts. */
-function vWeek() {
-  const w = ui.w,
-    cfg = planCfg(w),
-    edit = ui.pedit === w,
-    pl = st.wplan[w] || (edit ? LEERPLAN() : null),
-    g = ui.pgen && ui.pgen.w === w ? ui.pgen : null;
-  let h = `<header class="top"><div class="brand"><h1>Kraftwerk</h1><span class="today">${dshort(weekDate(w))} – ${dshort(weekDate(w, 6))}</span></div>
-   <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button></h2><div class="sub">Wochenplan – Kraft, Laufen, Schwimmen</div></div>
-   ${g ? "" : edit ? `<button class="hbtn on" data-act="pedit">Fertig</button>` : `<button class="hbtn" data-act="pplan">Planen</button>`}</header>`;
-  if (g) {
-    h += g.list.length
-      ? `<div class="pprev"><div class="pnav"><button data-act="pprev" aria-label="Vorheriger Vorschlag">‹</button><span>Vorschlag ${g.i + 1} von ${g.list.length}</span><button data-act="pnext" aria-label="Nächster Vorschlag">›</button></div>
-        <div class="pbox">${planRows(w, g.list[g.i], "vorschau")}</div><button class="btn gold" data-act="ptake">Diesen Plan übernehmen</button><button class="btn" data-act="pcancel">Abbrechen</button></div>`
-      : `<p class="lead pnote">Mit diesen Vorgaben gibt es keine Woche, die alle Regeln erfüllt. ${cfg.rest ? "Gib mehr Tage für Doppeltraining frei oder nimm weniger Ruhetage." : "Plane einen Ruhetag mit Doppeltraining ein."}</p>
-        <button class="btn gold" data-act="pplan">Vorgaben ändern</button><button class="btn" data-act="pcancel">Abbrechen</button>`;
-    return h;
-  }
-  if (!pl) return h + `<p class="lead pnote">Für diese Woche gibt es noch keinen Plan. Oben rechts auf „Planen“ tippen – für Vorschläge oder um selbst einzuteilen.</p>`;
-  const iss = planIssues(pl, cfg);
-  if (edit) {
-    const offen = SIDS.filter((id) => planDayOf(pl, id) < 0);
-    h += `<p class="lead pnote">${ui.ppick ? `<b>${SESS[ui.ppick]}</b> gewählt – tippe auf den Tag, auf den die Einheit soll.` : "Tippe auf eine Einheit und dann auf den Tag, auf den sie soll."}</p>
-      <div class="ppool ${ui.ppick ? "ziel" : ""}" data-pdrop="-1"><span>Ohne Tag</span><div class="ps">${offen.length ? offen.map((id) => pChip(w, id, -1, "edit")).join("") : "<em>alle Einheiten verteilt</em>"}</div></div>
-      <div class="pbox ${ui.ppick ? "ziel" : ""}">${planRows(w, pl, "edit")}</div>`;
-  } else {
-    const n = SIDS.filter((id) => sessDone(w, id)).length;
-    h += `<div class="pcount"><b>${n} / 7</b><span>Einheiten erledigt</span></div><div class="pbox">${planRows(w, pl, "live")}</div>`;
-  }
-  h += iss.length
-    ? `<div class="piss"><b>Verstößt gegen deine Regeln</b>${iss.map((x) => `<span>${esc(x)}</span>`).join("")}</div>`
-    : edit ? `<div class="pok">✓ Passt zu allen Regeln</div>` : "";
-  return h;
-}
-/** Blatt „Woche planen“: Vorschläge, selbst einteilen, Vorgaben und Regeln. */
-function planSheetHtml() {
-  const w = ui.w, cfg = planCfg(w), alle = cfg.dbl.every((x) => x);
-  return `<div class="grab"></div><h3>Woche ${w} planen</h3><p>Lass dir gültige Wochen vorschlagen oder teile die Einheiten selbst ein – die App prüft dabei deine Regeln.</p>
-   <button class="btn gold" data-act="pgen">Wochen vorschlagen</button><button class="btn" data-act="pedit">${st.wplan[w] ? "Plan selbst ändern" : "Selbst einteilen"}</button>
-   <div class="pcfg">
-   <div class="pcfg-blk"><span>Schwimmen<small>Wenn du den Tag schon kennst, trag ihn ein – die Vorschläge richten sich danach.</small></span>
-    <div class="pdays p8"><button class="chip ${cfg.swim < 0 ? "on" : ""}" data-pswim="-1">offen</button>${WD.map((d, i) => `<button class="chip ${cfg.swim === i ? "on" : ""}" data-pswim="${i}" ${i === 1 ? 'disabled aria-label="Dienstag: kein Schwimmen"' : ""}>${d}</button>`).join("")}</div></div>
-   <div class="pcfg-blk"><span>Ruhetage<small>Sieben Einheiten auf sieben Tage – für jeden Ruhetag wird an einem anderen Tag doppelt trainiert.</small></span>
-    <div class="chips">${[0, 1, 2, 3].map((n) => `<button class="chip ${cfg.rest === n ? "on" : ""}" data-prest="${n}">${n}</button>`).join("")}</div></div>
-   ${cfg.rest ? `<div class="pcfg-blk"><span>Doppeltraining möglich an</span>
-    <div class="pdays">${WD.map((d, i) => `<button class="chip ${cfg.dbl[i] ? "on" : ""}" data-pdbl="${i}">${d}</button>`).join("")}</div>
-    <button class="linkbtn" data-pdbl="all">${alle ? "Nur Samstag und Sonntag" : "Alle Tage (Ferien)"}</button></div>` : ""}
-   <p class="prules">Regeln: mindestens ein Lauf am Wochenende · nach UK2 ein Lauf · kein Lauf direkt vor oder nach UK1 · UK1 und UK2 mit mindestens 2 Tagen Abstand und einem OK-Tag dazwischen · OK-Tage mit mindestens 2 Tagen Abstand · Schwimmen nie dienstags.</p></div>
-   <button class="btn" data-act="close">Schließen</button>`;
-}
-function openPlanSheet() {
-  openSheet(planSheetHtml());
-}
-
 /* ---------- Fortschritt ---------- */
 function vProg() {
   const seg = ui.ptab || "over";
@@ -3523,14 +3319,10 @@ function vCalendar() {
     const k = iso(s.date);
     (byDay[k] = byDay[k] || []).push(s);
   });
-  const enDay = {};
-  Object.values(st.endu).forEach((e) => {
-    if (e && e.done && e.date) enDay[iso(new Date(e.date))] = 1;
-  });
   const s0 = startDate(),
     now = new Date();
   const m = new Date(s0.getFullYear(), s0.getMonth(), 1);
-  let h = `<div class="sec"><h3>Kalender</h3><p class="lead small">Gold: Kraft · Blau: Laufen/Schwimmen · ✓ grün: Kraftwoche komplett</p>`;
+  let h = `<div class="sec"><h3>Kalender</h3><p class="lead small">Gold: Training · ✓ grün: Woche komplett</p>`;
   while (m <= now) {
     const y = m.getFullYear(),
       mo = m.getMonth(),
@@ -3550,9 +3342,8 @@ function vCalendar() {
     for (let dd = 1; dd <= days; dd++) {
       const dt = new Date(y, mo, dd),
         k = iso(dt),
-        ss = byDay[k],
-        en = enDay[k];
-      h += `<span class="cd ${ss ? "on" : en ? "en" : ""} ${k === iso(now) ? "today" : ""}">${dd}${ss || en ? `<i></i>` : ""}${ss && en ? `<i class="e2"></i>` : ""}</span>`;
+        ss = byDay[k];
+      h += `<span class="cd ${ss ? "on" : ""} ${k === iso(now) ? "today" : ""}">${dd}${ss ? `<i></i>` : ""}</span>`;
       col++;
       if (col === 7) {
         const mon = new Date(y, mo, dd - 6);
@@ -3869,21 +3660,6 @@ function locModeRow(name) {
   const split = st.locMode[b] === "split";
   return `<div class="frow sel"><span>Homegym & Studio<small>freie Gewichte</small></span><select data-locmode="${esc(b)}"><option value="shared" ${split ? "" : "selected"}>gemeinsame Gewichte</option><option value="split" ${split ? "selected" : ""}>getrennt führen</option></select></div>`;
 }
-/** Zeilen des Wochenplans in zeitlicher Reihenfolge der Plan-Woche, beschriftet mit dem echten Wochentag.
- *  modus: "live" = Einheiten antippbar, "edit" = Einheit wählen und Tag als Ziel antippen, "vorschau" = nur ansehen. */
-function planRows(w, days, modus) {
-  const ti = todayIdx(w),
-    s0 = planStartWd(),
-    edit = modus === "edit";
-  return [0, 1, 2, 3, 4, 5, 6]
-    .map((k) => (s0 + k) % 7)
-    .map((i) => {
-      const a = days[i];
-      return `<div class="prow ${i === ti && modus === "live" ? "today" : ""}" ${edit ? `data-pdrop="${i}"` : ""}><div class="pd"><b>${WD[i]}</b><span>${dshort(planDate(w, i))}</span></div>
-   <div class="ps">${a.length ? a.map((id) => pChip(w, id, i, modus)).join(a.length > 1 ? '<i class="pplus">dann</i>' : "") : "<em>Ruhetag</em>"}</div></div>`;
-    })
-    .join("");
-}
 
 /** Link in der Übungsauswahl, der ausgeblendete Übungen des aktuellen Ortes zurückholt. */
 function unhideRow() {
@@ -3973,7 +3749,7 @@ function vSet() {
 }
 
 /** Zeichnet die gewählte Ansicht neu. Ansichten lesen den Zustand nur – geschrieben wird ausschließlich in der Bedienung. */
-const ANSICHT = { train: () => vTrain(), week: () => vWeek(), rec: () => vProg(), set: () => vSet() };
+const ANSICHT = { train: () => vTrain(), rec: () => vProg(), set: () => vSet() };
 let lastView = "";
 function render() {
   buildDays();
@@ -4107,9 +3883,6 @@ const ui = {
   volPick: {}, // gewählte Option je Volumen-Vorschlag
   asked: {}, // „Alle Sätze geschafft“ wurde für diese Einheit schon gefragt
   ctxCard: null, // Übungskarte, zu der das Kontextmenü offen ist
-  pgen: null, // Wochenvorschläge { w, list, i }
-  pedit: null, // Woche, deren Plan gerade selbst eingeteilt wird
-  ppick: null, // gewählte Einheit beim Einteilen
 };
 
 /* ---------- Blätter ---------- */
@@ -4266,17 +4039,6 @@ function openSessDetail(w, d) {
   if (nt) h += `<p style="margin-top:12px;color:var(--silver)">✎ ${esc(nt)}</p>`;
   h += `<button class="btn gold" data-jump="${w}|${d}">Zur Einheit springen</button><button class="btn" data-act="close">Schließen</button>`;
   $("#sheet").innerHTML = h;
-  showSheet();
-}
-function openEndu(id) {
-  const w = ui.w,
-    k = w + "|" + id;
-  const e = st.endu[k] || {};
-  const run = pIsRun(id);
-  $("#sheet").innerHTML = `<div class="grab"></div><h3>${SESS[id]}</h3><p>Ein Tipp genügt – Strecke und Zeit sind freiwillig.</p>
-   <div class="form"><div class="frow"><span>${run ? "Kilometer" : "Meter"}</span><input inputmode="decimal" data-endu="${k}|km" value="${esc(e.km || "")}" placeholder="optional"></div>
-   <div class="frow"><span>Minuten</span><input inputmode="numeric" data-endu="${k}|min" value="${esc(e.min || "")}" placeholder="optional"></div></div>
-   <button class="btn gold" data-endone="${k}">${e.done ? "✓ Erledigt – zurücknehmen" : "Erledigt"}</button><button class="btn" data-act="close">Schließen</button>`;
   showSheet();
 }
 function openCtx(sid, card) {
@@ -4894,64 +4656,7 @@ const AKTION = {
     reopenPicker();
     toast("Ausgeblendete Übungen wiederhergestellt");
   },
-  // Wochenplaner
-  pplan() {
-    openPlanSheet();
-  },
-  pgen() {
-    closeSheet();
-    ui.pedit = null;
-    ui.pgen = { w: ui.w, list: genPlans(ui.w), i: 0 };
-    render();
-    window.scrollTo(0, 0);
-  },
-  pcancel() {
-    ui.pgen = null;
-    render();
-  },
-  pnext() {
-    blaetterePlan(1);
-  },
-  pprev() {
-    blaetterePlan(-1);
-  },
-  ptake() {
-    const g = ui.pgen;
-    if (!g || !g.list.length) return;
-    st.wplan[ui.w] = JSON.parse(JSON.stringify(g.list[g.i]));
-    ui.pgen = null;
-    save();
-    render();
-    window.scrollTo(0, 0);
-    toast("Wochenplan übernommen");
-  },
-  pedit() {
-    const w = ui.w;
-    closeSheet();
-    ui.ppick = null;
-    if (ui.pedit === w) {
-      // Fertig: ein Plan ohne jede Einheit wird nicht gespeichert
-      ui.pedit = null;
-      if (st.wplan[w] && st.wplan[w].every((a) => !a.length)) delete st.wplan[w];
-    } else {
-      ui.pedit = w;
-      if (!st.wplan[w]) {
-        st.wplan[w] = LEERPLAN();
-        const sw = planCfg(w).swim;
-        if (sw >= 0) st.wplan[w][sw].push("s");
-      }
-    }
-    save();
-    render();
-  },
 };
-/** Ändert eine Vorgabe im Blatt „Woche planen“ und zeichnet das Blatt neu. */
-function aendereVorgabe(fn) {
-  fn(planCfgEdit(ui.w));
-  save();
-  render();
-  openPlanSheet();
-}
 function addStudio(inp, anwenden) {
   const n = inp.value.trim();
   if (!n) return;
@@ -4960,12 +4665,6 @@ function addStudio(inp, anwenden) {
   save();
   if (anwenden) applyStudio(id);
   else render();
-}
-function blaetterePlan(dir) {
-  const g = ui.pgen;
-  if (!g || !g.list.length) return;
-  g.i = (g.i + dir + g.list.length) % g.list.length;
-  render();
 }
 
 /** data-sess="…": Trainingszeit der gewählten Einheit. */
@@ -5171,6 +4870,21 @@ const KLICK = {
     if (ui.d >= DAYS.length) ui.d = 0;
     render();
     toast(st.wsplit[ui.w] != null ? "Woche " + ui.w + ": Push + Pull" : "Split aufgehoben");
+  },
+
+  /* --- Prioritäten --- */
+  pwahl(t, v) {
+    st.prioWahl[ui.w + "|" + ui.d] = +v;
+    save();
+    render();
+  },
+  prio(t, sid) {
+    const s = slotFor(ui.d, sid),
+      p = (prioOf(s) % 3) + 1;
+    st.prio[sid] = p;
+    save();
+    render();
+    toast(`${exName(s, ui.w)}: Priorität ${p} – gilt für alle Wochen`);
   },
 
   /* --- Sätze --- */
@@ -5453,56 +5167,6 @@ const KLICK = {
     render();
   },
 
-  /* --- Wochenplaner --- */
-  prest(t, v) {
-    aendereVorgabe((c) => (c.rest = +v));
-  },
-  pdbl(t, v) {
-    aendereVorgabe((c) => {
-      if (v === "all") c.dbl = c.dbl.every((x) => x) ? [0, 0, 0, 0, 0, 1, 1] : [1, 1, 1, 1, 1, 1, 1];
-      else c.dbl[+v] = c.dbl[+v] ? 0 : 1;
-    });
-  },
-  pswim(t, v) {
-    aendereVorgabe((c) => (c.swim = +v));
-  },
-  psess(t, id) {
-    if (pIsStr(id)) {
-      ui.tab = "train";
-      ui.d = STRD[id];
-      render();
-      window.scrollTo(0, 0);
-    } else openEndu(id);
-  },
-  ppick(t, id) {
-    ui.ppick = ui.ppick === id ? null : id;
-    render();
-  },
-  pdrop(t, v) {
-    const id = ui.ppick,
-      pl = st.wplan[ui.w];
-    if (!id || !pl) return;
-    const von = planDayOf(pl, id),
-      nach = +v;
-    if (von >= 0) pl[von] = pl[von].filter((x) => x !== id);
-    if (nach >= 0) {
-      pl[nach].push(id);
-      pl[nach].sort((x, y) => (pIsStr(y) ? 1 : 0) - (pIsStr(x) ? 1 : 0)); // Kraft zuerst
-    }
-    ui.ppick = null;
-    save();
-    render();
-  },
-  endone(t, key) {
-    const e = (st.endu[key] = st.endu[key] || {});
-    e.done = !e.done;
-    e.date = e.done ? new Date().toISOString() : null;
-    save();
-    closeSheet();
-    render();
-    if (e.done) haptic();
-  },
-
   /* --- Pausen-Pille --- */
   timer(t, v) {
     if (v === "plus") {
@@ -5582,13 +5246,6 @@ const EINGABE = {
   },
   bodym(t, monat) {
     st.bodyM[monat] = t.value;
-    save();
-  },
-  endu(t, v) {
-    const p = v.split("|"),
-      feld = p.pop(),
-      key = p.join("|");
-    (st.endu[key] = st.endu[key] || {})[feld] = t.value;
     save();
   },
   set(t, k) {
@@ -5675,7 +5332,7 @@ document.addEventListener("click", (e) => {
     toggleHint(hinweis.dataset.cuetog);
     return;
   }
-  const knopf = ziel.closest("button,[data-pick],[data-pdrop]");
+  const knopf = ziel.closest("button,[data-pick]");
   if (knopf) {
     waehle(KLICK, knopf);
     return;
@@ -5997,7 +5654,7 @@ document.addEventListener("touchend", (e) => {
 /* ==========================================================================
    7 · SELBSTTEST
    Einstellungen → Über Kraftwerk → Selbsttest. Prüft Zustand, Umwandlung, Rechenkern,
-   Plan, Wochenplaner, alle Ansichten und die Aktionstabellen – ohne etwas zu verändern.
+   Plan, alle Ansichten und die Aktionstabellen – ohne etwas zu verändern.
    ========================================================================== */
 function selfTest() {
   const errs = [];
@@ -6014,7 +5671,7 @@ function selfTest() {
     }
   };
   const vorher = JSON.stringify(st);
-  const uiVorher = { tab: ui.tab, w: ui.w, d: ui.d, ptab: ui.ptab, sgPage: ui.sgPage, pgen: ui.pgen, pedit: ui.pedit, ppick: ui.ppick };
+  const uiVorher = { tab: ui.tab, w: ui.w, d: ui.d, ptab: ui.ptab, sgPage: ui.sgPage };
   let html = "";
 
   versuch("Zustand", () => {
@@ -6086,8 +5743,20 @@ function selfTest() {
     });
   });
 
+  versuch("Prioritäten und Dauer", () => {
+    for (let w = 1; w <= NW; w++)
+      daysFor(w).forEach((day, d) => {
+        day.slots.forEach((s) => ok([1, 2, 3].includes(prioOf(s)), `W${w} ${day.tag}: Priorität von ${s.id} ungültig`));
+        ok(day.slots.filter((s) => s.t && !s.opt).every((s) => prioOf(s) === 1 || st.prio[s.id]), `W${w} ${day.tag}: Hauptübung nicht Prio 1`);
+        const m = [1, 2, 3].map((p) => dauer(w, d, p));
+        ok(m[0] <= m[1] && m[1] <= m[2] && m[2] < 180, `W${w} ${day.tag}: Dauer unplausibel (${m.join("/")} min)`);
+      });
+    for (const k in st.prioWahl) ok([1, 2, 3].includes(st.prioWahl[k]), "gespeicherte Auswahl „Schaffst du heute alles?“ ungültig: " + k);
+  });
+
   versuch("Plan", () => {
     ok(currentWeek() >= 1 && currentWeek() <= NW, "Aktuelle Woche außerhalb des Plans");
+    ok(W(7).pbt === 3 && W(11).pbt === 2 && W(6).pbt === (st.cycle === 1 ? 2 : 3), "OK2-Topset: Wiederholungen je Block stimmen nicht (4 · 3 · 2)");
     [0, 5, 10].forEach((a) => {
       const v = WK.slice(a, a + 4).map((r) => r[4]);
       ok(v[0] === 4 && v.every((x, i) => !i || x < v[i - 1]), `Variante Block ${a / 5 + 1}: RIR startet nicht bei 4 oder fällt nicht jede Woche`);
@@ -6122,31 +5791,6 @@ function selfTest() {
     }
   });
 
-  versuch("Wochenplaner", () => {
-    const tage = [0, 1, 2, 3, 4, 5, 6].map((i) => planDate(1, i));
-    ok(
-      tage.every((dt, i) => (dt.getDay() + 6) % 7 === i),
-      "Wochenplaner: Wochentag und Datum passen nicht zusammen",
-    );
-    ok(
-      tage.every((dt) => dt >= weekDate(1) && dt <= weekDate(1, 6)),
-      "Wochenplaner: Tag außerhalb der Plan-Woche",
-    );
-    [0, 1, 2].forEach((rest) => {
-      const cfg = { rest, dbl: [0, 0, 0, 0, 0, 1, 1], swim: -1 };
-      const g = genPlans(1, cfg);
-      ok(g.length > 0, "Wochenplaner: keine Lösung bei " + rest + " Ruhetagen");
-      g.forEach((p) => ok(planIssues(p, cfg).length === 0, "Wochenplaner: Vorschlag verletzt Regeln"));
-      g.forEach((p) => ok(["l1", "l2"].some((id) => planDayOf(p, id) >= 5), "Wochenplaner: Vorschlag ohne Lauf am Wochenende"));
-    });
-    [0, 2, 3, 4, 5, 6].forEach((sw) => {
-      const cfg = { rest: 0, dbl: [0, 0, 0, 0, 0, 1, 1], swim: sw };
-      ok(genPlans(1, cfg).every((p) => planDayOf(p, "s") === sw), "Wochenplaner: eingetragener Schwimmtag " + WD[sw] + " wird nicht eingehalten");
-    });
-    const nurWerktags = [["uk1"], ["l1"], ["ok1"], ["l2"], ["uk2"], ["s"], ["ok2"]];
-    ok(planIssues(nurWerktags, null).includes("Am Wochenende fehlt ein Lauf"), "Wochenplaner: fehlender Wochenend-Lauf wird nicht erkannt");
-    for (const w in st.wplan) ok(Array.isArray(st.wplan[w]) && st.wplan[w].length === 7, "Wochenplan Woche " + w + " beschädigt");
-  });
 
   versuch("Ansichten", () => {
     const zeichne = (name, min, fn) => {
@@ -6165,17 +5809,7 @@ function selfTest() {
         ui.d = d;
         zeichne(`Training W${w} ${day.tag}`, 500, vTrain);
       });
-      ui.d = 0;
-      zeichne("Wochenplan W" + w, 300, vWeek);
     }
-    ui.pedit = ui.w = uiVorher.w;
-    ui.ppick = "uk1";
-    zeichne("Wochenplan selbst einteilen", 300, vWeek);
-    ui.pedit = ui.ppick = null;
-    ui.pgen = { w: ui.w, list: genPlans(ui.w), i: 0 };
-    zeichne("Wochenvorschläge", 300, vWeek);
-    ui.pgen = null;
-    zeichne("Blatt Woche planen", 300, planSheetHtml);
     ui.w = uiVorher.w;
     ui.d = uiVorher.d;
     buildDays();
