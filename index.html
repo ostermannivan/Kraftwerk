@@ -567,18 +567,13 @@ body.typing #jumpset{ display:none; }
   #splash .rule{ width:150px; opacity:0; animation:fadeIn .6s ease .2s forwards; }
   #pr .card, #pr .t2{ animation:none; }
 }
-.prio{ margin:0 0 12px; }
-.prio-q{ font-size:var(--fs-m); color:var(--silver); margin:2px 2px 0; }
-.prio .seg{ grid-template-columns:repeat(3,1fr); margin:8px 0 6px; }
-.prio .seg button{ height:48px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; }
-.prio .seg button b{ font-weight:inherit; font-size:var(--fs-m); }
-.prio .seg button span{ font-size:var(--fs-xs); color:var(--muted); }
-.prio-info{ font-size:var(--fs-s); color:var(--muted); margin:0 2px; line-height:1.4; }
 .pbadge{ height:20px; padding:0 7px; margin-right:10px; border-radius:10px; font-size:var(--fs-xs); font-weight:700; letter-spacing:.03em; border:1px solid var(--line); color:var(--muted); align-self:center; }
 .pbadge.p1{ border-color:rgba(var(--gold-rgb),.6); color:var(--gold2); }
 .pbadge.p2{ border-color:var(--silver); color:var(--silver); }
 .ausinfo{ font-size:var(--fs-s); color:var(--muted); margin:6px 2px 10px; line-height:1.45; }
 .sugline.find span{ color:var(--gold2); font-weight:600; }
+.durchip{ height:30px; padding:0 12px; border-radius:15px; border:1px solid var(--line); font-size:var(--fs-s); color:var(--muted); white-space:nowrap; }
+.durchip.on{ border-color:rgba(var(--gold-rgb),.55); color:var(--gold2); }
 </style>
 </head>
 <body>
@@ -1472,7 +1467,7 @@ const TECH = {
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.9";
+const APPVER = "11.26.10";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -1526,6 +1521,7 @@ function DEF() {
     cfg: {}, // je Platz: n = Sätze, ss = Supersatz, ps = Pause in Sekunden
     setov: {}, // Satzzahl einer einzelnen Woche ("Woche|Platz")
     wsplit: {}, // Push/Pull-Split je Woche
+    wmerge: {}, // Ganzkörper je Woche: Tag d und d+1 zusammengelegt (Wert = d)
     repMax: {}, // Höchst-Wiederholungen je Übung
     groupOv: {}, // geänderte Muskelgruppe je Übung
     boAdd: {}, // +1 Backoff-Satz je Hauptübung
@@ -1822,6 +1818,8 @@ function clearTraining() {
   st.setov = {};
   st.fb = {};
   st.wsplit = {};
+  st.wmerge = {};
+  st.prioWahl = {};
 }
 
 /* ==========================================================================
@@ -1904,11 +1902,16 @@ let DAYS = [];
 const SLOTDAY = {};
 const _dc = {};
 function daysFor(w) {
-  const sp = st.wsplit[w];
+  const sp = st.wsplit[w],
+    gk = st.wmerge[w];
   const key =
     w +
     "|" +
     (sp ?? "") +
+    "|" +
+    (gk ?? "") +
+    "|" +
+    JSON.stringify(st.prio).length +
     "|" +
     JSON.stringify(st.extra).length +
     "|" +
@@ -1943,7 +1946,56 @@ function daysFor(w) {
     const b = BASE_DAYS[4];
     out.push({ id: b.id, okey: "pul", name: "Pull", tag: "PULL", pull: true, slots: ord("pul", [...b.mix, ...(st.extra[4] || [])]) });
   }
+  if (gk != null) {
+    const stu = !!st.studio[w + "|" + gk];
+    out[gk] = { ...out[gk], okey: "gk" + gk + (stu ? "-studio" : ""), name: "Ganzkörper", tag: "GK", optional: false, studio: stu, gk: [gk, gk + 1] };
+    out[gk].slots = ord(out[gk].okey, ganzkoerper(w, gk, stu));
+    out[gk + 1] = { ...out[gk + 1], inGK: gk, slots: [] };
+  }
   return (_dc[key] = out);
+}
+/**
+ * Ganzkörper aus Tag a und a+1 bei wenig Zeit: beide Hauptübungen mit allen Pflichtsätzen, dazu Grundübungen (Priorität 1–2)
+ * beider Tage im Wechsel, zuerst mit je 2 Sätzen, bei Luft bis zur Satzzahl eines normalen Trainings mit ihren vollen Sätzen.
+ * Isolation, Optionales und die Zusatzsätze entfallen. Für Studio und Homegym jeweils aus der passenden Übungsliste.
+ */
+function ganzkoerper(w, a, stu) {
+  const teile = [a, a + 1].map((i) => {
+    const b = BASE_DAYS[i];
+    return { main: b.main.filter((x) => !x.opt), rest: [...(stu ? b.studio : b.mix), ...(st.extra[i] || [])].filter((x) => !x.opt) };
+  });
+  const satz = (x) => rx(x, w).sets;
+  const normal = teile.map((t) => [...t.main, ...t.rest].reduce((n, x) => n + satz(x), 0));
+  const ziel = Math.round((normal[0] + normal[1]) / 2);
+  const out = [...teile[0].main, ...teile[1].main].map((x) => ({ ...x, gk: true }));
+  let n = out.reduce((k, x) => k + satz(x), 0);
+  const pool = [];
+  const g = teile.map((t) => t.rest.filter((x) => prioOf(x) <= 2));
+  for (let i = 0; i < Math.max(g[0].length, g[1].length); i++) [g[0][i], g[1][i]].forEach((x) => x && pool.push({ ...x, cap: 2, gk: true }));
+  pool.forEach((x) => {
+    const k = satz(x);
+    if (n + k <= ziel) {
+      out.push(x);
+      n += k;
+    }
+  });
+  // Noch Luft bis zur Satzzahl eines Trainings: Grundübungen bekommen ihre vollen Sätze zurück.
+  out.forEach((x) => {
+    if (!x.cap) return;
+    const voll = rx({ ...x, cap: null }, w).sets;
+    const mehr = Math.min(voll - satz(x), ziel - n);
+    if (mehr > 0) {
+      x.cap += mehr;
+      n += mehr;
+    }
+  });
+  return out;
+}
+/** Reihenfolge der Tagesreiter: Pull-Tag hinter seinem Push-Tag, ein im Ganzkörper aufgegangener Tag entfällt. */
+function tagFolge(w) {
+  const sp = st.wsplit[w];
+  const f = daysFor(w).length === 5 ? (sp === 0 ? [0, 4, 1, 2, 3] : [0, 1, 2, 4, 3]) : [0, 1, 2, 3];
+  return f.filter((i) => daysFor(w)[i].inGK == null);
 }
 function buildDays() {
   for (const k in _dc) delete _dc[k];
@@ -2147,7 +2199,12 @@ const isSkipped = (w, d, sid) => !!st.skip[w + "|" + d + "|" + sid];
 
 /* ---------- Einträge und Trainingszeit ---------- */
 function lk(w, d, sid) {
-  return w + "|" + d + "|" + sid;
+  return w + "|" + gkTag(w, d) + "|" + sid;
+}
+/** Ist Tag d in dieser Woche im Ganzkörper-Tag aufgegangen, liegen seine Einträge beim Ganzkörper-Tag. */
+function gkTag(w, d) {
+  const m = st.wmerge[w];
+  return m != null && d === m + 1 ? m : d;
 }
 function getLog(w, d, sid) {
   return st.log[lk(w, d, sid)];
@@ -2182,6 +2239,7 @@ function started(w, d) {
 function dayDone(w, d) {
   const day = daysFor(w)[d];
   if (!day) return { all: 0, ok: 0, done: false };
+  if (day.inGK != null) return dayDone(w, day.inGK);
   let all = 0,
     ok = 0;
   day.slots.forEach((s) => {
@@ -2344,7 +2402,7 @@ function rx(slot, w) {
       pct: p,
       kg: rnd(ref * p),
       vorwoche: ref === basis ? null : vw,
-      optSatz: !P.deload && ov == null && P[k[2]] ? 1 : 0, // laut Vorlage möglicher zusätzlicher Satz
+      optSatz: !P.deload && !slot.gk && ov == null && P[k[2]] ? 1 : 0, // laut Vorlage möglicher zusätzlicher Satz
     };
   }
   const c = st.cfg[slot.id] || {};
@@ -2352,7 +2410,7 @@ function rx(slot, w) {
   const sb = nm && stalled(nm, w) ? 1 : 0;
   return {
     setback: !!sb,
-    sets: ov ?? Math.max(1, (c.n ?? slot.n) - red + fbAdj(P.block)) + sb,
+    sets: ov ?? Math.min(slot.cap ?? 9, Math.max(1, (c.n ?? slot.n) - red + fbAdj(P.block)) + sb),
     reps: capReps(nm && st.set.tracked.includes(nm) ? "6–8" : slot.rt === "I" ? P.ri : P.rg, nm),
     rir: P.acc,
   };
@@ -2875,16 +2933,16 @@ function vTrain() {
     }).join("") +
     `</div>`;
   const sp_ = st.wsplit[w];
-  const disp = DAYS.length === 5 ? (sp_ === 0 ? [0, 4, 1, 2, 3] : [0, 1, 2, 4, 3]) : [0, 1, 2, 3];
+  const disp = tagFolge(w);
   h +=
-    `<div class="days" style="grid-template-columns:repeat(${DAYS.length},1fr)">` +
+    `<div class="days" style="grid-template-columns:repeat(${disp.length},1fr)">` +
     disp
       .map((i) => [DAYS[i], i])
       .map(([dd, i]) => {
         const s = dayDone(w, i);
         const opt = dd.optional && !started(w, i) && i !== d;
         const lab = dd.pull ? "Pull" : dd.split ? "Push" : dd.tag;
-        const sub = dd.pull || dd.split ? (DAYS[sp_] || {}).tag || "" : "";
+        const sub = dd.gk ? dd.gk.map((i) => BASE_DAYS[i].tag).join("+") : dd.pull || dd.split ? (DAYS[sp_] || {}).tag || "" : "";
         return `<button class="day ${i === d ? "sel" : ""} ${s.done ? "done" : ""} ${opt ? "optx" : ""}" data-day="${i}"><b>${lab}</b><span>${s.done ? "✓ " + ((d_) => (d_ ? d_.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : ""))(sessDate(w, i)) : s.ok ? s.ok + "/" + s.all : (dd.optional ? "optional" : sub || "offen")}</span></button>`;
       })
       .join("") +
@@ -2892,12 +2950,13 @@ function vTrain() {
   if (P.deload && (w === 5 || w === 10)) h += vFeedback(P.block + 1);
   if (day.optional && !started(w, d)) h += `<p class="lead small">Optionaler Tag – zählt erst, sobald du den ersten Satz abhakst.</p>`;
   if (day.pull) h += `<p class="lead small">Zusätzliche Pull-Einheit dieser Woche.</p>`;
+  if (day.gk) h += `<p class="lead small">${day.gk.map((i) => BASE_DAYS[i].tag).join(" und ")} dieser Woche zusammengelegt: beide Hauptübungen und die Grundübungen, ungefähr so viele Sätze wie ein Training.</p>`;
   const canPlace = !day.pull && !day.split && BASE_DAYS[d].studio;
   const onS = !!st.studio[w + "|" + d];
   if (weekDone(NW))
     h += `<div class="cyclecard"><b>Zyklus ${st.cycle} geschafft.</b><span>Bereit für die nächste Runde mit neuen Startwerten?</span><button class="chip on" data-act="cycle">Nächsten Zyklus starten</button></div>`;
   h += vBackupNote();
-  h += vStatus();
+  h += vStatus(w, d);
   h += vSession(w, d);
   const ok_ = ui.opt[w + "|" + d];
   let optShown = false;
@@ -2930,13 +2989,16 @@ function vTrain() {
     h += onS
       ? `<button class="linkbtn" data-place="home">Zurück zur Homegym-Variante</button>`
       : `<button class="linkbtn" data-place="studio">Heute im Studio trainieren?</button>`;
-  if (d === 0 || d === 2) {
-    const sp = st.wsplit[w];
+  const sp = st.wsplit[w],
+    gk = st.wmerge[w];
+  if ((d === 0 || d === 2) && gk == null)
     h +=
       sp === d
         ? `<button class="linkbtn" data-wsplit="off">Push/Pull-Split dieser Woche aufheben</button>`
         : `<button class="linkbtn" data-wsplit="${d}">Mehr Zeit diese Woche? ${day.tag} in Push + Pull aufteilen</button>`;
-  }
+  if (day.gk && !started(w, d)) h += `<button class="linkbtn" data-wmerge="off">Ganzkörper aufheben – wieder ${day.gk.map((i) => BASE_DAYS[i].tag).join(" und ")} einzeln</button>`;
+  else if (sp == null && gk == null && d <= 2 && !started(w, d) && !started(w, d + 1))
+    h += `<button class="linkbtn" data-wmerge="${d}">Weniger Zeit diese Woche? ${day.tag} + ${BASE_DAYS[d + 1].tag} zu einem Ganzkörper-Training zusammenlegen</button>`;
   return h;
 }
 function vWelcome() {
@@ -2987,21 +3049,31 @@ function vBackupNote() {
   return `<div class="bknote"><div><b>${now.getDay() === 0 ? "Sonntag – Zeit für die Sicherung" : "Deine Sicherung ist überfällig"}</b><span>${last ? "Letzte Sicherung vor " + days + (days === 1 ? " Tag" : " Tagen") : "Noch keine Sicherung"} · am besten in iCloud Drive speichern</span></div>
     <div class="bkbtns"><button class="chip on" data-act="export">Jetzt sichern</button><button class="chip" data-act="bksnooze">Später</button></div></div>`;
 }
-function vStatus() {
+function vStatus(w, d) {
   const last = sessionsAll()[0];
-  return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last ? relDay(last.date) + " · " + esc(last.tag) : "noch nie – los geht’s"}</b></div></div>`;
+  return `<div class="status"><div><span>Zuletzt trainiert</span><b>${last ? relDay(last.date) + " · " + esc(last.tag) : "noch nie – los geht’s"}</b></div>${vDauer(w, d)}</div>`;
 }
+const PRIONAME = { 3: "Alle Übungen", 2: "Prio 1 + 2", 1: "Nur Prio 1" };
 function vSession(w, d) {
+  return sessOf(w, d) ? "" : `<button class="btn gold startbtn" data-sess="start">▶  Training starten</button>`;
+}
+/** Dezente Zeile im Status: geschätzte Dauer und Auswahl – antippen öffnet „Schaffst du heute alle Übungen?“. */
+function vDauer(w, d) {
   const s = sessOf(w, d);
   if (s && s.e) return "";
-  const wahl = prioWahl(w, d),
-    opt = [3, 2, 1].map((p) => ({ p, min: dauer(w, d, p), n: DAYS[d].slots.filter((x) => zaehlt(w, d, x, p) && !(x.opt && !slotStarted(w, d, x))).length }));
-  const name = { 3: "Alle", 2: "Prio 1 + 2", 1: "Nur Prio 1" };
-  const cur = opt.find((o) => o.p === wahl);
-  return `<div class="prio"><div class="prio-q">Schaffst du heute alle Übungen?</div>
-   <div class="seg">${opt.map((o) => `<button class="${o.p === wahl ? "on" : ""}" data-pwahl="${o.p}"><b>${name[o.p]}</b><span>${o.min} min</span></button>`).join("")}</div>
-   <div class="prio-info">${cur.n} Übungen · ca. ${cur.min} min · Priorität ändern: auf P1/P2/P3 an der Übung tippen</div></div>
-   ${s ? "" : `<button class="btn gold startbtn" data-sess="start">▶  Training starten</button>`}`;
+  const wahl = prioWahl(w, d);
+  return `<button class="durchip ${wahl < 3 ? "on" : ""}" data-act="prioblatt">ca. ${dauer(w, d, wahl)} min · ${PRIONAME[wahl]} ▾</button>`;
+}
+function openPrio() {
+  const w = ui.w,
+    d = ui.d,
+    wahl = prioWahl(w, d);
+  const zahl = (p) => DAYS[d].slots.filter((x) => zaehlt(w, d, x, p) && !(x.opt && !slotStarted(w, d, x))).length;
+  $("#sheet").innerHTML = `<div class="grab"></div><h3>Schaffst du heute alle Übungen?</h3><p>Bei wenig Zeit nur die wichtigsten – der Tag gilt dann trotzdem als geschafft.</p>
+   ${[3, 2, 1].map((p) => `<button class="opt ${p === wahl ? "cur" : ""}" data-pwahl="${p}"><span class="n">${PRIONAME[p]}</span><span class="h">${zahl(p)} Übungen · ca. ${dauer(w, d, p)} min</span></button>`).join("")}
+   <p class="small" style="margin-top:14px">Priorität einer Übung ändern: im Training auf P1 / P2 / P3 tippen.</p>
+   <button class="btn" data-act="close">Fertig</button>`;
+  showSheet();
 }
 function vSessionFoot(w, d) {
   const s = sessOf(w, d);
@@ -4257,6 +4329,8 @@ function startCycle() {
         studioId: st.studioId,
         setov: st.setov,
         wsplit: st.wsplit,
+        wmerge: st.wmerge,
+        prioWahl: st.prioWahl,
         fb: st.fb,
       }),
     ),
@@ -4460,7 +4534,7 @@ function doCsv() {
     const ds = dt ? iso(dt) : "";
     st.log[k].sets.forEach((z, i) => {
       if (z.kg === "" && z.reps === "" && !z.ok) return;
-      recs.push([+w, +d, pos, i + 1, [w, TAGS[+d], pos, exName(slot, +w), i + 1, z.kg, z.reps, z.rir, z.ok ? "ja" : "nein", ds]]);
+      recs.push([+w, +d, pos, i + 1, [w, (daysFor(+w)[+d] || {}).tag || TAGS[+d], pos, exName(slot, +w), i + 1, z.kg, z.reps, z.rir, z.ok ? "ja" : "nein", ds]]);
     });
   });
   recs.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2] || a[3] - b[3]).forEach((r) => rows.push(r[4]));
@@ -4582,6 +4656,9 @@ function showPrevPop(c) {
 
 /** data-act="…": Aktionen ohne Argument. */
 const AKTION = {
+  prioblatt() {
+    openPrio();
+  },
   onboard() {
     st.onboarded = true;
     save();
@@ -4872,10 +4949,22 @@ const KLICK = {
     toast(st.wsplit[ui.w] != null ? "Woche " + ui.w + ": Push + Pull" : "Split aufgehoben");
   },
 
+  wmerge(t, v) {
+    if (v === "off") delete st.wmerge[ui.w];
+    else st.wmerge[ui.w] = +v;
+    save();
+    buildDays();
+    if (DAYS[ui.d].inGK != null) ui.d = DAYS[ui.d].inGK;
+    render();
+    toast(st.wmerge[ui.w] != null ? "Woche " + ui.w + ": Ganzkörper" : "Wieder getrennte Einheiten");
+  },
+
   /* --- Prioritäten --- */
   pwahl(t, v) {
-    st.prioWahl[ui.w + "|" + ui.d] = +v;
+    if (+v === 3) delete st.prioWahl[ui.w + "|" + ui.d];
+    else st.prioWahl[ui.w + "|" + ui.d] = +v;
     save();
+    closeSheet();
     render();
   },
   prio(t, sid) {
@@ -5572,8 +5661,7 @@ document.addEventListener("focusout", (e) => {
         dy = e.changedTouches[0].clientY - sy;
       sx = null;
       if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 2 || Date.now() - t0 > 700) return;
-      const sp_ = st.wsplit[ui.w];
-      const disp = DAYS.length === 5 ? (sp_ === 0 ? [0, 4, 1, 2, 3] : [0, 1, 2, 4, 3]) : [0, 1, 2, 3];
+      const disp = tagFolge(ui.w);
       const k = disp.indexOf(ui.d);
       const nk = k + (dx < 0 ? 1 : -1);
       if (nk < 0 || nk >= disp.length) return;
@@ -5751,6 +5839,16 @@ function selfTest() {
         const m = [1, 2, 3].map((p) => dauer(w, d, p));
         ok(m[0] <= m[1] && m[1] <= m[2] && m[2] < 180, `W${w} ${day.tag}: Dauer unplausibel (${m.join("/")} min)`);
       });
+    [0, 1, 2].forEach((m) =>
+      [false, true].forEach((stu) => {
+        const g = ganzkoerper(8, m, stu),
+          haupt = [m, m + 1].flatMap((i) => BASE_DAYS[i].main.filter((x) => !x.opt).map((x) => x.id));
+        ok(haupt.every((id) => g.some((x) => x.id === id)), `Ganzkörper ${BASE_DAYS[m].tag}+${BASE_DAYS[m + 1].tag}: Hauptübung fehlt`);
+        ok(g.every((x) => !x.opt && (x.t || prioOf(x) <= 2)), `Ganzkörper ${BASE_DAYS[m].tag}+${BASE_DAYS[m + 1].tag}: Isolation oder Optionales enthalten`);
+        ok(new Set(g.map((x) => x.id)).size === g.length, `Ganzkörper ${BASE_DAYS[m].tag}+${BASE_DAYS[m + 1].tag}: Übung doppelt`);
+      }),
+    );
+    for (const w in st.wmerge) ok([0, 1, 2].includes(st.wmerge[w]) && st.wsplit[w] == null, "Ganzkörper Woche " + w + " ungültig oder zusammen mit Push/Pull");
     for (const k in st.prioWahl) ok([1, 2, 3].includes(st.prioWahl[k]), "gespeicherte Auswahl „Schaffst du heute alles?“ ungültig: " + k);
   });
 
