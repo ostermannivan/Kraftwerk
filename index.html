@@ -1326,12 +1326,13 @@ const BLK = {
 // prettier-ignore
 const WK = [
  [1,"Einstieg",4,.70,4,3],[1,"Aufbau",3,.72,3,2],[1,"Steigerung",2,.74,2.5,2],[1,"Peak",1,.76,2,1],[1,"Deload",4,.65,4,4],
- [2,"Einstieg",4,.72,4,3],[2,"Aufbau",3,.74,3,2],[2,"Steigerung",2,.76,2,2],[2,"Peak",1,.78,1,1],[2,"Deload",4,.65,4,4],
- [3,"Einstieg",4,.74,4,3],[3,"Aufbau",3,.76,3,2],[3,"Steigerung",2,.78,2,1],[3,"Peak",1,.80,1.5,1],[3,"Deload",4,.65,4,4]];
+ [2,"Einstieg",4,.74,4,3],[2,"Aufbau",3,.76,3,2],[2,"Steigerung",2,.78,2,2],[2,"Peak",1,.80,1,1],[2,"Deload",4,.65,4,4],
+ [3,"Einstieg",4,.75,4,3],[3,"Aufbau",3,.77,3,2],[3,"Steigerung",2,.79,2,1],[3,"Peak",1,.81,1.5,1],[3,"Deload",4,.65,4,4]];
 // Variante (pausierte Kniebeuge) wie in der Vorlage: 3 × 5 · 3 × 5 · 3 × 4, jeder Block startet bei RIR 4 und fällt jede Woche.
 // Übergang im 1. Zyklus (umgestellt nach Woche 6): schon trainierte Wochen behalten ihre damalige Vorgabe
 // (pks = Sätze, pkr = Wiederholungen, vr = RIR) – sonst gälten sie nachträglich als unvollständig.
-// Kreuzheben (kht/khb) lief in Block 1 des 1. Zyklus noch mit 5 Wiederholungen, das OK2-Topset (pbt) mit einer weniger.
+// Kreuzheben (kht/khb) lief in Block 1 des 1. Zyklus noch mit 5 Wiederholungen, das OK2-Topset (pbt) mit einer weniger,
+// der Backoff in Woche 6 noch mit 72 % (seit 11.26.11 wie Rise'n'Grind: Block 2 ab 74 %, Block 3 ab 75 %).
 const UEBERGANG = {
   1: {
     1: { pks: 2, kht: 5, khb: 5, pbt: 3 },
@@ -1339,7 +1340,7 @@ const UEBERGANG = {
     3: { pks: 2, vr: 2, kht: 5, khb: 5, pbt: 3 },
     4: { pks: 2, kht: 5, khb: 5, pbt: 3 },
     5: { pks: 2, kht: 5, khb: 5, pbt: 3 },
-    6: { pks: 2, pkr: 4, vr: 3, pbt: 2 },
+    6: { pks: 2, pkr: 4, vr: 3, pbt: 2, bo: 0.72 },
   },
 };
 const NW = WK.length;
@@ -1467,7 +1468,7 @@ const TECH = {
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.10";
+const APPVER = "11.26.11";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -1837,7 +1838,6 @@ const num = (v) => {
 const f1 = (x) => (x == null ? "–" : x.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
 const fk = (x) => (x == null ? "–" : x.toLocaleString("de-DE", { maximumFractionDigits: 2 }));
 const rnd = (x) => Math.round(x / st.set.round) * st.set.round;
-const rdn = (x) => Math.floor(x / st.set.round) * st.set.round;
 const mmss = (s) => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 function startDate() {
   const d = new Date(st.set.start + "T00:00:00");
@@ -2321,26 +2321,32 @@ function weekStreak() {
 }
 
 /* ---------- Vorgaben: Gewicht, Sätze, Wiederholungen, RIR ---------- */
+/** Bestes geschätztes 1RM aus den Topsets eines Blocks (ohne Deload). */
+function blockBest(lift, blk) {
+  const v = [];
+  for (let w = 1; w <= NW; w++) if (W(w).block === blk && !W(w).deload) v.push(topE1(lift, w));
+  const ok = v.filter((x) => x != null);
+  return ok.length ? Math.max(...ok) : null;
+}
+/**
+ * Rechen-1RM eines Blocks wie bei Rise'n'Grind: Block 1 = Startwert, danach das beste geschätzte 1RM des Vorblocks –
+ * nur wenn es gestiegen ist (nie weniger als vorher) und höchstens 5 % mehr. Eigene Einträge in den Einstellungen gehen vor.
+ */
+function blockBase(lift, blk) {
+  const s = st.set;
+  if (blk === 1) return num(s[lift]);
+  const eigen = num(s[lift + blk]);
+  if (eigen != null) return eigen;
+  const vor = blockBase(lift, blk - 1),
+    best = blockBest(lift, blk - 1);
+  return best == null || vor == null ? vor : Math.max(vor, Math.min(best, vor * 1.05));
+}
 function base1RM(lift, w) {
   const blk = W(w).block,
     s = st.set;
-  const b1 = { kb: s.kb, bd: s.bd, kh: s.kh };
-  const avg = (ws, l) => {
-    const v = ws.map((x) => topE1(l, x)).filter((x) => x != null);
-    return v.length ? rdn(v.reduce((a, b) => a + b, 0) / v.length) : null;
-  };
-  const b2 = {};
-  ["kb", "bd", "kh"].forEach((l) => {
-    b2[l] = num(s[l + "2"]) ?? avg([3, 4], l) ?? b1[l];
-  });
-  const b3 = {};
-  ["kb", "bd", "kh"].forEach((l) => {
-    b3[l] = num(s[l + "3"]) ?? avg([8, 9], l) ?? b2[l];
-  });
-  const B = blk === 1 ? b1 : blk === 2 ? b2 : b3;
-  if (lift === "pkb") return B.kb * s.fpkb;
-  if (lift === "pbd") return B.bd * s.fpbd;
-  return B[lift];
+  if (lift === "pkb") return blockBase("kb", blk) * s.fpkb;
+  if (lift === "pbd") return blockBase("bd", blk) * s.fpbd;
+  return blockBase(lift, blk);
 }
 const isCalibW = (w) => WK[w - 1] && WK[w - 1][1] === "Peak";
 const isCalib = (slot, w) => slot && slot.t === "BO" && !slot.opt && ["kb", "bd", "kh"].includes(slot.lift) && isCalibW(w);
@@ -3761,10 +3767,10 @@ function secStartwerte() {
 }
 function secRechen1RM() {
   const auto = (l, b) => {
-    const v = (b === 2 ? [3, 4] : [8, 9]).map((x) => topE1(l, x)).filter((x) => x != null);
-    return v.length ? f1(rdn(v.reduce((a, c) => a + c, 0) / v.length)) : "noch offen";
+    const best = blockBest(l, b - 1);
+    return best == null ? "noch offen" : f1(Math.round(blockBase(l, b) * 10) / 10) + " (bestes im Block " + (b - 1) + ": " + f1(Math.round(best * 10) / 10) + ")";
   };
-  return `<div class="sec form"><h3>Rechen-1RM Block 2 & 3</h3><p class="lead">Leer lassen = automatisch aus deinen Topsets (Block 2: W3/W4, Block 3: W8/W9).</p>
+  return `<div class="sec form"><h3>Rechen-1RM Block 2 & 3</h3><p class="lead">Leer lassen = automatisch wie bei Rise'n'Grind: dein bestes geschätztes 1RM aus den Topsets des Vorblocks – nur wenn es gestiegen ist, höchstens + 5 %.</p>
    ${setInput("kb2", "Kniebeuge Block 2", "automatisch: " + auto("kb", 2), "auto")}${setInput("bd2", "Bankdrücken Block 2", "automatisch: " + auto("bd", 2), "auto")}${setInput("kh2", "Kreuzheben Block 2", "automatisch: " + auto("kh", 2), "auto")}
    ${setInput("kb3", "Kniebeuge Block 3", "automatisch: " + auto("kb", 3), "auto")}${setInput("bd3", "Bankdrücken Block 3", "automatisch: " + auto("bd", 3), "auto")}${setInput("kh3", "Kreuzheben Block 3", "automatisch: " + auto("kh", 3), "auto")}
    ${setInput("fpkb", "Faktor pausierte Kniebeuge", "Anteil vom Kniebeuge-1RM")}${setInput("fpbd", "Faktor pausiertes Bankdrücken", "Anteil vom Bank-1RM")}</div>`;
@@ -5854,6 +5860,14 @@ function selfTest() {
 
   versuch("Plan", () => {
     ok(currentWeek() >= 1 && currentWeek() <= NW, "Aktuelle Woche außerhalb des Plans");
+    ["kb", "bd", "kh"].forEach((l) =>
+      [2, 3].forEach((b) => {
+        if (num(st.set[l + b]) != null) return;
+        const v = blockBase(l, b - 1),
+          n = blockBase(l, b);
+        ok(n >= v && n <= v * 1.05 + 0.01, `Rechen-1RM ${l} Block ${b}: ${n} – muss zwischen ${v} und + 5 % liegen`);
+      }),
+    );
     ok(W(7).pbt === 3 && W(11).pbt === 2 && W(6).pbt === (st.cycle === 1 ? 2 : 3), "OK2-Topset: Wiederholungen je Block stimmen nicht (4 · 3 · 2)");
     [0, 5, 10].forEach((a) => {
       const v = WK.slice(a, a + 4).map((r) => r[4]);
