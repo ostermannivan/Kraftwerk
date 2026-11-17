@@ -290,8 +290,8 @@ section.ex .exl{ cursor:pointer; }
 .cue[data-cuetog]{ cursor:pointer; }
 .cue{ font-size:var(--fs-sm); line-height:1.45; color:#9A9DA3; margin-top:8px; }
 .cuefold{ display:block; font-size:var(--fs-s); color:var(--dim); margin-top:6px; padding:2px 0; }
-.vwinfo{ font-size:var(--fs-s); color:var(--sage); margin-top:2px; }
-.target{ display:flex; align-items:baseline; margin:10px 0 2px; gap:10px; }
+.vwinfo{ flex-basis:100%; font-size:var(--fs-s); color:var(--sage); margin-top:2px; }
+.target{ display:flex; flex-wrap:wrap; align-items:baseline; margin:10px 0 2px; column-gap:10px; }
 .sugline{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; margin:10px 0 4px; font-size:var(--fs-m); }
 .sugline span{ color:var(--muted); font-size:var(--fs-s); }
 .sugline em{ font-style:normal; color:var(--muted); font-size:var(--fs-s); }
@@ -1468,7 +1468,7 @@ const TECH = {
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.11";
+const APPVER = "11.26.12";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -2070,6 +2070,14 @@ function hintText(name, w, d) {
   if (st.hints[k] != null) return st.hints[k];
   const lib = libEntry(name);
   return [lib && lib.h, st.exnotes[k] || st.exnotes[name]].filter(Boolean).join("\n");
+}
+/** Übungen einer Gruppe für einen Ort. Im Studio zusätzlich alle Kurz-/Langhantel-, SZ- und Körpergewichtsübungen aus dem Homegym. */
+function ortsListe(g, loc) {
+  const passt = (o, n) => o === loc || (loc === "Studio" && o === "Homegym" && isFree(n));
+  return [
+    ...dedupeN((LIB[g] || []).filter((e) => passt(e.o, e.n)).map((e) => ({ ...e, n: canon(e.n), o: loc }))),
+    ...st.custom.filter((x) => x.g === g && passt(x.o || "Homegym", x.n)).map((x) => ({ n: x.n, o: "eigene" })),
+  ];
 }
 function dedupeN(a) {
   const s = new Set();
@@ -3218,19 +3226,24 @@ function vTech(slot, w, d) {
 }
 function e1Text(slot, w, d) {
   const r = rx(slot, w),
-    L = getLog(w, d, slot.id);
-  if (!L) return "";
+    L = getLog(w, d, slot.id),
+    gross = slot.t === "TOP" && ["kb", "bd", "kh"].includes(slot.lift);
+  const rek = gross ? bestMain(slot.lift, w) : null;
+  const rekText = rek ? ` · Rekord ${f1(rek.e)} kg` : "";
+  // Vor dem Satz bei Kniebeuge, Bank und Kreuzheben: was es bedeutet, wenn die Vorgabe geschafft wird
+  const ziel = () => {
+    if (!gross || !r.kg) return "";
+    const e = Math.round((r.kg / pct(r.reps, r.rir)) * 10) / 10;
+    return `Geschafft → e1RM <b>${f1(e)} kg</b>${rek && e > rek.e ? ` <span class="pr">· wäre neuer Rekord</span>` : rekText}`;
+  };
+  if (!L) return ziel();
   let best = null;
   L.sets.forEach((s, i) => {
     const e = setE1(s, slot.t ? r.reps : parseInt(String(s.reps).split(/[\/·]/)[0]), slot.t ? r.rir : accRir(i, L.sets.length, W(w)));
     if (e != null && (best == null || e > best)) best = e;
   });
-  if (best == null) return "";
-  let pr = "";
-  if (slot.t === "TOP" && ["kb", "bd", "kh"].includes(slot.lift)) {
-    const prev = bestMain(slot.lift, w);
-    if (prev == null || best > prev.e) pr = ` <span class="pr">· neuer Rekord</span>`;
-  }
+  if (best == null) return ziel();
+  const pr = gross ? (rek == null || best > rek.e ? ` <span class="pr">· neuer Rekord</span>` : rekText) : "";
   return `e1RM heute <b>${f1(best)} kg</b>${pr}`;
 }
 
@@ -3975,10 +3988,7 @@ function openSwap(sid) {
     i = sl.indexOf(slot),
     next = sl[i + 1] && !sl[i + 1].t ? sl[i + 1] : null;
   const loc = DAYS[d].studio ? "Studio" : "Homegym";
-  const list = [
-    ...dedupeN((LIB[slot.g] || []).filter((e) => e.o === loc).map((e) => ({ ...e, n: canon(e.n) }))),
-    ...st.custom.filter((x) => x.g === slot.g && (x.o || "Homegym") === loc).map((x) => ({ n: x.n, o: "eigene" })),
-  ].filter((e) => !hidList().includes(e.n) || e.n === cur);
+  const list = ortsListe(slot.g, loc).filter((e) => !hidList().includes(e.n) || e.n === cur);
   ui.sheetCtx = ["swap", sid];
   $("#sheet").innerHTML = `<div class="grab"></div><h3>Übung anpassen</h3><p>${esc(slot.g)} · Änderungen gelten ab Woche ${w}.</p>
    <div class="frow2"><span>Sätze (normale Woche)</span></div><div class="setsel">${[1, 2, 3, 4, 5, 6].map((v) => `<button class="chip ${v === n ? "on" : ""}" data-setn="${v}">${v}</button>`).join("")}</div>
@@ -4010,10 +4020,7 @@ function openAdd(g) {
   g = g || ui.addg || "Brust";
   ui.addg = g;
   const loc = DAYS[ui.d].studio ? "Studio" : "Homegym";
-  const list = [
-    ...dedupeN((LIB[g] || []).filter((e) => e.o === loc).map((e) => ({ ...e, n: canon(e.n) }))),
-    ...st.custom.filter((x) => x.g === g && (x.o || "Homegym") === loc).map((x) => ({ n: x.n, o: "eigene" })),
-  ].filter((e) => !hidList().includes(e.n));
+  const list = ortsListe(g, loc).filter((e) => !hidList().includes(e.n));
   ui.sheetCtx = ["add", g];
   $("#sheet").innerHTML = `<div class="grab"></div><h3>Übung hinzufügen</h3><p>Zu „${esc(DAYS[ui.d].name)}“ ab Woche ${ui.w}.</p>
    <div class="chips cwrap">${GROUPS.map((x) => `<button class="chip ${x === g ? "on" : ""}" data-addg="${esc(x)}">${esc(x)}</button>`).join("")}</div>
