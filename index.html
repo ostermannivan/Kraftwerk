@@ -72,10 +72,6 @@ input, textarea, select{ font:inherit; color:var(--gold2); }
 .linkbtn{ display:block; margin:6px auto 0; font-size:var(--fs-sm); color:var(--muted); text-decoration:underline; text-underline-offset:3px; padding:8px; }
 
 /* ---------- Knöpfe, Felder, Listen ---------- */
-.fld{ position:relative; }
-.fld input{ width:100%; height:46px; border-radius:var(--r1); border:1px solid var(--inline); background:var(--inbg); padding:14px 8px 2px; text-align:center; font-size:18px; font-weight:600; -webkit-appearance:none; appearance:none; }
-.fld input::placeholder{ color:#6E5E3F; font-weight:500; }
-.fld label{ position:absolute; top:4px; left:0; right:0; text-align:center; font-size:10px; color:var(--muted); pointer-events:none; }
 .sec h3{ font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 10px; color:var(--text); }
 .sec{ margin-top:22px; }
 .row{ display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); gap:12px; }
@@ -154,7 +150,7 @@ input, textarea, select{ font:inherit; color:var(--gold2); }
 .weekhead{ margin-top:10px; padding-right:84px; }
 .weekhead h2{ margin:0; color:var(--text); font-family:var(--serif); font-weight:400; font-size:40px; line-height:1.02; letter-spacing:-.015em; }
 .weekhead .sub{ font-size:13.5px; color:var(--silver); margin-top:6px; }
-.weeks::-webkit-scrollbar, .weeks.locked{ display:none; }
+.weeks::-webkit-scrollbar{ display:none; }
 .weeks{ display:flex; overflow-x:auto; scrollbar-width:none; gap:6px; padding:10px 0 10px; }
 nav.tabs .in{ max-width:var(--maxw); margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); height:var(--tabbar); }
 nav.tabs button svg{ width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.6; }
@@ -174,7 +170,6 @@ nav.tabs button.sel::after{ content:""; position:absolute; top:6px; width:4px; h
 .day.done.sel{ border-color:var(--sage); background:var(--sage-bg); }
 .day.optx{ background:transparent; border:0; opacity:.7; }
 .clock{ font-family:var(--serif); font-weight:400; font-size:26px; color:var(--gold2); font-variant-numeric:tabular-nums; }
-.stickbar{ position:absolute; left:0; bottom:-3px; height:2px; background:var(--sage); border-radius:1px; transition:width .3s; }
 .wkpick{ font:inherit; color:inherit; padding:0; }
 .wkpick i{ font-style:normal; font-size:var(--fs-m); color:var(--gold); margin-left:2px; vertical-align:6px; }
 header.top{ position:relative; padding:14px 2px 2px; }
@@ -238,13 +233,10 @@ body.scrolled .navtitle{ height:28px; opacity:1; padding-top:6px; }
 .ex.ss{ margin-left:0; padding-left:14px; border-left:0; box-shadow:inset 0 1px 0 var(--hair), inset 2px 0 0 var(--steel); }
 .ex .swin{ background:var(--s1); }
 .ex.main .kind{ color:var(--gold2); }
-section.ex.lifted{ transform:scale(1.02); transition:transform .2s ease; position:relative; z-index:71; }
 section.ex .exl{ cursor:pointer; }
 .exmeta em{ font-style:normal; color:var(--silver); }
-.exmeta{ display:flex; flex-wrap:wrap; gap:2px 0; margin-top:5px; font-size:var(--fs-sm); color:var(--muted); }
+.exmeta{ margin-top:5px; font-size:var(--fs-sm); color:var(--muted); line-height:1.45; font-variant-numeric:tabular-nums; }
 .exmeta b{ color:var(--text); font-weight:600; }
-.exmeta.mono{ letter-spacing:.01em; font-family:var(--sans); font-size:var(--fs-sm); gap:0; margin-top:8px; color:var(--silver); font-variant-numeric:tabular-nums; }
-.exmeta.mono b{ color:var(--text); font-weight:600; }
 .exmeta span::before{ color:#4A4E56; content:""; display:inline-block; width:1px; height:11px; background:var(--line); margin:0 10px; vertical-align:-1px; }
 .e1 .pr{ color:var(--sage); }
 .e1 b{ color:var(--gold2); font-family:var(--serif); font-weight:400; font-size:var(--fs-l); }
@@ -255,13 +247,10 @@ section.ex .exl{ cursor:pointer; }
 .swin{ position:relative; z-index:1; background:var(--bg); transition:transform .2s ease; }
 .sets .swrap{ margin-bottom:0; }
 .sets{ display:grid; gap:4px; margin-top:10px; }
-.set .prev i{ font-style:normal; color:#6D6A62; }
 .set.flash{ animation:rowflash 1.6s ease; }
-.set{ display:grid; grid-template-columns:26px 1.25fr 1fr 1fr 40px; gap:6px; align-items:center; }
-.set.hasrir{ grid-template-columns:26px 1.2fr 1fr .9fr .8fr 40px; }
-.set.ok .prev{ color:var(--sage); }
+.set{ display:grid; grid-template-columns:26px 1.3fr 1fr 40px; gap:7px; align-items:center; }
+.set.hasrir{ grid-template-columns:26px 1.3fr 1fr 1fr 40px; }
 .set .no{ text-align:center; cursor:pointer; font-variant-numeric:tabular-nums; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:var(--r2); border:1px solid var(--line); font-size:11.5px; color:var(--silver); }
-.set .prev{ cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums; font-size:var(--fs-s); color:#7C8087; }
 .set.ok .chk{ color:var(--ink-sage); background:var(--sage); border-color:var(--sage); }
 .set.ok .no{ border-color:var(--sage); background:var(--sage); color:var(--ink-sage); }
 .set.ok .cell{ border-color:transparent; background:var(--sage-bg); color:#D3EAD7; }
@@ -290,68 +279,23 @@ section.ex .exl{ cursor:pointer; }
 .cue[data-cuetog]{ cursor:pointer; }
 .cue{ font-size:var(--fs-sm); line-height:1.45; color:#9A9DA3; margin-top:8px; }
 .cuefold{ display:block; font-size:var(--fs-s); color:var(--dim); margin-top:6px; padding:2px 0; }
-.vwinfo{ flex-basis:100%; font-size:var(--fs-s); color:var(--sage); margin-top:2px; }
-.target{ display:flex; flex-wrap:wrap; align-items:baseline; margin:10px 0 2px; column-gap:10px; }
-.sugline{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; margin:10px 0 4px; font-size:var(--fs-m); }
-.sugline span{ color:var(--muted); font-size:var(--fs-s); }
-.sugline em{ font-style:normal; color:var(--muted); font-size:var(--fs-s); }
-.sugline.sb b{ color:var(--bronze); }
-.sugline small{ flex-basis:100%; font-size:var(--fs-s); color:var(--silver); }
-.sugline b{ font-weight:400; font-size:22px; color:var(--gold2); font-family:var(--serif); }
-.sethead.hasrir{ grid-template-columns:26px 1.2fr 1fr .9fr .8fr 40px; }
+.sethead.hasrir{ grid-template-columns:26px 1.3fr 1fr 1fr 40px; }
 .sethead span{ text-align:center; }
 .sethead span:nth-child(2){ text-align:left; }
-.sethead{ display:grid; grid-template-columns:26px 1.25fr 1fr 1fr 40px; gap:6px; align-items:center; padding:0 0 2px; text-transform:none; letter-spacing:0; font-size:var(--fs-xs); color:#6E7178; padding-bottom:4px; border-bottom:1px solid var(--hair); margin-bottom:4px; }
+.sethead{ display:grid; grid-template-columns:26px 1.3fr 1fr 40px; gap:6px; align-items:center; padding:0 0 2px; text-transform:none; letter-spacing:0; font-size:var(--fs-xs); color:#6E7178; padding-bottom:4px; border-bottom:1px solid var(--hair); margin-bottom:4px; }
 .swdel{ position:absolute; right:0; top:0; bottom:0; width:96px; background:#8E3B2E; color:#fff; font-weight:600; font-size:var(--fs-ml); border-radius:var(--r1); }
 .kind{ text-transform:none; letter-spacing:0; font-size:var(--fs-s); color:var(--muted); }
 .exno{ font-family:var(--serif); font-size:var(--fs-m); letter-spacing:0; color:var(--gold); margin-right:8px; }
 .exno i{ font-style:normal; font-size:var(--fs-xs); color:var(--dim); }
 .exname{ font-family:var(--serif); font-weight:400; font-size:21px; line-height:1.18; letter-spacing:-.005em; margin-top:4px; }
-.acts{ display:flex; gap:18px; margin-top:12px; padding-top:10px; border-top:1px solid var(--hair); }
-.acts button{ padding:2px 0; text-transform:none; letter-spacing:.01em; font-size:var(--fs-sm); color:var(--muted); }
-.acts button:active{ color:var(--gold2); }
 .big{ line-height:1; color:var(--gold2); font-variant-numeric:lining-nums tabular-nums; font-family:var(--serif); font-weight:400; font-size:52px; letter-spacing:-.02em; }
 .big small{ font-size:17px; color:var(--gold); margin-left:2px; }
-.warm{ margin:2px 0 6px; letter-spacing:.01em; font-size:var(--fs-sm); color:var(--muted); }
 .chk{ background:transparent; font-size:18px; color:var(--ink); width:var(--feld); height:var(--feld); border-radius:20px; border:1.5px solid #3A3F47; justify-self:end; }
 .chk svg{ width:20px; height:20px; display:block; margin:auto; fill:none; stroke:var(--ink-sage); stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
 .setbtns{ display:flex; gap:18px; margin-top:4px; }
 .addset{ display:block; margin:6px 0 2px; padding:6px 2px; font-size:var(--fs-sm); color:var(--gold2); }
 
 /* ---------- Fokus-Modus ---------- */
-#focus{ position:fixed; inset:0; z-index:55; background:var(--bg); display:none; flex-direction:column; overflow-y:auto; padding:calc(env(safe-area-inset-top,0px) + 10px) 18px calc(env(safe-area-inset-bottom,0px) + 90px); }
-#focus.show{ display:flex; animation:enter .25s ease; }
-#focus .fname{ font-family:var(--serif); font-weight:400; font-size:28px; text-align:center; }
-#focus .kind, #focus .flast, #focus .frx, #focus .warm{ text-align:center; }
-#focus .fset{ text-align:center; font-size:var(--fs-s); color:var(--muted); }
-#focus .finputs .fld input{ height:68px; font-size:26px; }
-.fhead{ display:flex; justify-content:space-between; align-items:center; }
-.fclose{ width:40px; height:40px; border-radius:var(--r2); background:var(--s1); font-size:18px; color:var(--silver); }
-.fprog{ height:3px; background:var(--s2); border-radius:2px; margin:12px 0 18px; }
-.fprog i{ display:block; height:100%; background:var(--gold); border-radius:2px; transition:width .3s; }
-.fname{ font-family:var(--serif); font-size:30px; line-height:1.15; margin:4px 0 6px; }
-.fset{ color:var(--silver); font-size:var(--fs-l); }
-.fbig{ font-family:var(--serif); font-size:78px; line-height:1; color:var(--gold2); margin:16px 0 4px; font-variant-numeric:tabular-nums; }
-.fbig small{ font-size:26px; color:var(--gold); }
-.frx{ font-size:17px; color:var(--text); }
-.finputs{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:20px 0 14px; }
-.finputs.r3{ grid-template-columns:1fr 1fr 1fr; }
-.finputs .fld input{ height:64px; font-size:24px; padding-top:18px; }
-.fok{ height:64px; font-size:19px; }
-.fnav{ display:flex; justify-content:space-between; margin-top:14px; }
-.fnav button{ font-size:var(--fs-l); color:var(--silver); padding:8px 4px; }
-.fnav button[disabled]{ opacity:.3; }
-.fnext{ margin-top:14px; font-size:var(--fs-ml); color:var(--muted); border-top:1px solid var(--line); padding-top:12px; }
-.fdone{ text-align:center; margin-top:18vh; }
-.flast{ font-size:var(--fs-m); color:var(--muted); margin-top:4px; }
-.flast b{ color:var(--silver); }
-.fstage{ position:relative; width:min(72vw,280px); aspect-ratio:1; margin:14px auto 6px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.fstage .fbig{ margin:0; font-size:64px; position:relative; }
-.fring{ position:absolute; inset:0; width:100%; height:100%; }
-.fring circle{ stroke-width:4; }
-.fring .curseg{ animation:segpulse 1.8s ease-in-out infinite; stroke-width:6; }
-.fsetno{ position:relative; font-size:var(--fs-m); color:var(--muted); margin-top:4px; }
-.fsetno i{ font-style:normal; color:var(--dim); }
 
 /* ---------- Woche ---------- */
 .ps{ flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
@@ -451,17 +395,15 @@ body.scrolled .iosback{ border-bottom:1px solid var(--hair); }
 #timer.show{ display:block; }
 #timer{ position:fixed; display:none; top:0; bottom:auto; left:0; right:0; height:0; background:none; border:0; z-index:60; }
 #timer #tbar{ position:fixed; top:env(safe-area-inset-top,0px); left:0; height:2px; background:var(--gold); border-radius:0 2px 2px 0; transition:width .25s linear; }
-#timer .t{ font-family:var(--serif); font-size:20px; min-width:0; color:var(--gold2); font-variant-numeric:tabular-nums; }
-#timer .lbl{ flex:1; font-size:var(--fs-m); color:var(--muted); display:none; }
-#timer button{ height:38px; border-radius:var(--r1); background:var(--s2); padding:0 8px; white-space:nowrap; font-size:var(--fs-m); display:none; }
-#timer.open .t{ font-size:30px; }
-#timer.open .lbl{ display:block; flex:1; font-size:var(--fs-m); color:var(--silver); }
-#timer.open button{ display:block; flex:1; height:40px; border-radius:var(--r2); background:var(--s3); font-size:var(--fs-ml); color:var(--text); }
+#timer .t{ font-family:var(--serif); font-size:28px; line-height:1.05; min-width:0; color:var(--gold2); font-variant-numeric:tabular-nums; }
+#timer .lbl{ flex:1 1 auto; min-width:0; font-size:var(--fs-s); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#timer button{ height:40px; border-radius:20px; background:var(--s2); border:1px solid var(--line); padding:0 14px; white-space:nowrap; font-size:var(--fs-ml); color:var(--silver); flex:0 0 auto; }
+#timer button.weiter{ background:var(--gold-bg); border-color:var(--inline); color:var(--gold2); }
+#timer .tx{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
 #timer.end .in{ animation:pulse 1.2s ease-in-out 3; border-color:var(--sage); }
 #timer.end .t{ color:var(--sage); }
 #timer.end #tbar{ background:var(--sage); width:100% !important; }
-#timer .in{ position:fixed; display:flex; align-items:center; gap:10px; padding:6px 12px 6px 14px; margin:0; max-width:none; height:auto; background:rgba(24,27,32,.94); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border:1px solid rgba(var(--gold-rgb),.55); border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,.45); cursor:pointer; top:auto; bottom:calc(env(safe-area-inset-bottom,0px) + var(--tabbar) + 12px); left:12px; right:auto; }
-#timer.open .in{ left:12px; flex-wrap:wrap; border-radius:var(--r4); padding:12px 14px; gap:10px 8px; right:12px; }
+#timer .in{ position:fixed; display:flex; align-items:center; gap:10px; padding:6px 12px 6px 14px; margin:0; max-width:none; height:auto; background:rgba(24,27,32,.94); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border:1px solid rgba(var(--gold-rgb),.55); border-radius:var(--r4); box-shadow:0 8px 24px rgba(0,0,0,.45); top:auto; bottom:calc(env(safe-area-inset-bottom,0px) + var(--tabbar) + 12px); left:12px; right:12px; padding:10px 10px 10px 16px; }
 .sheetbg{ position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:40; display:none; }
 .sheetbg.show{ display:block; }
 .sheet{ position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--s1); border-radius:18px 18px 0 0; max-height:82vh; overflow-y:auto; padding:8px 16px calc(24px + env(safe-area-inset-bottom,0px)); transform:translateY(100%); transition:transform .25s ease; }
@@ -505,16 +447,7 @@ body.scrolled .iosback{ border-bottom:1px solid var(--hair); }
 #jumpset{ position:fixed; right:14px; bottom:calc(env(safe-area-inset-bottom,0px) + var(--tabbar) + 14px); z-index:25; display:none; background:var(--gold); color:var(--ink); font-weight:700; font-size:var(--fs-m); border-radius:20px; padding:9px 14px; box-shadow:0 6px 18px rgba(0,0,0,.45); }
 #jumpset.show{ display:block; animation:fadeIn .2s ease; }
 body.typing #jumpset{ display:none; }
-#ctxbg.blur{ -webkit-backdrop-filter:blur(10px) saturate(.8); backdrop-filter:blur(10px) saturate(.8); background:rgba(5,6,8,.45); z-index:70; }
 #ctxbg{ z-index:75; }
-#ctx{ position:fixed; left:50%; transform:translateX(-50%) scale(.92); width:min(300px,84vw); z-index:72; display:none; opacity:0; background:var(--menu); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-radius:var(--r3); overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.55); }
-#ctx.show{ display:block; animation:ctxin .22s cubic-bezier(.2,1.2,.4,1) forwards; }
-.ctxhead{ font-size:var(--fs-s); color:var(--muted); padding:10px 16px 8px; border-bottom:1px solid rgba(255,255,255,.08); }
-.ctxi{ display:flex; width:100%; justify-content:space-between; align-items:center; padding:13px 16px; font-size:var(--fs-xl); color:var(--text); border-bottom:1px solid rgba(255,255,255,.07); text-align:left; }
-.ctxi:last-child{ border-bottom:0; }
-.ctxi i{ font-style:normal; color:var(--muted); }
-.ctxi.red, .ctxi.red i{ color:var(--red); }
-.ctxi:active{ background:rgba(255,255,255,.06); }
 .actsheet{ position:fixed; left:8px; right:8px; bottom:calc(env(safe-area-inset-bottom,0px) + 8px); z-index:80; display:none; flex-direction:column; gap:8px; }
 .actsheet.show{ display:flex; animation:asin .25s cubic-bezier(.2,1,.3,1); }
 .as-card{ background:var(--menu); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-radius:var(--r3); overflow:hidden; }
@@ -548,7 +481,6 @@ body.typing #jumpset{ display:none; }
 @keyframes draw{ to{ stroke-dashoffset:0; } }
 @keyframes flash{ 0%,100%{ opacity:0; } 25%{ opacity:1; } }
 @keyframes rowflash{ 0%,60%{ box-shadow:0 0 0 2px var(--gold); border-radius:10px; } 100%{ box-shadow:none; } }
-@keyframes segpulse{ 50%{ stroke-opacity:.45; } }
 @keyframes drawchk{ to{ stroke-dashoffset:0; } }
 @keyframes chkpop{ 0%{ transform:scale(.8); } 100%{ transform:scale(1); } }
 @keyframes cellfill{ from{ background:#1B1E23; } to{ background:#142019; } }
@@ -567,27 +499,70 @@ body.typing #jumpset{ display:none; }
   #splash .rule{ width:150px; opacity:0; animation:fadeIn .6s ease .2s forwards; }
   #pr .card, #pr .t2{ animation:none; }
 }
-.pbadge{ height:20px; padding:0 7px; margin-right:10px; border-radius:10px; font-size:var(--fs-xs); font-weight:700; letter-spacing:.03em; border:1px solid var(--line); color:var(--muted); align-self:center; }
-.pbadge.p1{ border-color:rgba(var(--gold-rgb),.6); color:var(--gold2); }
-.pbadge.p2{ border-color:var(--silver); color:var(--silver); }
 .ausinfo{ font-size:var(--fs-s); color:var(--muted); margin:6px 2px 10px; line-height:1.45; }
-.sugline.find span{ color:var(--gold2); font-weight:600; }
 .durchip{ height:30px; padding:0 12px; border-radius:15px; border:1px solid var(--line); font-size:var(--fs-s); color:var(--muted); white-space:nowrap; }
 .durchip.on{ border-color:rgba(var(--gold-rgb),.55); color:var(--gold2); }
+
+/* ---------- Training aufgeräumt (11.26.13) ---------- */
+.runhead{ position:sticky; top:0; z-index:12; display:flex; align-items:center; gap:10px; margin:0 calc(-1 * var(--rand)) 12px; padding:calc(env(safe-area-inset-top,0px) + 10px) var(--rand) 10px; background:rgba(var(--bg-rgb),.9); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px solid var(--hair); }
+.runhead .rh-l{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
+.runhead .rh-l b{ font-family:var(--serif); font-weight:400; font-size:21px; color:var(--text); }
+.runhead .rh-l span{ font-size:var(--fs-s); color:var(--muted); }
+.runhead .clock{ font-size:22px; }
+.runhead .chip.end{ height:36px; }
+.runhead .rhbar{ position:absolute; left:0; bottom:-1px; height:2px; background:var(--gold); border-radius:0 2px 2px 0; transition:width .3s ease; }
+.mehr{ width:40px; height:40px; margin:-6px -8px 0 0; border-radius:var(--r2); color:var(--muted); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+.mehr svg{ width:20px; height:20px; fill:currentColor; }
+.mehr:active{ background:var(--s2); }
+.info{ font-size:var(--fs-sm); color:var(--muted); margin-top:3px; line-height:1.4; }
+.info.up{ color:var(--sage); }
+.info.gold{ color:var(--gold2); }
+.info.down{ color:var(--bronze); }
+.ex.aktiv{ box-shadow:inset 0 0 0 1px rgba(var(--gold-rgb),.45); background:linear-gradient(180deg,var(--gold-bg2),var(--s1) 160px); }
+.ex.fertig{ box-shadow:inset 0 0 0 1px rgba(var(--sage-rgb),.28); background:linear-gradient(180deg,#111813,var(--s1) 160px); }
+.ex.fertig .exname::after{ content:"✓"; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; margin-left:8px; border-radius:50%; background:var(--sage-bg); color:var(--sage); font-family:var(--sans); font-size:12px; vertical-align:3px; }
+.ex .sets{ margin-top:12px; }
+.rirb{ font:inherit; font-weight:600; }
+.rirb.ph{ color:var(--dim); font-weight:500; }
+.sstag{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:6px; font-family:var(--sans); font-size:11.5px; font-weight:700; color:var(--bg); background:var(--gold2); margin-right:8px; vertical-align:2px; }
+.sstag.B{ background:var(--steel); }
+.set .no .sstag{ margin:0; }
+.set .no:has(.sstag){ border:0; background:none; }
+.ex.ss2{ box-shadow:inset 0 1px 0 var(--hair), inset 2px 0 0 var(--steel); }
+.ex.ss2.aktiv{ box-shadow:inset 0 0 0 1px rgba(var(--gold-rgb),.45), inset 2px 0 0 var(--steel); }
+.ex.ss2.fertig{ box-shadow:inset 0 0 0 1px rgba(var(--sage-rgb),.28), inset 2px 0 0 var(--steel); }
+.sskopf{ font-size:var(--fs-s); color:var(--steel); margin-bottom:6px; }
+.ss2 .exhead + .exhead{ margin-top:10px; padding-top:10px; border-top:1px solid var(--hair); }
+.ss2 .exhead .kind{ display:none; }
+.mitem{ display:flex; align-items:center; gap:14px; width:100%; padding:9px 2px; text-align:left; min-height:54px; }
+.mitem .mi{ width:38px; height:38px; border-radius:11px; background:var(--s3); color:var(--gold2); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+.mitem .mi svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.mitem .mt{ display:flex; flex-direction:column; min-width:0; }
+.mitem .mt b{ font-weight:400; font-size:var(--fs-xl); color:var(--text); }
+.mitem .mt small{ font-size:var(--fs-sm); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mitem.red .mt b, .mitem.red .mi{ color:var(--red); }
+.mitem:active{ background:rgba(255,255,255,.04); border-radius:var(--r2); }
+.rirpick{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:14px 0 10px; }
+.rirpick button{ height:50px; border-radius:var(--r2); background:var(--s3); font-size:18px; color:var(--text); font-variant-numeric:tabular-nums; }
+.rirpick button.on{ background:var(--gold); color:var(--ink); font-weight:600; }
+.dlist{ width:100%; text-align:left; margin:16px 0 4px; }
+.dlist h4{ margin:14px 0 2px; font-size:var(--fs-xs); font-weight:500; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
+.dlist div{ display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--hair); font-size:var(--fs-ml); }
+.dlist div b{ font-weight:500; color:var(--sage); white-space:nowrap; }
+.dlist div b.gold{ color:var(--gold2); }
+body:has(.sheet.show) #timer, body:has(#done.show) #timer{ display:none; }
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"><div class="word" id="spw"></div><div class="rule"></div><div class="claim" id="spg"></div><div class="claim2" id="spd"></div></div>
 <div id="pr" aria-live="polite"><div class="card"><div class="t1">NEUER REKORD</div><div class="t2" id="prv"></div><div class="t3" id="prn"></div></div></div>
 <div class="wrap" id="app"></div>
-<div id="focus" role="dialog" aria-label="Fokus-Modus"></div>
 <div id="done" role="dialog" aria-label="Einheit geschafft"></div>
-<div id="pop" role="status"></div>
 <button id="jumpset" data-jumpset aria-label="Zum aktuellen Satz">↓ Aktueller Satz</button>
 <div id="flash"></div>
 <div class="timer" id="timer"><div class="in"><div class="bar" id="tbar"></div>
-  <div class="t" id="tval">0:00</div><div class="lbl" id="tlbl">Pause</div>
-  <button data-timer="minus">−15 s</button><button data-timer="plus">+15 s</button><button data-timer="stop">Fertig</button></div></div>
+  <div class="tx"><div class="lbl" id="tlbl">Pause</div><div class="t" id="tval">0:00</div></div>
+  <button data-timer="plus">+30 s</button><button data-timer="stop" class="weiter">Weiter</button></div></div>
 <nav class="tabs"><div class="in">
   <button data-tab="train"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>Training</button>
   <button data-tab="rec"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Fortschritt</button>
@@ -599,7 +574,6 @@ body.typing #jumpset{ display:none; }
 <label id="hapt" aria-hidden="true"><input type="checkbox" switch tabindex="-1"></label>
 <div id="undo" role="status"><span></span><button data-undo>Rückgängig</button></div>
 <div id="acts" class="actsheet" role="dialog"></div>
-<div id="ctx" role="menu"></div>
 <div class="sheetbg" id="ctxbg"></div>
 
 <script>
@@ -1468,7 +1442,7 @@ const TECH = {
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.12";
+const APPVER = "11.26.13";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -2642,7 +2616,8 @@ function suggest(name, lt, range, w, d) {
   if (st_ > 0 && lt.first < lo) return { kg: Math.max(0, lt.kg - st_), d: "−" + fk(st_) };
   return { kg: lt.kg, d: "±0" };
 }
-function focusQueue() {
+/** Reihenfolge aller Sätze des Tages, Supersätze verschränkt. */
+function satzFolge() {
   const w = ui.w,
     d = ui.d,
     day = DAYS[d];
@@ -2934,13 +2909,14 @@ function vTrain() {
   const from = weekDate(w),
     to = weekDate(w, 6);
   const coreDone = [0, 1, 2].filter((x) => dayDone(w, x).done).length;
+  const ss0 = sessOf(w, d);
+  if (ss0 && !ss0.e) return vTrainLaeuft(w, d);
   let h = `<header class="top"><div class="brand"><h1>Kraftwerk</h1><span class="today">${dshort(from)} – ${dshort(to)}</span></div>${plateRing(coreDone)}
    <div class="weekhead"><h2><button class="wkpick" data-wkpick="1">Woche ${w} <i>▾</i></button>${P.deload ? ' <span class="dl">Deload</span>' : ""}</h2>
    <div class="sub">${st.cycle > 1 ? "Zyklus " + st.cycle + " · " : ""}Block ${P.block} – ${P.deload ? "Erholung" : P.phase}${st.studio[w + "|" + d] && !DAYS[d].split && !DAYS[d].pull ? ` <span class="trialpill studio">${esc(studioName(locOf(w, d)))}</span>` : ""}</div></div>
 </header>`;
-  const ss0 = sessOf(w, d);
   h +=
-    `<div class="navsticky"><div class="navtitle">Woche ${w} · ${esc(DAYS[d].pull ? "Pull" : DAYS[d].split ? "Push" : DAYS[d].tag)}</div>${ss0 && !ss0.e ? `<div class="stickclock"><span>${((dd_) => `${dd_.ok} / ${dd_.all} Sätze · ${dd_.all ? Math.round((100 * dd_.ok) / dd_.all) : 0} %`)(dayDone(w, d))}</span><b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now() - new Date(ss0.s))}</b><button class="chip" data-sess="focus">Fokus</button><button class="chip end" data-sess="end">Beenden</button><i class="stickbar" style="width:${((dd_) => (dd_.all ? (100 * dd_.ok) / dd_.all : 0))(dayDone(w, d))}%"></i></div>` : runBanner(w, d)}<div class="weeks ${ss0 && !ss0.e ? "locked" : ""}">` +
+    `<div class="navsticky"><div class="navtitle">Woche ${w} · ${esc(DAYS[d].pull ? "Pull" : DAYS[d].split ? "Push" : DAYS[d].tag)}</div>${runBanner(w, d)}<div class="weeks">` +
     WK.map((r, i) => {
       const x = i + 1;
       return `<button class="wk ${x === w ? "sel" : ""} ${weekDone(x) ? "done" : ""} ${x === currentWeek() ? "now" : ""}" data-week="${x}" aria-label="Woche ${x}">${x}</button>`;
@@ -2972,12 +2948,53 @@ function vTrain() {
   h += vBackupNote();
   h += vStatus(w, d);
   h += vSession(w, d);
+  h += vUebungen(w, d);
+  h += vSessionFoot(w, d);
+  if (canPlace && !started(w, d))
+    h += onS
+      ? `<button class="linkbtn" data-place="home">Zurück zur Homegym-Variante</button>`
+      : `<button class="linkbtn" data-place="studio">Heute im Studio trainieren?</button>`;
+  const sp = st.wsplit[w],
+    gk = st.wmerge[w];
+  if ((d === 0 || d === 2) && gk == null)
+    h +=
+      sp === d
+        ? `<button class="linkbtn" data-wsplit="off">Push/Pull-Split dieser Woche aufheben</button>`
+        : `<button class="linkbtn" data-wsplit="${d}">Mehr Zeit diese Woche? ${day.tag} in Push + Pull aufteilen</button>`;
+  if (day.gk && !started(w, d)) h += `<button class="linkbtn" data-wmerge="off">Ganzkörper aufheben – wieder ${day.gk.map((i) => BASE_DAYS[i].tag).join(" und ")} einzeln</button>`;
+  else if (sp == null && gk == null && d <= 2 && !started(w, d) && !started(w, d + 1))
+    h += `<button class="linkbtn" data-wmerge="${d}">Weniger Zeit diese Woche? ${day.tag} + ${BASE_DAYS[d + 1].tag} zu einem Ganzkörper-Training zusammenlegen</button>`;
+  return h;
+}
+/** Während das Training läuft: schlichter Kopf (Einheit, Sätze, Uhr, Beenden) und die Übungen – sonst nichts. */
+function vTrainLaeuft(w, d) {
+  const s = sessOf(w, d),
+    dd = dayDone(w, d),
+    day = DAYS[d];
+  const rest = dd.all ? Math.max(0, Math.round((dauer(w, d, prioWahl(w, d)) * (dd.all - dd.ok)) / dd.all)) : 0;
+  const titel = (day.pull ? "Pull" : day.split ? "Push" : day.tag) + " · Woche " + w;
+  return `<div class="runhead"><div class="rh-l"><b>${esc(titel)}</b><span>${dd.ok} / ${dd.all} Sätze${dd.ok < dd.all ? ` · ca. ${rest} min übrig` : ""}</span></div>
+    <b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now() - new Date(s.s))}</b><button class="chip end" data-sess="end">Beenden</button>
+    <i class="rhbar" style="width:${dd.all ? (100 * dd.ok) / dd.all : 0}%"></i></div>${vUebungen(w, d)}`;
+}
+/** Die Übungen eines Tages, mit optionalen Übungen, Supersätzen, Notizen. */
+function vUebungen(w, d) {
+  const day = DAYS[d];
+  let h = "";
   const ok_ = ui.opt[w + "|" + d];
   let optShown = false;
   const weg = (x) => exName(x, w) != null && !isSkipped(w, d, x.id) && !slotStarted(w, d, x) && prioOf(x) > prioWahl(w, d);
   const aus = day.slots.filter((x) => weg(x) && !x.opt);
+  const sichtbar = visSlots(d, w);
+  const imSupersatz = new Set();
   day.slots.forEach((slot) => {
-    if (weg(slot)) return;
+    if (weg(slot) || imSupersatz.has(slot.id)) return;
+    const ss = slot.t ? null : ssInfo(slot, d);
+    if (ss && ss.pos === 1 && sichtbar[sichtbar.indexOf(slot) + 1] === ss.other && sichtbar.includes(slot)) {
+      imSupersatz.add(ss.other.id);
+      h += vSuperset(slot, ss.other, w, d);
+      return;
+    }
     if (slot.opt && exName(slot, w) != null && !ok_ && !slotStarted(w, d, slot)) {
       if (!optShown) {
         const opt = day.slots.filter((s) => s.opt && exName(s, w) != null && !weg(s));
@@ -2998,21 +3015,6 @@ function vTrain() {
   const nk = w + "|" + d;
   h += `<div class="sec note"><h3>Notizen</h3><textarea data-note="${nk}" placeholder="Technik, Schlaf, Besonderheiten …">${esc(st.notes[nk] || "")}</textarea></div>`;
   h += `<p class="quote">${esc(D.QUOTES[(w * 4 + d) % D.QUOTES.length])}</p>`;
-  h += vSessionFoot(w, d);
-  if (canPlace && !started(w, d))
-    h += onS
-      ? `<button class="linkbtn" data-place="home">Zurück zur Homegym-Variante</button>`
-      : `<button class="linkbtn" data-place="studio">Heute im Studio trainieren?</button>`;
-  const sp = st.wsplit[w],
-    gk = st.wmerge[w];
-  if ((d === 0 || d === 2) && gk == null)
-    h +=
-      sp === d
-        ? `<button class="linkbtn" data-wsplit="off">Push/Pull-Split dieser Woche aufheben</button>`
-        : `<button class="linkbtn" data-wsplit="${d}">Mehr Zeit diese Woche? ${day.tag} in Push + Pull aufteilen</button>`;
-  if (day.gk && !started(w, d)) h += `<button class="linkbtn" data-wmerge="off">Ganzkörper aufheben – wieder ${day.gk.map((i) => BASE_DAYS[i].tag).join(" und ")} einzeln</button>`;
-  else if (sp == null && gk == null && d <= 2 && !started(w, d) && !started(w, d + 1))
-    h += `<button class="linkbtn" data-wmerge="${d}">Weniger Zeit diese Woche? ${day.tag} + ${BASE_DAYS[d + 1].tag} zu einem Ganzkörper-Training zusammenlegen</button>`;
   return h;
 }
 function vWelcome() {
@@ -3117,83 +3119,127 @@ function plateRing(n) {
   }
   return `<div class="plate" aria-label="${n} von 3 Einheiten diese Woche"><svg viewBox="0 0 64 64">${arcs}<circle cx="32" cy="32" r="16" fill="none" stroke="var(--line)" stroke-width="1"/></svg><b>${n}<i>/3</i></b></div>`;
 }
+const ICON_MEHR = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>`;
+/** Alles, was eine Übungskarte zum Zeichnen braucht – einmal berechnet. */
+function slotDaten(slot, w, d) {
+  const name = exName(slot, w),
+    r = rx(slot, w),
+    P = W(w),
+    main = !!slot.t,
+    L = logView(w, d, slot.id, r.sets);
+  const lt = main ? null : lastTime(name, w, d, slot.id);
+  const sug = main ? null : suggest(name, lt, r.reps, w, d);
+  return { slot, name, r, P, main, L, lt, sug, showRir: slot.t !== "BO" };
+}
+/** „zuletzt …“ für die Infozeile. */
+function zuletzt(k, w, d) {
+  if (k.main) {
+    const li = lastInfo(k.slot, w, d),
+      z = li && li.sets.find((x) => num(x.kg) != null);
+    return z ? `zuletzt ${fk(num(z.kg))} × ${esc(z.reps || "–")}${z.rir !== "" && z.rir != null ? " @" + esc(z.rir) : ""}` : "";
+  }
+  return k.lt ? `zuletzt ${fk(k.lt.kg)} × ${esc(String(k.lt.reps).split(" · ")[0] || "–")}` : "";
+}
+/** Kopf einer Übung: Art, Name, eine Zeile Sätze · RIR · Pause · zuletzt, darunter Hinweise und Anpassungen je eine Zeile. */
+function slotKopf(k, w, d, opt = {}) {
+  const { slot, name, r, P, main } = k;
+  const rirInfo = slot.t === "BO" ? "" : main ? `RIR ${fk(r.rir)}` : P.deload ? `RIR ${fk(P.acc)}` : r.sets > 1 ? "RIR 1–2 → 0" : "RIR 1";
+  const pause = opt.pause ?? esc(pauseTxt(slot));
+  const meta = [`<b>${r.sets} × ${esc(String(r.reps))}</b>`, rirInfo, pause && `⏱ ${pause}`, zuletzt(k, w, d)].filter(Boolean).join(" · ");
+  const zeilen = [];
+  if (r.vorwoche) zeilen.push(`<div class="info up">↑ angepasst – in Woche ${r.vorwoche.w} ${fk(r.vorwoche.kg)} kg × ${r.vorwoche.reps} geschafft</div>`);
+  if (slot.t === "TOP" || slot.t === "VAR")
+    zeilen.push(`<div class="info">Aufwärmen ${warmups(r.kg)
+      .map(([g, n]) => (typeof g === "number" ? fk(g) : g) + " × " + n)
+      .join(" · ")}</div>`);
+  if (!main) {
+    const s = k.sug,
+      lt = k.lt;
+    if (!s) zeilen.push(`<div class="info">Gewicht finden: mit einem leichten ersten Satz herantasten, dann so steigern, dass die Ziel-RIR passt.</div>`);
+    else if (s.setback) zeilen.push(`<div class="info down">↓ Neuer Anlauf mit ${fk(s.kg)} kg – drei Wochen ohne Fortschritt</div>`);
+    else if (lt && s.kg > lt.kg) zeilen.push(`<div class="info gold">↑ +${fk(s.kg - lt.kg)} kg – letztes Mal ${lt.last || lt.first} Wdh. geschafft</div>`);
+    else if (lt && s.kg < lt.kg) zeilen.push(`<div class="info down">↓ ${fk(s.kg)} kg – letztes Mal zu schwer</div>`);
+  }
+  return `<div class="exl"><div class="kind">${opt.nr ? `<span class="exno">${opt.nr}</span>` : ""}${esc(opt.art ?? slot.art)} · ${esc(main ? slot.g : exPrimary(name, slot))}</div>
+   <div class="exname">${opt.tag ? `<span class="sstag ${opt.tag}">${opt.tag}</span>` : ""}${esc(name)}</div>
+   <div class="exmeta">${meta}</div>${zeilen.join("")}${hintHtml(name, w, d)}</div>
+   <button class="mehr" data-more="${slot.id}" aria-label="Mehr zu ${esc(name)}">${ICON_MEHR}</button>`;
+}
+/** Eine Satzzeile: kg · Wdh. · RIR (Kurzwahl) · Haken. Vorgaben stehen grau als Platzhalter, der Haken übernimmt sie. */
+function satzZeile(k, w, d, i, tag) {
+  const { slot, r, P, main, L, sug, showRir } = k;
+  const s = L.sets[i];
+  const kph = main ? f1(r.kg).replace(",0", "") : sug ? fk(sug.kg) : "–";
+  const rt = slot.t === "TOP" || slot.t === "VAR" ? r.rir : main ? null : accRir(i, r.sets, P);
+  const rirPh = rt != null ? rirTxt(rt) : "";
+  return `<div class="swrap" data-sw="set|${slot.id}|${i}"${tag ? ` data-slot="${slot.id}"` : ""}><div class="swin"><div class="set ${showRir ? "hasrir" : ""} ${s.ok ? "ok" : ""} ${ui.pop === slot.id + "|" + i ? "pop" : ""}" data-i="${i}">
+      <div class="no">${tag ? `<span class="sstag ${tag}">${tag}</span>` : i + 1}</div>
+      <input class="cell" inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}" aria-label="Gewicht Satz ${i + 1}">
+      <input class="cell" inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${isCalib(slot, w) && i === r.sets - 1 ? "max" : esc(String(r.reps))}" aria-label="Wiederholungen Satz ${i + 1}">
+      ${showRir ? `<button class="cell rirb ${s.rir === "" || s.rir == null ? "ph" : ""}" data-rirpick="${slot.id}|${i}" aria-label="RIR Satz ${i + 1}">${esc(s.rir !== "" && s.rir != null ? s.rir : rirPh)}</button>` : ""}
+      <button class="chk" data-chk="${i}" aria-label="Satz ${i + 1} erledigt">${s.ok ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ""}</button></div></div>
+      <button class="swdel" data-del="set|${slot.id}|${i}">Löschen</button></div>`;
+}
+const satzKopf = (rir) => `<div class="sethead ${rir ? "hasrir" : ""}"><span>#</span><span>kg</span><span>Wdh.</span>${rir ? "<span>RIR</span>" : ""}<span></span></div>`;
+/** Hinweis „Satz 1 war schwer/leicht – restliche Sätze mit …?“ und Kalibrierung. */
+function slotHinweise(k, w, d) {
+  const { slot, L } = k;
+  let h = "";
+  const ak = ui.adj[w + "|" + d + "|" + slot.id];
+  if (ak && !L.sets.slice(1).every((z) => z.ok))
+    h += `<div class="adjbox"><span>${esc(k.name)}: ${esc(ak.why)} – restliche Sätze mit <b>${fk(ak.kg)} kg</b>?</span><div><button class="chip on" data-adjok="${slot.id}">Übernehmen</button><button class="chip" data-adjno="${slot.id}">Nein</button></div></div>`;
+  if (isCalib(slot, w))
+    h += `<div class="calib">Kalibrierung: letzter Backoff-Satz so viele saubere Wiederholungen wie möglich (RIR 0). So prüft die App, wie genau deine RIR-Schätzungen sind.</div>`;
+  return h;
+}
+function slotTechnik(k, w, d) {
+  const { slot, name, P, main } = k;
+  let h = "";
+  if (!main && !P.deload && (slot.rt === "I" || (libEntry(name) && ["Schulter seitlich", "Schulter hinten", "Bizeps", "Trizeps", "Waden", "Bauch"].includes(libEntry(name).g))))
+    h += vTech(slot, w, d);
+  if (slot.t === "TOP" || slot.t === "VAR" || (!main && st.set.tracked.includes(name))) h += `<div class="e1" data-e1="${slot.id}">${e1Text(slot, w, d)}</div>`;
+  return h;
+}
+function nrText(slot, w, d) {
+  const vis = visSlots(d, w),
+    i = vis.indexOf(slot) + 1;
+  return `${String(i).padStart(2, "0")}<i>/${String(vis.length).padStart(2, "0")}</i>`;
+}
 function vSlot(slot, w, d) {
   const name = exName(slot, w);
   if (name == null) return "";
   if (isSkipped(w, d, slot.id))
     return `<section class="ex skipped"><div class="skiprow"><div><span class="kind">${esc(slot.art)} · heute übersprungen</span><b>${esc(name)}</b></div><button class="chip" data-unskip="${slot.id}">Doch machen</button></div></section>`;
-  const r = rx(slot, w),
-    P = W(w),
-    main = !!slot.t,
-    L = logView(w, d, slot.id, r.sets);
-  const tracked = !main && st.set.tracked.includes(name);
-  const ss = main ? null : ssInfo(slot, d);
-  const kind = ss ? `Supersatz ${ss.pos}/2` : slot.art;
-  const rirInfo = slot.t === "BO" ? "" : main ? `RIR ${fk(r.rir)}` : P.deload ? `RIR ${fk(P.acc)}` : r.sets > 1 ? "RIR 1–2 → 0" : "RIR 1";
-  const pause = ss && ss.pos === 1 ? "direkt weiter" : esc(pauseTxt(slot));
-  const vis = visSlots(d, w),
-    idx = vis.indexOf(slot) + 1;
-  const head = `<div class="exhead"><div class="exl"><div class="kind"><span class="exno">${String(idx).padStart(2, "0")}<i>/${String(vis.length).padStart(2, "0")}</i></span>${esc(kind)} · ${esc(main ? slot.g : exPrimary(name, slot))}</div><div class="exname">${esc(name)}</div>
-   <div class="exmeta mono"><button class="pbadge ${["", "p1", "p2", ""][prioOf(slot)]}" data-prio="${slot.id}" aria-label="Priorität ${prioOf(slot)} – antippen zum Ändern">P${prioOf(slot)}</button><b>${r.sets}×${esc(String(r.reps))}</b>${rirInfo ? `<span>${rirInfo}</span>` : ""}<span>⏱ ${pause}</span></div>
-   ${hintHtml(name, w, d)}
-   <div class="acts">${main ? "" : `<button data-swap="${slot.id}">Tauschen</button>`}<button data-mnote="${slot.id}">Hinweise</button><button data-pause="${slot.id}">Pause</button></div></div></div>`;
-  let h =
-    `<section class="ex ${slot.t === "TOP" ? "main" : ""} ${ss ? "ss" : ""}" data-slot="${slot.id}">` +
-    (main
-      ? head
-      : `<div class="swrap" data-sw="ex|${slot.id}"><div class="swin">${head}</div><button class="swdel" data-del="ex|${slot.id}">Entfernen</button></div>`);
-  let sug = null;
-  const lt = main ? null : lastTime(name, w, d, slot.id);
-  if (main) {
-    h += `<div class="target"><div class="big" data-kg="${slot.id}">${f1(r.kg)}<small> kg</small></div>${r.vorwoche ? `<div class="vwinfo">↑ angepasst – in Woche ${r.vorwoche.w} ${fk(r.vorwoche.kg)} kg × ${r.vorwoche.reps} geschafft</div>` : ""}</div>`;
-    if (slot.t === "TOP" || slot.t === "VAR")
-      h += `<div class="warm">Aufwärmen  ${warmups(r.kg)
-        .map(([k, n]) => (typeof k === "number" ? fk(k) : k) + " × " + n)
-        .join("  ·  ")}</div>`;
-  } else {
-    sug = suggest(name, lt, r.reps, w, d);
-    h += sug
-      ? `<div class="sugline ${sug.setback ? "sb" : ""}"><span>Vorschlag</span><b>${fk(sug.kg)} kg</b><em>${esc(sug.d)}${lt ? ` · zuletzt ${lt.same ? "diese Woche " : "W" + lt.w + " "}${esc(lt.day)}` : ""}</em>${sug.setback ? `<small>Drei Wochen ohne Fortschritt – neuer Anlauf mit weniger Gewicht und einem Satz mehr.</small>` : ""}</div>`
-      : `<div class="sugline find"><span>Gewicht finden</span><em>Noch kein Verlauf: mit einem leichten ersten Satz herantasten, dann so steigern, dass die Ziel-RIR passt.</em></div>`;
-  }
-  const ak = ui.adj[w + "|" + d + "|" + slot.id];
-  if (ak && !L.sets.slice(1).every((z) => z.ok))
-    h += `<div class="adjbox"><span>${esc(ak.why)} – restliche Sätze mit <b>${fk(ak.kg)} kg</b>?</span><div><button class="chip on" data-adjok="${slot.id}">Übernehmen</button><button class="chip" data-adjno="${slot.id}">Nein</button></div></div>`;
-  if (isCalib(slot, w))
-    h += `<div class="calib">Kalibrierung: letzter Backoff-Satz so viele saubere Wiederholungen wie möglich (RIR 0). So prüft die App, wie genau deine RIR-Schätzungen sind.</div>`;
-  const pv = prevSets(slot, w, d);
-  const showRir = slot.t !== "BO";
-  h += `<div class="sets"><div class="sethead ${showRir ? "hasrir" : ""}"><span>#</span><span>Vorher</span><span>kg</span><span>Wdh.</span>${showRir ? "<span>RIR</span>" : ""}<span></span></div>`;
-  for (let i = 0; i < r.sets; i++) {
-    const s = L.sets[i];
-    const kph = main ? f1(r.kg).replace(",0", "") : sug ? fk(sug.kg) : "–";
-    const rt = slot.t === "TOP" || slot.t === "VAR" ? r.rir : main ? null : accRir(i, r.sets, P);
-    const p =
-      pv && pv[i] && num(pv[i].kg) != null
-        ? `${fk(num(pv[i].kg))}×${esc(pv[i].reps || "–")}${pv[i].rir !== "" && pv[i].rir != null ? `<i> @${esc(pv[i].rir)}</i>` : ""}`
-        : "–";
-    h += `<div class="swrap" data-sw="set|${slot.id}|${i}"><div class="swin"><div class="set ${showRir ? "hasrir" : ""} ${s.ok ? "ok" : ""} ${ui.pop === slot.id + "|" + i ? "pop" : ""}" data-i="${i}">
-      <div class="no" data-prevpop="${slot.id}|${i}">${i + 1}</div><div class="prev" data-prevpop="${slot.id}|${i}">${p}</div>
-      <input class="cell" inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}" aria-label="Gewicht Satz ${i + 1}">
-      <input class="cell" inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${isCalib(slot, w) && i === r.sets - 1 ? "max" : esc(String(r.reps))}" aria-label="Wiederholungen Satz ${i + 1}">
-      ${showRir ? `<input class="cell" inputmode="decimal" data-f="rir" value="${esc(s.rir)}" placeholder="${rt != null ? rirTxt(rt) : ""}" aria-label="RIR Satz ${i + 1}">` : ""}
-      <button class="chk" data-chk="${i}" aria-label="Satz ${i + 1} erledigt">${s.ok ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ""}</button></div></div>
-      <button class="swdel" data-del="set|${slot.id}|${i}">Löschen</button></div>`;
+  const k = slotDaten(slot, w, d),
+    dd = k.L.sets.slice(0, k.r.sets);
+  const zustand = dd.length && dd.every((z) => z.ok) ? "fertig" : dd.some((z) => z.ok) ? "aktiv" : "";
+  let h = `<section class="ex ${slot.t === "TOP" ? "main" : ""} ${zustand}" data-slot="${slot.id}"><div class="exhead">${slotKopf(k, w, d, { nr: nrText(slot, w, d) })}</div>`;
+  h += slotHinweise(k, w, d);
+  h += `<div class="sets">${satzKopf(k.showRir)}`;
+  for (let i = 0; i < k.r.sets; i++) h += satzZeile(k, w, d, i);
+  h += `</div>`;
+  if (k.r.optSatz) h += `<div class="setbtns"><button class="addset" data-addset="${slot.id}">+ ${k.r.sets + 1}. Satz (optional)</button></div>`;
+  return h + slotTechnik(k, w, d) + `</section>`;
+}
+/** Supersatz als eine Karte: die Sätze beider Übungen in der Reihenfolge, in der sie gemacht werden (A, B, A, B …). */
+function vSuperset(a, b, w, d) {
+  const ka = slotDaten(a, w, d),
+    kb = slotDaten(b, w, d);
+  const alle = [...ka.L.sets.slice(0, ka.r.sets), ...kb.L.sets.slice(0, kb.r.sets)];
+  const zustand = alle.length && alle.every((z) => z.ok) ? "fertig" : alle.some((z) => z.ok) ? "aktiv" : "";
+  const vis = visSlots(d, w);
+  const nr = `${String(vis.indexOf(a) + 1).padStart(2, "0")}–${String(vis.indexOf(b) + 1).padStart(2, "0")}<i>/${String(vis.length).padStart(2, "0")}</i>`;
+  let h = `<section class="ex ss2 ${zustand}"><div class="sskopf"><span class="exno">${nr}</span>Supersatz · direkt weiter, dann ${esc(pauseTxt(b))}</div>
+    <div class="exhead">${slotKopf(ka, w, d, { tag: "A", art: "Supersatz", pause: "" })}</div>
+    <div class="exhead">${slotKopf(kb, w, d, { tag: "B", art: "Supersatz", pause: "" })}</div>`;
+  h += slotHinweise(ka, w, d) + slotHinweise(kb, w, d);
+  h += `<div class="sets">${satzKopf(true)}`;
+  for (let i = 0; i < Math.max(ka.r.sets, kb.r.sets); i++) {
+    if (i < ka.r.sets) h += satzZeile(ka, w, d, i, "A");
+    if (i < kb.r.sets) h += satzZeile(kb, w, d, i, "B");
   }
   h += `</div>`;
-  if (slot.t !== "TOP")
-    h += `<div class="setbtns"><button class="addset" data-addset="${slot.id}">${r.optSatz ? `+ ${r.sets + 1}. Satz (optional)` : "+ Satz"}</button>${r.sets > 1 ? `<button class="addset" data-subset="${slot.id}">− Satz</button>` : ""}</div>`;
-  if (
-    !main &&
-    !P.deload &&
-    (slot.rt === "I" ||
-      (libEntry(name) && ["Schulter seitlich", "Schulter hinten", "Bizeps", "Trizeps", "Waden", "Bauch"].includes(libEntry(name).g)))
-  )
-    h += vTech(slot, w, d);
-  if (slot.t === "TOP" || slot.t === "VAR" || tracked) {
-    h += `<div class="e1" data-e1="${slot.id}">${e1Text(slot, w, d)}</div>`;
-  }
-  return h + `</section>`;
+  return h + slotTechnik(ka, w, d) + slotTechnik(kb, w, d) + `</section>`;
 }
 function hintHtml(name, w, d) {
   if (st.set.hideHints) return "";
@@ -3217,7 +3263,7 @@ function vTech(slot, w, d) {
     return `<div class="techrow"><span>Letzter Satz extra:</span><button class="chip" data-tech="drop|${slot.id}">Drop-Satz</button><button class="chip" data-tech="myo|${slot.id}">Myo-Reps</button></div>`;
   let h = `<div class="techbox"><div class="th"><b>${TECH[tk.type][0]}</b><button class="linkbtn" data-tech="off|${slot.id}">entfernen</button></div><p>${TECH[tk.type][1]}</p>`;
   tk.e.forEach((z, j) => {
-    h += `<div class="set tset ${z.ok ? "ok" : ""}"><div class="no">${tk.type === "drop" ? "D" : "M" + (j + 1)}</div><div class="prev"></div>
+    h += `<div class="set tset ${z.ok ? "ok" : ""}"><div class="no">${tk.type === "drop" ? "D" : "M" + (j + 1)}</div>
       <input class="cell" inputmode="decimal" data-tk="${slot.id}|${j}|kg" value="${esc(z.kg)}" placeholder="${esc(z.pkg || "–")}">
       <input class="cell" inputmode="numeric" data-tk="${slot.id}|${j}|reps" value="${esc(z.reps)}" placeholder="${tk.type === "drop" ? "max" : "3–5"}">
       <button class="chk" data-tkok="${slot.id}|${j}">${z.ok ? "✓" : ""}</button></div>`;
@@ -3248,100 +3294,6 @@ function e1Text(slot, w, d) {
 }
 
 /* ---------- Fokus-Modus und Abschluss ---------- */
-function setRing(n, done, cur) {
-  const R = 88,
-    C = 2 * Math.PI * R,
-    seg = C / Math.max(1, n),
-    gap = n > 1 ? 7 : 0;
-  let a = "";
-  for (let k = 0; k < n; k++) {
-    const c = done[k] ? "var(--sage)" : k === cur ? "var(--gold)" : "var(--s3)";
-    a += `<circle cx="100" cy="100" r="${R}" fill="none" stroke="${c}" stroke-width="${k === cur ? 7 : 5}" stroke-dasharray="${seg - gap} ${C - seg + gap}" stroke-dashoffset="${-k * seg}" transform="rotate(-90 100 100)" ${k === cur && !done[k] ? 'class="curseg"' : ""}/>`;
-  }
-  return `<svg class="fring" viewBox="0 0 200 200" aria-hidden="true">${a}</svg>`;
-}
-function renderFocus() {
-  const el = $("#focus");
-  if (!el) return;
-  const w = ui.w,
-    d = ui.d,
-    q = focusQueue();
-  const s0 = sessOf(w, d);
-  const done = q.filter(([sid, k]) => {
-    const L = getLog(w, d, sid);
-    return L && L.sets[k] && L.sets[k].ok;
-  }).length;
-  let h = `<div class="fhead"><button class="fclose" data-fx="close" aria-label="Schließen">✕</button><b class="clock" ${s0 && !s0.e ? `data-clock="${w}|${d}"` : ""}>${s0 ? (s0.e ? fmtDur(new Date(s0.e) - new Date(s0.s)) : fmtClock(Date.now() - new Date(s0.s))) : "0:00"}</b><span class="muted small">${done}/${q.length} · ${q.length ? Math.round((100 * done) / q.length) : 0} %</span></div>
-    <div class="fprog"><i style="width:${q.length ? (100 * done) / q.length : 0}%"></i></div>`;
-  if (ui.fi >= q.length) {
-    const s = sessOf(w, d);
-    h += `<div class="fdone"><div class="fbig">Geschafft.</div><p class="muted">${done} von ${q.length} Sätzen erledigt${s ? " · " + fmtDur((s.e ? new Date(s.e) : new Date()) - new Date(s.s)) : ""}</p>
-      ${s && !s.e ? `<button class="btn gold" data-fx="end">Training beenden</button>` : ""}<button class="btn" data-fx="close">Zur Übersicht</button></div>`;
-    el.innerHTML = h;
-    return;
-  }
-  const [sid, i] = q[ui.fi];
-  const slot = slotFor(d, sid),
-    r = rx(slot, w),
-    name = exName(slot, w),
-    L = logView(w, d, sid, r.sets),
-    s = L.sets[i];
-  const main = !!slot.t,
-    hasRir = slot.t !== "BO";
-  const lt = main ? null : lastTime(name, w, d, sid),
-    sug = main ? null : suggest(name, lt, r.reps, w, d);
-  const kg = main ? r.kg : sug ? sug.kg : null;
-  const exIdx = [...new Set(q.map((x) => x[0]))].indexOf(sid) + 1,
-    exN = new Set(q.map((x) => x[0])).size;
-  const nxt = q[ui.fi + 1];
-  const nxtTxt = nxt
-    ? nxt[0] === sid
-      ? "Satz " + (nxt[1] + 1) + " · gleiche Übung"
-      : (() => {
-          const ns = slotFor(d, nxt[0]);
-          return exName(ns, w) + (ns.t ? " · " + ns.art : "") + " · Satz " + (nxt[1] + 1);
-        })()
-    : "Letzter Satz der Einheit";
-  const ss = main ? null : ssInfo(slot, d);
-  h += `<div class="fbody"><div class="kind">Übung ${exIdx}/${exN} · ${ss ? "Supersatz " + ss.pos + "/2" : esc(slot.art)} · ${esc(slot.g)}</div>
-    <div class="fname">${esc(name)}</div>
-    <div class="fset">${s.ok ? '<span class="gain">Satz erledigt</span>' : "Wischen: vorheriger / nächster Satz"}</div>
-    ${(() => {
-      const li = lastInfo(slot, w, d);
-      const z = li && li.sets[i];
-      return z && num(z.kg) != null
-        ? `<div class="flast">Letztes Mal (W${li.x}): <b>${esc(z.kg)} kg × ${esc(z.reps || "–")}</b>${z.rir !== "" && z.rir != null ? " @ RIR " + esc(z.rir) : ""}</div>`
-        : "";
-    })()}
-    <div class="fstage">${setRing(
-      r.sets,
-      L.sets.slice(0, r.sets).map((z) => !!(z && z.ok)),
-      i,
-    )}<div class="fbig">${kg != null ? fk(kg) + "<small> kg</small>" : "–"}</div><div class="fsetno">Satz ${i + 1}<i>/${r.sets}</i></div></div>
-    <div class="frx">× ${esc(String(r.reps))}${slot.t === "BO" ? "" : " @ RIR " + (main ? fk(r.rir) : rirTxt(accRir(i, r.sets, W(w))))}${sug ? ` · <span class="muted">${esc(sug.d)} zur Vorwoche</span>` : ""}</div>
-    ${
-      (slot.t === "TOP" || slot.t === "VAR") && i === 0
-        ? `<div class="warm">Aufwärmen: ${warmups(r.kg)
-            .map(([k, n]) => (typeof k === "number" ? fk(k) : k) + "×" + n)
-            .join(" · ")}</div>`
-        : ""
-    }
-    ${hintHtml(name, w, d)}
-    ${(() => {
-      const ak = ui.adj[w + "|" + d + "|" + sid];
-      return ak && i > 0 && !s.ok
-        ? `<div class="adjbox"><span>${esc(ak.why)} – mit <b>${fk(ak.kg)} kg</b> weiter?</span><div><button class="chip on" data-adjok="${sid}">Übernehmen</button><button class="chip" data-adjno="${sid}">Nein</button></div></div>`
-        : "";
-    })()}
-    <div class="finputs ${hasRir ? "r3" : ""}" data-slot="${sid}" data-i="${i}">
-      <div class="fld"><label>kg</label><input inputmode="decimal" data-ff="kg" value="${esc(s.kg)}" placeholder="${kg != null ? esc(fk(kg)) : "–"}"></div>
-      <div class="fld"><label>Wdh.</label><input inputmode="numeric" data-ff="reps" value="${esc(s.reps)}" placeholder="${esc(String(r.reps))}"></div>
-      ${hasRir ? `<div class="fld"><label>RIR</label><input inputmode="decimal" data-ff="rir" value="${esc(s.rir)}" placeholder="${main ? fk(r.rir) : rirTxt(accRir(i, r.sets, W(w)))}"></div>` : ""}</div>
-    <button class="btn gold fok" data-fx="ok">${s.ok ? "✓ Erledigt – weiter" : "✓  Satz erledigt"}</button>
-    <div class="fnav"><button data-fx="prev" ${ui.fi === 0 ? "disabled" : ""}>‹ Zurück</button><button data-fx="next">Überspringen ›</button></div>
-    <div class="fnext">Als Nächstes: ${esc(nxtTxt)}</div></div>`;
-  el.innerHTML = h;
-}
 function showDone(w, d) {
   const s = sessOf(w, d),
     dd = dayDone(w, d);
@@ -3360,10 +3312,29 @@ function showDone(w, d) {
   o.innerHTML = `<div class="card"><div class="ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52"/><path d="M38 62 l15 15 l30 -32"/></svg></div>
     <div class="t1">Einheit geschafft</div><div class="t2">${esc(day.pull ? "Pull" : day.split ? "Push" : day.tag)} · Woche ${w}</div>
     <div class="vals"><div><b>${s ? fmtDur(new Date(s.e) - new Date(s.s)) : "–"}</b><span>Dauer</span></div><div><b>${dd.ok}/${dd.all}</b><span>Sätze</span></div>${e != null ? `<div><b>${f1(e)}</b><span>${pr ? "e1RM · Rekord" : "e1RM kg"}</span></div>` : ""}</div>
+    ${bilanz(w, d, pr ? { name: exName(top, w), e } : null)}
     <button class="btn" data-act="donex">Schließen</button></div>`;
   o.classList.remove("show");
   void o.offsetWidth;
   o.classList.add("show");
+}
+/** Bilanz: neuer Rekord und welche Übungen beim nächsten Mal mehr Gewicht bekommen. */
+function bilanz(w, d, rekord) {
+  const hoch = [];
+  if (w < NW)
+    daysFor(w)[d].slots.forEach((slot) => {
+      if (slot.t) return;
+      const name = exName(slot, w),
+        L = getLog(w, d, slot.id);
+      if (name == null || !L || !L.sets.some((z) => z.ok)) return;
+      const heute = Math.max(...L.sets.filter((z) => z.ok && num(z.kg) != null).map((z) => num(z.kg)));
+      const s = suggest(name, lastTime(name, w + 1, d, slot.id), rx(slot, w).reps, w + 1, d);
+      if (s && isFinite(heute) && s.kg > heute && !s.setback) hoch.push([name, s.kg - heute]);
+    });
+  if (!rekord && !hoch.length) return "";
+  return `<div class="dlist">${rekord ? `<h4>Rekord</h4><div><span>${esc(rekord.name)}</span><b class="gold">e1RM ${f1(rekord.e)} kg</b></div>` : ""}${
+    hoch.length ? `<h4>Nächstes Mal steigern</h4>${hoch.map(([n, k]) => `<div><span>${esc(n)}</span><b>+${fk(k)} kg</b></div>`).join("")}` : ""
+  }</div>`;
 }
 function showPR(name, e) {
   $("#prv").textContent = f1(e) + " kg";
@@ -3812,7 +3783,7 @@ function secImTraining() {
   const s = st.set;
   return `<div class="sec form"><h3>Im Training</h3>
    <div class="frow"><span>Technik-Hinweise anzeigen<small>einzeln ausblenden: auf den Hinweis tippen</small></span><button class="toggle ${s.hideHints ? "" : "on"}" data-toggle="hideHints" aria-label="Technik-Hinweise anzeigen"></button></div>
-   <div class="frow"><span>Display wach halten<small>während die App offen ist</small></span><button class="toggle ${s.wake ? "on" : ""}" data-toggle="wake" aria-label="Display wach halten"></button></div>
+   <div class="frow"><span>Display immer wach halten<small>während eines Trainings bleibt es ohnehin an</small></span><button class="toggle ${s.wake ? "on" : ""}" data-toggle="wake" aria-label="Display wach halten"></button></div>
    <div class="frow"><span>Ton am Pausenende</span><button class="toggle ${s.sound ? "on" : ""}" data-toggle="sound" aria-label="Ton am Pausenende"></button></div></div>`;
 }
 function secSicherung() {
@@ -4126,26 +4097,29 @@ function openSessDetail(w, d) {
   $("#sheet").innerHTML = h;
   showSheet();
 }
-function openCtx(sid, card) {
+/** „⋯“ an der Übung (oder Kopf antippen / lange drücken): alles Seltene an einer Stelle. */
+function openMore(sid) {
   const slot = slotFor(ui.d, sid);
   if (!slot) return;
   haptic();
   const main = !!slot.t,
-    nm = exName(slot, ui.w);
-  const r = card.getBoundingClientRect();
-  const c = $("#ctx");
-  c.innerHTML = `<div class="ctxhead">${esc(nm)}</div>${main ? "" : `<button class="ctxi" data-ctx="swap|${sid}">Tauschen<i>⇄</i></button>`}<button class="ctxi" data-ctx="hint|${sid}">Hinweise<i>✎</i></button><button class="ctxi" data-ctx="pause|${sid}">Pause<i>⏱</i></button><button class="ctxi" data-ctx="skip|${sid}">Heute überspringen<i>↷</i></button>${main ? "" : `<button class="ctxi red" data-ctx="del|${sid}">Entfernen<i>✕</i></button>`}`;
-  const top = Math.min(Math.max(r.top + 20, 70), innerHeight - 320);
-  c.style.top = top + "px";
-  c.classList.add("show");
-  $("#ctxbg").classList.add("show", "blur");
-  card.classList.add("lifted");
-  ui.ctxCard = card;
-}
-function closeCtx() {
-  $("#ctx").classList.remove("show");
-  $("#ctxbg").classList.remove("show", "blur");
-  if (ui.ctxCard) ui.ctxCard.classList.remove("lifted");
+    nm = exName(slot, ui.w),
+    r = rx(slot, ui.w),
+    p = prioOf(slot);
+  const erste = (hintText(nm, ui.w, ui.d) || "").split("\n").map((x) => x.trim()).find(Boolean);
+  const it = (a, icon, titel, sub, cls = "") =>
+    `<button class="mitem ${cls}" data-ctx="${a}|${sid}"><span class="mi">${icon}</span><span class="mt"><b>${titel}</b>${sub ? `<small>${sub}</small>` : ""}</span></button>`;
+  const I = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+  openSheet(`<div class="grab"></div><h3>${esc(nm)}</h3>
+    ${it("hint", I("M12 11v6M12 7.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"), "Hinweise und Technik", erste ? esc(erste) : "eigene Notizen eintragen")}
+    ${main ? "" : it("swap", I("M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"), "Übung tauschen", "Sätze, Supersatz, Muskelgruppe")}
+    ${slot.t === "TOP" ? "" : it("add", I("M12 5v14M5 12h14"), "Satz hinzufügen", `jetzt ${r.sets} ${r.sets === 1 ? "Satz" : "Sätze"}`)}
+    ${slot.t === "TOP" || r.sets <= 1 ? "" : it("sub", I("M5 12h14"), "Satz entfernen", "")}
+    ${it("pause", I("M12 9v4l2.5 2.5M9 2h6M20 13a8 8 0 1 1-16 0 8 8 0 0 1 16 0z"), "Pause ändern", "jetzt " + esc(pauseTxt(slot)))}
+    ${it("prio", I("M5 21V4M5 4h11l-2 4 2 4H5"), "Priorität P" + p, p === 1 ? "immer dabei · antippen für P2" : p === 2 ? "bei „Nur Prio 1“ ausgeblendet · antippen für P3" : "bei wenig Zeit zuerst ausgeblendet · antippen für P1")}
+    ${it("skip", I("M5 5l9 7-9 7V5zM18 5v14"), "Heute überspringen", "")}
+    ${main ? "" : it("del", I("M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"), "Ab Woche " + ui.w + " entfernen", "", "red")}
+    <button class="btn" data-act="close">Schließen</button>`);
 }
 
 /* ==========================================================================
@@ -4154,6 +4128,30 @@ function closeCtx() {
    ========================================================================== */
 
 /* ---------- Satz abhaken, Vorausfüllen, Übungen und Orte ---------- */
+/** Priorität einer Übung eine Stufe weiter (1 → 2 → 3 → 1), gilt für alle Wochen. */
+function prioWeiter(sid) {
+    const s = slotFor(ui.d, sid),
+    p = (prioOf(s) % 3) + 1;
+  st.prio[sid] = p;
+  save();
+  render();
+  toast(`${exName(s, ui.w)}: Priorität ${p} – gilt für alle Wochen`);
+}
+/** Einen Satz weniger (nicht, wenn der letzte schon abgehakt ist). */
+function satzWeniger(sid) {
+    const r = rx(slotFor(ui.d, sid), ui.w);
+  if (r.sets <= 1) return;
+  const L = getLog(ui.w, ui.d, sid);
+  if (L && L.sets[r.sets - 1] && L.sets[r.sets - 1].ok) {
+    toast("Letzter Satz ist schon abgehakt");
+    return;
+  }
+  st.setov[ui.w + "|" + sid] = r.sets - 1;
+  if (L) L.sets.length = Math.min(L.sets.length, r.sets - 1);
+  save();
+  render();
+}
+
 function toggleSet(sid, i, kgDefault, force) {
   const slot = slotFor(ui.d, sid),
     r = rx(slot, ui.w);
@@ -4204,12 +4202,12 @@ function toggleSet(sid, i, kgDefault, force) {
     if (!st.dates[dk]) st.dates[dk] = new Date().toISOString();
     if (!st.sess[dk]) st.sess[dk] = { s: new Date().toISOString(), e: null };
     const ss = slot.t ? null : ssInfo(slot, ui.d);
-    if (!(ss && ss.pos === 1)) startTimer(slotPause(slot), exName(slot, ui.w));
+    if (!(ss && ss.pos === 1)) startTimer(slotPause(slot), naechsterSatz(sid));
     else toast("Weiter: " + exName(ss.other, ui.w));
   }
   save();
   render();
-  if (ui.focus) renderFocus();
+  if (s.ok) zumNaechstenSatz();
   setTimeout(() => {
     ui.pop = null;
   }, 500);
@@ -4217,7 +4215,7 @@ function toggleSet(sid, i, kgDefault, force) {
     const dk2 = ui.w + "|" + ui.d,
       se = st.sess[dk2],
       dd = dayDone(ui.w, ui.d);
-    if (s.ok && se && !se.e && dd.all > 0 && dd.ok >= dd.all && !ui.focus && !ui.asked[dk2]) {
+    if (s.ok && se && !se.e && dd.all > 0 && dd.ok >= dd.all && !ui.asked[dk2]) {
       ui.asked[dk2] = true;
       setTimeout(() => {
         $("#sheet").innerHTML =
@@ -4240,13 +4238,11 @@ function toggleSet(sid, i, kgDefault, force) {
   }
 }
 function prefillRow(inp) {
-  const row = inp.closest(".set"),
-    box = inp.closest(".finputs");
-  const host = row || box;
+  const host = inp.closest(".set");
   if (!host) return;
-  const sid = row ? inp.closest("[data-slot]").dataset.slot : box.dataset.slot;
-  const i = row ? +row.dataset.i : +box.dataset.i;
-  const attr = row ? "data-f" : "data-ff";
+  const sid = inp.closest("[data-slot]").dataset.slot;
+  const i = +host.dataset.i;
+  const attr = "data-f";
   const slot = slotFor(ui.d, sid);
   if (!slot) return;
   const r = rx(slot, ui.w);
@@ -4364,24 +4360,6 @@ function startCycle() {
 }
 
 /* ---------- Fokus-Modus ---------- */
-function openFocus() {
-  ui.focus = true;
-  const q = focusQueue();
-  const i = q.findIndex(([sid, k]) => {
-    const L = getLog(ui.w, ui.d, sid);
-    return !(L && L.sets[k] && L.sets[k].ok);
-  });
-  ui.fi = i < 0 ? q.length : i;
-  renderFocus();
-  $("#focus").classList.add("show");
-  document.body.style.overflow = "hidden";
-}
-function closeFocus() {
-  ui.focus = false;
-  $("#focus").classList.remove("show");
-  document.body.style.overflow = "";
-  render();
-}
 
 /* ---------- Pausen-Pille mit Ton ---------- */
 let tEnd = 0,
@@ -4469,15 +4447,36 @@ setAudioType("ambient");
 /* ---------- Display wach halten ---------- */
 let wl = null;
 async function wake() {
-  if (!st.set.wake || !("wakeLock" in navigator)) return;
+  if (!(st.set.wake || runningSess()) || !("wakeLock" in navigator)) return;
   try {
     wl = await navigator.wakeLock.request("screen");
   } catch (e) {}
 }
 
+/** Beschriftung der Pausenleiste: was als Nächstes kommt. */
+function naechsterSatz(jetzt) {
+  const nx = satzFolge().find(([sid, i]) => {
+    const L = getLog(ui.w, ui.d, sid);
+    return !(L && L.sets[i] && L.sets[i].ok);
+  });
+  if (!nx) return "Pause";
+  if (nx[0] === jetzt) return "Pause · danach Satz " + (nx[1] + 1);
+  return "Pause · danach " + exName(slotFor(ui.d, nx[0]), ui.w);
+}
+/** Nach dem Abhaken sanft zum nächsten offenen Satz rollen, wenn er nicht gut sichtbar ist. */
+function zumNaechstenSatz() {
+  setTimeout(() => {
+    const el = curRowEl();
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 150 || r.bottom > innerHeight - 190)
+      el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  }, 260);
+}
+
 /* ---------- „Aktueller Satz“-Knopf und laufende Uhr ---------- */
 function curRowEl() {
-  const q = focusQueue();
+  const q = satzFolge();
   const nx = q.find(([sid, i]) => {
     const L = getLog(ui.w, ui.d, sid);
     return !(L && L.sets[i] && L.sets[i].ok);
@@ -4489,7 +4488,7 @@ function updJump() {
   if (!b) return;
   const tg = curTarget();
   let show = false;
-  if (tg && ui.tab === "train" && !ui.focus) {
+  if (tg && ui.tab === "train") {
     if (tg.w !== ui.w || tg.d !== ui.d) show = true;
     else {
       const el = curRowEl();
@@ -4622,6 +4621,10 @@ function finishSession() {
 function afterFinish() {
   clearInterval(tInt);
   $("#timer").classList.remove("show");
+  if (wl && !st.set.wake && !runningSess()) {
+    wl.release();
+    wl = null;
+  }
   showDone(ui.w, ui.d);
 }
 const FRAGE_BEENDEN = "Training beenden? Nicht abgehakte Sätze werden einfach ausgelassen.";
@@ -4630,36 +4633,8 @@ function toggleHint(key) {
   else st.hintHide[key] = true;
   save();
   render();
-  if (ui.focus) renderFocus();
 }
 
-/* ---------- „Vorher“-Sprechblase an einer Satzzeile ---------- */
-let popT = null,
-  popAt = 0;
-function showPrevPop(c) {
-  const pop = $("#pop");
-  const [sid, i] = c.dataset.prevpop.split("|");
-  const slot = slotFor(ui.d, sid);
-  if (!slot) return;
-  const li = lastInfo(slot, ui.w, ui.d);
-  const z = li && li.sets[+i];
-  const dt = li ? sessDate(li.x, li.di) : null;
-  const lab = li
-    ? `W${li.x} ${esc((daysFor(li.x)[li.di] || {}).tag || "")}${dt ? " · " + dt.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : ""}`
-    : "";
-  pop.innerHTML =
-    z && (num(z.kg) != null || z.reps)
-      ? `<span>Satz ${+i + 1} · ${lab}</span><b>${z.kg ? esc(z.kg) + " kg" : "–"} × ${esc(z.reps || "–")}${z.rir !== "" && z.rir != null ? ` <em>@ RIR ${esc(z.rir)}</em>` : ""}</b>`
-      : `<span>Satz ${+i + 1}</span><b>noch kein Wert vorher</b>`;
-  const row = c.closest(".set").getBoundingClientRect();
-  pop.classList.add("show");
-  const ph = pop.offsetHeight;
-  pop.style.top = Math.max(8, row.top - ph - 6) + "px";
-  pop.style.left = Math.max(10, row.left) + "px";
-  popAt = Date.now();
-  clearTimeout(popT);
-  popT = setTimeout(() => pop.classList.remove("show"), 4000);
-}
 
 /* ==========================================================================
    Aktionstabellen
@@ -4762,9 +4737,6 @@ const EINHEIT = {
   start() {
     openStartForm();
   },
-  focus() {
-    openFocus();
-  },
   async end() {
     const k = ui.w + "|" + ui.d;
     if (!st.sess[k]) return;
@@ -4801,46 +4773,6 @@ const EINHEIT = {
   },
 };
 
-/** data-fx="…": Fokus-Modus. */
-const FOKUS = {
-  close() {
-    closeFocus();
-  },
-  prev() {
-    ui.fi = Math.max(0, ui.fi - 1);
-    renderFocus();
-  },
-  next() {
-    ui.fi = Math.min(focusQueue().length, ui.fi + 1);
-    renderFocus();
-  },
-  async end() {
-    if (!(await ask(FRAGE_BEENDEN))) return;
-    finishSession();
-    closeFocus();
-    afterFinish();
-  },
-  ok() {
-    const [sid, i] = focusQueue()[ui.fi];
-    const box = $("#focus .finputs");
-    const L = ensureLog(ui.w, ui.d, sid, rx(slotFor(ui.d, sid), ui.w).sets);
-    box.querySelectorAll("[data-ff]").forEach((inp) => {
-      L.sets[i][inp.dataset.ff] = inp.value;
-    });
-    const ph = num(box.querySelector("[data-ff=kg]").placeholder);
-    if (!L.sets[i].ok) toggleSet(sid, i, ph, true);
-    const q = focusQueue();
-    let n = ui.fi + 1;
-    while (n < q.length) {
-      const [s2, k2] = q[n];
-      const L2 = getLog(ui.w, ui.d, s2);
-      if (!(L2 && L2.sets[k2] && L2.sets[k2].ok)) break;
-      n++;
-    }
-    ui.fi = n;
-    renderFocus();
-  },
-};
 
 /** Antippen: data-Attribut → Aktion(Element, Wert). */
 const KLICK = {
@@ -4849,9 +4781,6 @@ const KLICK = {
   },
   sess(t, v) {
     if (EINHEIT[v]) EINHEIT[v](t);
-  },
-  fx(t, v) {
-    if (FOKUS[v]) FOKUS[v](t);
   },
   as(t, v) {
     if (askFertig) askFertig(v === "ok");
@@ -4925,7 +4854,7 @@ const KLICK = {
     save();
     closeSheet();
     render();
-    openFocus();
+    wake();
   },
   place(t, v) {
     const k = ui.w + "|" + ui.d;
@@ -4972,6 +4901,29 @@ const KLICK = {
     toast(st.wmerge[ui.w] != null ? "Woche " + ui.w + ": Ganzkörper" : "Wieder getrennte Einheiten");
   },
 
+  /* --- RIR per Kurzwahl --- */
+  rirpick(t, v) {
+    const [sid, i] = v.split("|"),
+      slot = slotFor(ui.d, sid),
+      r = rx(slot, ui.w),
+      L = getLog(ui.w, ui.d, sid),
+      cur = L && L.sets[+i] ? num(L.sets[+i].rir) : null;
+    const plan = slot.t === "TOP" || slot.t === "VAR" ? r.rir : accRir(+i, r.sets, W(ui.w));
+    const werte = [0, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6];
+    const an = cur ?? (typeof plan === "number" ? plan : null);
+    openSheet(`<div class="grab"></div><h3>RIR · Satz ${+i + 1}</h3><p>${esc(exName(slot, ui.w))} – wie viele Wiederholungen wären noch gegangen? Plan: ${esc(rirTxt(plan))}</p>
+      <div class="rirpick">${werte.map((x) => `<button class="${x === an ? "on" : ""}" data-rirset="${sid}|${i}|${x}">${x === 6 ? "6+" : fk(x)}</button>`).join("")}</div>
+      ${cur != null ? `<button class="btn" data-rirset="${sid}|${i}|">Eintrag löschen</button>` : ""}<button class="btn" data-act="close">Abbrechen</button>`);
+  },
+  rirset(t, v) {
+    const [sid, i, x] = v.split("|"),
+      L = ensureLog(ui.w, ui.d, sid, rx(slotFor(ui.d, sid), ui.w).sets);
+    L.sets[+i].rir = x === "" ? "" : String(x).replace(".", ",");
+    save();
+    closeSheet();
+    render();
+  },
+
   /* --- Prioritäten --- */
   pwahl(t, v) {
     if (+v === 3) delete st.prioWahl[ui.w + "|" + ui.d];
@@ -4980,14 +4932,7 @@ const KLICK = {
     closeSheet();
     render();
   },
-  prio(t, sid) {
-    const s = slotFor(ui.d, sid),
-      p = (prioOf(s) % 3) + 1;
-    st.prio[sid] = p;
-    save();
-    render();
-    toast(`${exName(s, ui.w)}: Priorität ${p} – gilt für alle Wochen`);
-  },
+
 
   /* --- Sätze --- */
   chk(t, v) {
@@ -5000,19 +4945,7 @@ const KLICK = {
     save();
     render();
   },
-  subset(t, sid) {
-    const r = rx(slotFor(ui.d, sid), ui.w);
-    if (r.sets <= 1) return;
-    const L = getLog(ui.w, ui.d, sid);
-    if (L && L.sets[r.sets - 1] && L.sets[r.sets - 1].ok) {
-      toast("Letzter Satz ist schon abgehakt");
-      return;
-    }
-    st.setov[ui.w + "|" + sid] = r.sets - 1;
-    if (L) L.sets.length = Math.min(L.sets.length, r.sets - 1);
-    save();
-    render();
-  },
+
   adjok(t, sid) {
     const key = ui.w + "|" + ui.d + "|" + sid,
       a = ui.adj[key];
@@ -5024,13 +4957,11 @@ const KLICK = {
     delete ui.adj[key];
     save();
     render();
-    if (ui.focus) renderFocus();
     toast("Restliche Sätze: " + fk(a.kg) + " kg");
   },
   adjno(t, sid) {
     delete ui.adj[ui.w + "|" + ui.d + "|" + sid];
     render();
-    if (ui.focus) renderFocus();
   },
   tech(t, v) {
     const [ty, sid] = v.split("|"),
@@ -5066,15 +4997,9 @@ const KLICK = {
   },
 
   /* --- Übung anpassen --- */
-  swap(t, sid) {
-    openSwap(sid);
-  },
-  mnote(t, sid) {
-    openHints(sid);
-  },
-  pause(t, sid) {
-    openPause(sid);
-  },
+
+
+
   psec(t, v) {
     const [sid, sec] = v.split("|"),
       c = st.cfg[sid] || {};
@@ -5178,13 +5103,19 @@ const KLICK = {
     closeSheet();
     render();
   },
+  more(t, sid) {
+    openMore(sid);
+  },
   ctx(t, v) {
     const [a, sid] = v.split("|");
-    closeCtx();
+    closeSheet();
     setTimeout(() => {
       if (a === "swap") openSwap(sid);
       else if (a === "hint") openHints(sid);
       else if (a === "pause") openPause(sid);
+      else if (a === "add") KLICK.addset(t, sid);
+      else if (a === "sub") satzWeniger(sid);
+      else if (a === "prio") prioWeiter(sid);
       else if (a === "skip") {
         skipExercise(sid);
         render();
@@ -5272,12 +5203,9 @@ const KLICK = {
   /* --- Pausen-Pille --- */
   timer(t, v) {
     if (v === "plus") {
-      tEnd += 15000;
-      tTot += 15;
+      tEnd += 30000;
+      tTot += 30;
       $("#timer").classList.remove("end");
-      tick();
-    } else if (v === "minus") {
-      tEnd = Math.max(Date.now(), tEnd - 15000);
       tick();
     } else {
       clearInterval(tInt);
@@ -5322,13 +5250,6 @@ const EINGABE = {
         if (big) big.innerHTML = f1(rb.kg) + "<small> kg</small>";
         document.querySelectorAll(`[data-slot="${bo.id}"] [data-f=kg]`).forEach((i) => (i.placeholder = f1(rb.kg).replace(",0", "")));
       });
-  },
-  ff(t, feld) {
-    // Fokus-Modus
-    const box = t.closest(".finputs"),
-      sid = box.dataset.slot;
-    ensureLog(ui.w, ui.d, sid, rx(slotFor(ui.d, sid), ui.w).sets).sets[+box.dataset.i][feld] = t.value;
-    save();
   },
   tk(t, v) {
     const [sid, j, feld] = v.split("|"),
@@ -5413,7 +5334,7 @@ function leseSicherung(datei) {
 }
 
 /* ---------- Ereignisse an die Tabellen binden ---------- */
-const HAPTIK = "[data-chk],[data-fx='ok'],[data-tkok],.day,.wk,[data-formstart],.fp,.ctxi,.as-btn";
+const HAPTIK = "[data-chk],[data-tkok],.day,.wk,[data-formstart],.fp,.mitem,.as-btn";
 function waehle(tabelle, el) {
   for (const k in tabelle) {
     if (el.dataset[k] !== undefined) {
@@ -5426,9 +5347,6 @@ function waehle(tabelle, el) {
 document.addEventListener("click", (e) => {
   const ziel = e.target;
   if (ziel.closest(HAPTIK)) haptic();
-  const vorher = ziel.closest("[data-prevpop]");
-  if (vorher) showPrevPop(vorher);
-  else $("#pop").classList.remove("show");
   const hinweis = ziel.closest("[data-cuetog]");
   if (hinweis) {
     toggleHint(hinweis.dataset.cuetog);
@@ -5439,9 +5357,10 @@ document.addEventListener("click", (e) => {
     waehle(KLICK, knopf);
     return;
   }
-  // Übungskarte antippen (Kopfbereich) öffnet das Kontextmenü
-  const karte = ziel.closest("section.ex[data-slot]");
-  if (karte && ui.tab === "train" && ziel.closest(".exl") && !ziel.closest("input,select,textarea")) openCtx(karte.dataset.slot, karte);
+  // Kopf einer Übung antippen öffnet das Mehr-Menü
+  const kopf = ziel.closest(".exhead");
+  const mehr = kopf && kopf.querySelector("[data-more]");
+  if (mehr && ui.tab === "train" && ziel.closest(".exl")) openMore(mehr.dataset.more);
 });
 document.addEventListener("input", (e) => {
   if (e.target.dataset) waehle(EINGABE, e.target);
@@ -5457,16 +5376,11 @@ document.addEventListener("change", (e) => {
 });
 $("#sheetbg").addEventListener("click", closeSheet);
 $("#ctxbg").addEventListener("click", () => {
-  closeCtx();
   if (askFertig) askFertig(false);
-});
-$("#timer").addEventListener("click", (e) => {
-  if (!e.target.closest("button")) $("#timer").classList.toggle("open");
 });
 window.addEventListener(
   "scroll",
   () => {
-    if (Date.now() - popAt >= 500) $("#pop").classList.remove("show");
     document.body.classList.toggle("scrolled", scrollY > 96);
     requestAnimationFrame(updJump);
   },
@@ -5569,38 +5483,6 @@ document.addEventListener("focusout", (e) => {
 
 
 /* ---------- Gesten ---------- */
-// Fokus-Modus: wischen = vorheriger / nächster Satz
-(function () {
-  let sx = null,
-    sy = null;
-  const f = document.getElementById("focus");
-  f.addEventListener(
-    "touchstart",
-    (e) => {
-      if (e.target.closest("input,button,textarea")) {
-        sx = null;
-        return;
-      }
-      sx = e.touches[0].clientX;
-      sy = e.touches[0].clientY;
-    },
-    { passive: true },
-  );
-  f.addEventListener(
-    "touchend",
-    (e) => {
-      if (sx == null) return;
-      const dx = e.changedTouches[0].clientX - sx,
-        dy = e.changedTouches[0].clientY - sy;
-      sx = null;
-      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-      const q = focusQueue();
-      ui.fi = Math.max(0, Math.min(q.length, ui.fi + (dx < 0 ? 1 : -1)));
-      renderFocus();
-    },
-    { passive: true },
-  );
-})();
 // Übungskarte lange drücken = Kontextmenü
 (function () {
   let lp = null,
@@ -5610,7 +5492,7 @@ document.addEventListener("focusout", (e) => {
   document.addEventListener(
     "touchstart",
     (e) => {
-      const card = e.target.closest("section.ex[data-slot]");
+      const card = e.target.closest("section.ex[data-slot]:not(.ss2)");
       if (!card || e.target.closest("input,button,textarea,select,.set,[data-sw='set']")) return;
       sx = e.touches[0].clientX;
       sy = e.touches[0].clientY;
@@ -5618,7 +5500,7 @@ document.addEventListener("focusout", (e) => {
       clearTimeout(lp);
       lp = setTimeout(() => {
         fired = true;
-        openCtx(card.dataset.slot, card);
+        openMore(card.dataset.slot);
       }, 480);
     },
     { passive: true },
@@ -5956,7 +5838,6 @@ function selfTest() {
         if (!tab[k]) fehlend.add(m[1] + " data-" + a[1]);
         else if (k === "act" && !AKTION[a[2]]) fehlend.add("Aktion " + a[2]);
         else if (k === "sess" && !EINHEIT[a[2]]) fehlend.add("Einheit " + a[2]);
-        else if (k === "fx" && !FOKUS[a[2]]) fehlend.add("Fokus " + a[2]);
       }
     }
     ok(fehlend.size === 0, "Ohne Aktion: " + [...fehlend].join(", "));
