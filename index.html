@@ -504,7 +504,7 @@ body.typing #jumpset{ display:none; }
 .durchip.on{ border-color:rgba(var(--gold-rgb),.55); color:var(--gold2); }
 
 /* ---------- Training aufgeräumt (11.26.13) ---------- */
-.runhead{ position:sticky; top:0; z-index:12; display:flex; align-items:center; gap:10px; margin:0 calc(-1 * var(--rand)) 12px; padding:calc(env(safe-area-inset-top,0px) + 10px) var(--rand) 10px; background:rgba(var(--bg-rgb),.9); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px solid var(--hair); }
+.runhead{ position:sticky; top:0; z-index:12; display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0 calc(-1 * var(--rand)) 12px; padding:calc(env(safe-area-inset-top,0px) + 10px) var(--rand) 10px; background:rgba(var(--bg-rgb),.9); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px solid var(--hair); }
 .runhead .rh-l{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
 .runhead .rh-l b{ font-family:var(--serif); font-weight:400; font-size:21px; color:var(--text); }
 .runhead .rh-l span{ font-size:var(--fs-s); color:var(--muted); }
@@ -551,6 +551,15 @@ body.typing #jumpset{ display:none; }
 .dlist div b{ font-weight:500; color:var(--sage); white-space:nowrap; }
 .dlist div b.gold{ color:var(--gold2); }
 body:has(.sheet.show) #timer, body:has(#done.show) #timer{ display:none; }
+.rhnav{ flex:0 0 100%; display:flex; align-items:center; gap:6px; overflow-x:auto; scrollbar-width:none; margin-top:-2px; }
+.rhnav::-webkit-scrollbar{ display:none; }
+.rhnav button{ height:32px; min-width:32px; padding:0 10px; border-radius:16px; background:var(--s2); color:var(--silver); font-size:var(--fs-sm); flex:0 0 auto; }
+.rhnav button.cur{ background:var(--gold-bg); color:var(--gold2); box-shadow:inset 0 0 0 1px var(--inline); }
+.rhnav button.done{ color:var(--sage); }
+.rhnav button:disabled{ opacity:.35; }
+.rhnav .rhsep{ width:1px; height:18px; background:var(--line); margin:0 4px; flex:0 0 auto; }
+.set .prevln{ grid-column:2 / -2; margin:-2px 0 1px 4px; font-size:11.5px; color:var(--dim); font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.set.ok .prevln{ color:#5E6E62; }
 </style>
 </head>
 <body>
@@ -1442,7 +1451,7 @@ const TECH = {
 const KEY = "kraftwerk.v1"; // Speicherschlüssel – bleibt dauerhaft gleich
 const KEY_KOPIE = "kraftwerk.v1.vor-11.26.2"; // Kopie des Zustands vor der Umwandlung auf Datenformat 2
 const KEY_DEFEKT = "kraftwerk.v1.defekt"; // nicht lesbarer Speicherinhalt wird hierhin gerettet
-const APPVER = "11.26.13";
+const APPVER = "11.26.14";
 const SCHEMA = 2; // Datenformat: 1 = bis 11.26.1, 2 = ab 11.26.2
 
 function iso(d) {
@@ -2521,19 +2530,23 @@ function lastTime(name, w, d, sid) {
   const e = exposures(name, w, d, sid)[0];
   if (!e) return null;
   const done = e.L.sets.filter((z) => num(z.kg) != null);
-  const kgs = done.map((z) => num(z.kg));
+  const kg = Math.max(...done.map((z) => num(z.kg)));
+  // Bewertet werden nur die Sätze mit dem höchsten Gewicht. Wurde danach leichter weitergemacht,
+  // war das Gewicht für alle Sätze zu schwer – das zählt nicht als geschafft.
+  const oben = done.filter((z) => num(z.kg) === kg);
   return {
     w: e.x,
     day: daysFor(e.x)[e.di].tag,
     same: e.x === w,
-    kg: Math.max(...kgs),
+    kg,
     reps: done
       .map((z) => z.reps)
       .filter(Boolean)
       .join(" · "),
-    first: parseInt(done[0].reps),
-    last: parseInt(done[done.length - 1].reps),
-    min: Math.min(...done.map((z) => parseInt(z.reps) || 0)),
+    first: parseInt(oben[0].reps),
+    last: parseInt(oben[oben.length - 1].reps),
+    min: Math.min(...oben.map((z) => parseInt(z.reps) || 0)),
+    reduziert: oben.length < done.length,
   };
 }
 function history(name, w) {
@@ -2547,8 +2560,10 @@ function history(name, w) {
         if (s.t || exName(s, x) !== name) continue;
         const L = getLog(x, di, s.id);
         if (L && L.sets.some((z) => num(z.kg) != null)) {
-          const dn = L.sets.filter((z) => num(z.kg) != null);
-          hit = { kg: Math.max(...dn.map((z) => num(z.kg))), last: parseInt(dn[dn.length - 1].reps) || 0, setback: !!L.setback };
+          const dn = L.sets.filter((z) => num(z.kg) != null),
+            kg = Math.max(...dn.map((z) => num(z.kg))),
+            oben = dn.filter((z) => num(z.kg) === kg);
+          hit = { kg, last: parseInt(oben[oben.length - 1].reps) || 0, setback: !!L.setback };
           break;
         }
       }
@@ -2566,6 +2581,7 @@ function lastInfo(slot, w, d) {
   const name = exName(slot, w);
   if (slot.t) {
     for (let x = w - 1; x >= 1; x--) {
+      if (W(x).deload && !W(w).deload) continue;
       const L = getLog(x, d, slot.id);
       if (L && L.sets.some((z) => num(z.kg) != null)) return { sets: L.sets, x, di: d };
     }
@@ -2598,6 +2614,8 @@ function suggest(name, lt, range, w, d) {
   const lo = pr[0],
     hi = pr[1] ?? pr[0];
   const st_ = stepFor(name);
+  if (st_ > 0 && lt.reduziert)
+    return lt.first >= hi ? { kg: lt.kg, d: "±0 · alle Sätze mit diesem Gewicht schaffen" } : { kg: Math.max(0, lt.kg - st_), d: "−" + fk(st_) + " · letztes Mal nicht alle Sätze geschafft", reduziert: true };
   if (isSmall(name) && st_ > 0) {
     const ok = (x) => x && x.min >= hi;
     const ex = exposures(name, w, d ?? ui.d);
@@ -2975,6 +2993,14 @@ function vTrainLaeuft(w, d) {
   const titel = (day.pull ? "Pull" : day.split ? "Push" : day.tag) + " · Woche " + w;
   return `<div class="runhead"><div class="rh-l"><b>${esc(titel)}</b><span>${dd.ok} / ${dd.all} Sätze${dd.ok < dd.all ? ` · ca. ${rest} min übrig` : ""}</span></div>
     <b class="clock" data-clock="${w}|${d}">${fmtClock(Date.now() - new Date(s.s))}</b><button class="chip end" data-sess="end">Beenden</button>
+    <div class="rhnav"><button class="rhw" data-week="${w - 1}" ${w <= 1 ? "disabled" : ""} aria-label="Vorige Woche">‹</button><button class="rhw cur" data-wkpick="1">W${w}</button><button class="rhw" data-week="${w + 1}" ${w >= NW ? "disabled" : ""} aria-label="Nächste Woche">›</button>
+    <span class="rhsep"></span>${tagFolge(w)
+      .map((i) => {
+        const x = DAYS[i],
+          dn = dayDone(w, i);
+        return `<button class="rhd ${i === d ? "cur" : ""} ${dn.done ? "done" : ""}" data-day="${i}">${esc(x.pull ? "Pull" : x.split ? "Push" : x.tag)}</button>`;
+      })
+      .join("")}</div>
     <i class="rhbar" style="width:${dd.all ? (100 * dd.ok) / dd.all : 0}%"></i></div>${vUebungen(w, d)}`;
 }
 /** Die Übungen eines Tages, mit optionalen Übungen, Supersätzen, Notizen. */
@@ -3129,23 +3155,20 @@ function slotDaten(slot, w, d) {
     L = logView(w, d, slot.id, r.sets);
   const lt = main ? null : lastTime(name, w, d, slot.id);
   const sug = main ? null : suggest(name, lt, r.reps, w, d);
-  return { slot, name, r, P, main, L, lt, sug, showRir: slot.t !== "BO" };
+  return { slot, name, r, P, main, L, lt, sug, showRir: slot.t !== "BO", vorher: lastInfo(slot, w, d) };
 }
-/** „zuletzt …“ für die Infozeile. */
-function zuletzt(k, w, d) {
-  if (k.main) {
-    const li = lastInfo(k.slot, w, d),
-      z = li && li.sets.find((x) => num(x.kg) != null);
-    return z ? `zuletzt ${fk(num(z.kg))} × ${esc(z.reps || "–")}${z.rir !== "" && z.rir != null ? " @" + esc(z.rir) : ""}` : "";
-  }
-  return k.lt ? `zuletzt ${fk(k.lt.kg)} × ${esc(String(k.lt.reps).split(" · ")[0] || "–")}` : "";
+/** Was beim letzten Mal in diesem Satz gemacht wurde – klein unter der Satzzeile. */
+function zuletztSatz(k, i) {
+  const z = k.vorher && k.vorher.sets[i];
+  if (!z || num(z.kg) == null) return "";
+  return `<div class="prevln">zuletzt ${fk(num(z.kg))} × ${esc(z.reps || "–")}${z.rir !== "" && z.rir != null ? " @" + esc(z.rir) : ""}</div>`;
 }
 /** Kopf einer Übung: Art, Name, eine Zeile Sätze · RIR · Pause · zuletzt, darunter Hinweise und Anpassungen je eine Zeile. */
 function slotKopf(k, w, d, opt = {}) {
   const { slot, name, r, P, main } = k;
   const rirInfo = slot.t === "BO" ? "" : main ? `RIR ${fk(r.rir)}` : P.deload ? `RIR ${fk(P.acc)}` : r.sets > 1 ? "RIR 1–2 → 0" : "RIR 1";
   const pause = opt.pause ?? esc(pauseTxt(slot));
-  const meta = [`<b>${r.sets} × ${esc(String(r.reps))}</b>`, rirInfo, pause && `⏱ ${pause}`, zuletzt(k, w, d)].filter(Boolean).join(" · ");
+  const meta = [`<b>${r.sets} × ${esc(String(r.reps))}</b>`, rirInfo, pause && `⏱ ${pause}`].filter(Boolean).join(" · ");
   const zeilen = [];
   if (r.vorwoche) zeilen.push(`<div class="info up">↑ angepasst – in Woche ${r.vorwoche.w} ${fk(r.vorwoche.kg)} kg × ${r.vorwoche.reps} geschafft</div>`);
   if (slot.t === "TOP" || slot.t === "VAR")
@@ -3158,7 +3181,7 @@ function slotKopf(k, w, d, opt = {}) {
     if (!s) zeilen.push(`<div class="info">Gewicht finden: mit einem leichten ersten Satz herantasten, dann so steigern, dass die Ziel-RIR passt.</div>`);
     else if (s.setback) zeilen.push(`<div class="info down">↓ Neuer Anlauf mit ${fk(s.kg)} kg – drei Wochen ohne Fortschritt</div>`);
     else if (lt && s.kg > lt.kg) zeilen.push(`<div class="info gold">↑ +${fk(s.kg - lt.kg)} kg – letztes Mal ${lt.last || lt.first} Wdh. geschafft</div>`);
-    else if (lt && s.kg < lt.kg) zeilen.push(`<div class="info down">↓ ${fk(s.kg)} kg – letztes Mal zu schwer</div>`);
+    else if (lt && s.kg < lt.kg) zeilen.push(`<div class="info down">↓ ${fk(s.kg)} kg – ${s.reduziert ? `letztes Mal ${fk(lt.kg)} kg nicht für alle Sätze geschafft` : "letztes Mal zu schwer"}</div>`);
   }
   return `<div class="exl"><div class="kind">${opt.nr ? `<span class="exno">${opt.nr}</span>` : ""}${esc(opt.art ?? slot.art)} · ${esc(main ? slot.g : exPrimary(name, slot))}</div>
    <div class="exname">${opt.tag ? `<span class="sstag ${opt.tag}">${opt.tag}</span>` : ""}${esc(name)}</div>
@@ -3177,7 +3200,7 @@ function satzZeile(k, w, d, i, tag) {
       <input class="cell" inputmode="decimal" enterkeyhint="next" data-f="kg" value="${esc(s.kg)}" placeholder="${esc(kph)}" aria-label="Gewicht Satz ${i + 1}">
       <input class="cell" inputmode="numeric" enterkeyhint="next" data-f="reps" value="${esc(s.reps)}" placeholder="${isCalib(slot, w) && i === r.sets - 1 ? "max" : esc(String(r.reps))}" aria-label="Wiederholungen Satz ${i + 1}">
       ${showRir ? `<button class="cell rirb ${s.rir === "" || s.rir == null ? "ph" : ""}" data-rirpick="${slot.id}|${i}" aria-label="RIR Satz ${i + 1}">${esc(s.rir !== "" && s.rir != null ? s.rir : rirPh)}</button>` : ""}
-      <button class="chk" data-chk="${i}" aria-label="Satz ${i + 1} erledigt">${s.ok ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ""}</button></div></div>
+      <button class="chk" data-chk="${i}" aria-label="Satz ${i + 1} erledigt">${s.ok ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ""}</button>${zuletztSatz(k, i)}</div></div>
       <button class="swdel" data-del="set|${slot.id}|${i}">Löschen</button></div>`;
 }
 const satzKopf = (rir) => `<div class="sethead ${rir ? "hasrir" : ""}"><span>#</span><span>kg</span><span>Wdh.</span>${rir ? "<span>RIR</span>" : ""}<span></span></div>`;
@@ -5724,6 +5747,15 @@ function selfTest() {
         );
       if (k > 150 && S0 === 70 && (k - S0) / 2 >= 25) ok(big[0] === 25 && wu[1][0] === 120, "Aufwärmen über 150 kg beginnt nicht mit 70 → 120");
     });
+  });
+
+  versuch("Gewichtsvorschlag", () => {
+    const n = "Schulterdrücken (sitzend; LH)";
+    const lt = (kg, oben, reduziert) => ({ kg, first: oben[0], last: oben[oben.length - 1], min: Math.min(...oben), reduziert });
+    ok(suggest(n, lt(62.5, [7], true), "6–8").kg === 60, "Gewicht im 2. Satz reduziert, 1. Satz unter Zielbereich → muss leichter werden");
+    ok(suggest(n, lt(62.5, [8], true), "6–8").kg === 62.5, "Gewicht reduziert, 1. Satz im Ziel → gleich bleiben");
+    ok(suggest(n, lt(60, [8, 8], false), "6–8").kg === 62.5, "alle Sätze am oberen Ende → steigern");
+    ok(suggest(n, lt(60, [7, 6], false), "6–8").kg === 60, "im Zielbereich → gleich bleiben");
   });
 
   versuch("Prioritäten und Dauer", () => {
